@@ -1,0 +1,2388 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSS & SVG Motion Lab</title>
+  <style>
+    :root {
+      --bg: #f7f8fc;
+      --bg-soft: #eef2f8;
+      --surface: #ffffff;
+      --surface-glass: rgba(255,255,255,.76);
+      --surface-soft: #f2f5fa;
+      --line: rgba(20,30,60,.12);
+      --line-strong: rgba(20,30,60,.24);
+      --text: #1b2233;
+      --muted: #5b6678;
+      --brand: #4f5bd5;
+      --cyan: #1aa6c4;
+      --mint: #1f9d57;
+      --yellow: #c98a12;
+      --rose: #e1495b;
+      --ink-code: #0e1525;
+      --code: #e9efff;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-card: 0 6px 24px rgba(20,30,60,.08);
+      --font-sans: "Pretendard", ui-sans-serif, system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "D2Coding", monospace;
+      --t-fast: 150ms;
+      --t-base: 240ms;
+      --t-slow: 380ms;
+      --ease-out: cubic-bezier(.2,.8,.2,1);
+      --ease-in: cubic-bezier(.4,0,1,1);
+      --spring: cubic-bezier(.2,1.4,.38,1);
+      --overshoot: cubic-bezier(.68,-0.6,.32,1.6);
+      --speed: 1;
+      --cta-duration: 180ms;
+      --lift-y: -10px;
+      --clip-size: 48%;
+      --upload-progress: 62;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #07111f;
+      --bg-soft: #0b1628;
+      --surface: #0f1830;
+      --surface-glass: rgba(255,255,255,.07);
+      --surface-soft: rgba(255,255,255,.06);
+      --line: rgba(255,255,255,.13);
+      --line-strong: rgba(255,255,255,.25);
+      --text: #f6f8ff;
+      --muted: #a9b8cd;
+      --brand: #7c8cff;
+      --cyan: #75e6ff;
+      --mint: #9af28b;
+      --yellow: #ffcf70;
+      --rose: #ff7e8a;
+      --ink-code: #080d17;
+      --code: #eaf0ff;
+      --shadow-card: 0 12px 34px rgba(0,0,0,.30);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      background:
+        linear-gradient(135deg, rgba(79,91,213,.10), transparent 36%),
+        linear-gradient(225deg, rgba(31,157,87,.08), transparent 42%),
+        linear-gradient(180deg, var(--bg), var(--bg-soft));
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: .20;
+      mask-image: linear-gradient(to bottom, black, transparent 70%);
+    }
+
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      transform: translateY(-140%);
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--text);
+      color: var(--bg);
+      transition: transform var(--t-fast) var(--ease-out);
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 84%, transparent);
+      -webkit-backdrop-filter: blur(18px) saturate(130%);
+      backdrop-filter: blur(18px) saturate(130%);
+    }
+
+    .topbar-inner {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: grid;
+      grid-template-columns: minmax(250px, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, var(--brand), var(--cyan) 55%, var(--mint));
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--brand) 30%, transparent);
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 1px;
+      min-width: 0;
+    }
+    .brand-title strong {
+      font-size: 17px;
+      line-height: 1.15;
+    }
+    .brand-title span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .global-controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-btn, .copy-btn, .tab-btn, .mini-btn, .choice-btn {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 11px;
+      transition:
+        transform var(--t-fast) var(--ease-out),
+        border-color var(--t-fast) var(--ease-out),
+        background var(--t-fast) var(--ease-out),
+        box-shadow var(--t-fast) var(--ease-out);
+    }
+
+    .control-btn:hover, .copy-btn:hover, .tab-btn:hover, .mini-btn:hover, .choice-btn:hover {
+      border-color: var(--brand);
+      box-shadow: 0 7px 18px color-mix(in srgb, var(--brand) 16%, transparent);
+      transform: translateY(-1px);
+    }
+
+    .control-btn[aria-pressed="true"], .tab-btn[aria-selected="true"], .choice-btn.is-active {
+      background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+      border-color: color-mix(in srgb, var(--brand) 58%, var(--line));
+      color: var(--brand);
+    }
+
+    .speed-select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 10px;
+      cursor: pointer;
+    }
+
+    .icon {
+      width: 17px;
+      height: 17px;
+      display: inline-block;
+      flex: none;
+    }
+
+    .app-shell {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 252px minmax(0, 1fr);
+      gap: 22px;
+      padding: 22px 20px 80px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 78px;
+      align-self: start;
+      max-height: calc(100vh - 96px);
+      overflow: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface-glass);
+      box-shadow: var(--shadow-card);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      backdrop-filter: blur(14px) saturate(120%);
+    }
+
+    .nav-group {
+      margin: 0 0 14px;
+    }
+    .nav-group strong {
+      display: block;
+      padding: 8px 10px 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out);
+    }
+    .nav-link:hover, .nav-link.is-active {
+      color: var(--brand);
+      background: color-mix(in srgb, var(--brand) 12%, transparent);
+    }
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: .55;
+    }
+
+    main {
+      min-width: 0;
+      display: grid;
+      gap: 18px;
+    }
+    section {
+      scroll-margin-top: 92px;
+      padding: 22px 0 4px;
+    }
+
+    .section-head {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 16px;
+      max-width: 980px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: var(--brand);
+      background: color-mix(in srgb, var(--brand) 10%, transparent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 0;
+      font-size: 36px;
+      line-height: 1.12;
+    }
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.18;
+    }
+    .lead {
+      max-width: 76ch;
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .glass {
+      background: var(--surface-glass);
+      border: 1px solid var(--line);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      backdrop-filter: blur(14px) saturate(120%);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: color-mix(in srgb, var(--brand) 16%, transparent);
+      color: var(--brand);
+      border: 1px solid var(--line);
+    }
+    .pill.cyan { color: var(--cyan); background: color-mix(in srgb, var(--cyan) 15%, transparent); }
+    .pill.mint { color: var(--mint); background: color-mix(in srgb, var(--mint) 15%, transparent); }
+    .pill.rose { color: var(--rose); background: color-mix(in srgb, var(--rose) 15%, transparent); }
+    .pill.yellow { color: var(--yellow); background: color-mix(in srgb, var(--yellow) 15%, transparent); }
+
+    .overview-grid, .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .overview-card, .recipe-card, .matrix-card, .tool-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 16px;
+    }
+    .overview-card {
+      min-height: 152px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      position: relative;
+      overflow: hidden;
+    }
+    .overview-card::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      width: 48px;
+      height: 28px;
+      border-radius: 999px;
+      opacity: .25;
+      background: linear-gradient(90deg, var(--brand), var(--cyan), var(--mint));
+      transform: translateX(0);
+      animation: overview-drift calc(2.4s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    .overview-card h3, .recipe-card h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+    .overview-card p, .recipe-card p, .matrix-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    @keyframes overview-drift { to { transform: translateX(-34px); } }
+
+    .engine-strip {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .engine-svg {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-md);
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+    }
+    .rules-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .rules-list li {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+    .rules-list strong { color: var(--text); }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .demo-frame {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface-glass);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    .demo-frame.wide { grid-column: 1 / -1; }
+    .demo-top {
+      padding: 16px 16px 0;
+      display: grid;
+      gap: 8px;
+    }
+    .demo-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .demo-title-row h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+    .tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .demo-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .demo-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(210px, .9fr);
+      gap: 14px;
+      padding: 14px 16px 16px;
+      min-width: 0;
+    }
+    .stage {
+      min-height: 210px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--brand) 6%, transparent), transparent),
+        linear-gradient(0deg, var(--surface-soft), var(--surface-soft));
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      isolation: isolate;
+    }
+    .stage.compact { min-height: 160px; }
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: .22;
+      z-index: -1;
+    }
+    .stage-label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+    .panel {
+      min-width: 0;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      display: grid;
+      gap: 11px;
+    }
+    .control-row {
+      display: grid;
+      gap: 7px;
+    }
+    .control-row label, .control-row .label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control-row output {
+      color: var(--brand);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--brand);
+    }
+
+    .use-case {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 11px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .use-case strong { color: var(--text); }
+
+    .code-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--ink-code);
+    }
+    .code-toolbar {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .code-tabs {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      min-height: 28px;
+      padding: 4px 8px;
+      border-color: rgba(255,255,255,.12);
+      background: transparent;
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+    }
+    .tab-btn[aria-selected="true"] {
+      color: #fff;
+      background: rgba(124,140,255,.22);
+      border-color: rgba(124,140,255,.55);
+    }
+    .copy-btn {
+      min-height: 28px;
+      padding: 4px 9px;
+      border-color: rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 12px;
+    }
+    pre {
+      margin: 0;
+      max-height: 240px;
+      overflow: auto;
+      padding: 14px;
+    }
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.62;
+      color: var(--code);
+      white-space: pre;
+      tab-size: 2;
+    }
+    .code-block[hidden] { display: none; }
+
+    .motion-cta {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 20px;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      box-shadow: 0 12px 28px color-mix(in srgb, var(--brand) 28%, transparent);
+      transform: translateY(0);
+      transition:
+        transform calc(var(--cta-duration) / var(--speed)) var(--ease-out),
+        box-shadow calc(var(--cta-duration) / var(--speed)) var(--ease-out),
+        filter calc(var(--cta-duration) / var(--speed)) var(--ease-out);
+    }
+    .motion-cta:hover, .motion-cta:focus-visible {
+      transform: translateY(-3px);
+      filter: saturate(1.12);
+      box-shadow: 0 18px 36px color-mix(in srgb, var(--brand) 36%, transparent);
+    }
+
+    .spinner {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      border: 7px solid color-mix(in srgb, var(--brand) 16%, transparent);
+      border-top-color: var(--brand);
+      animation: spin calc(.9s / var(--speed)) linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .lift-card {
+      width: 176px;
+      min-height: 120px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 16px;
+      display: grid;
+      align-content: end;
+      gap: 8px;
+      box-shadow: 0 10px 24px rgba(20,30,60,.10);
+      transition:
+        transform calc(320ms / var(--speed)) var(--spring),
+        box-shadow calc(320ms / var(--speed)) var(--ease-out);
+    }
+    .lift-card:hover, .lift-card:focus-within {
+      transform: translateY(var(--lift-y)) scale(1.02);
+      box-shadow: 0 20px 42px rgba(20,30,60,.18);
+    }
+    .fake-img {
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background:
+        linear-gradient(120deg, var(--cyan), var(--mint));
+    }
+
+    .ease-row {
+      width: 100%;
+      display: grid;
+      gap: 15px;
+    }
+    .ease-track {
+      height: 34px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--brand) 10%, transparent);
+      position: relative;
+      overflow: hidden;
+    }
+    .ease-track span {
+      position: absolute;
+      top: 7px;
+      left: 8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--brand);
+      animation: travel calc(1.9s / var(--speed)) infinite alternate;
+    }
+    .ease-track.spring span { animation-timing-function: var(--spring); background: var(--mint); }
+    .ease-track.linear span { animation-timing-function: linear; background: var(--cyan); }
+    .ease-track.out span { animation-timing-function: var(--ease-out); background: var(--rose); }
+    @keyframes travel { to { transform: translateX(230px); } }
+
+    .ripple-button {
+      position: relative;
+      overflow: hidden;
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 22px;
+      background: var(--text);
+      color: var(--bg);
+      cursor: pointer;
+      isolation: isolate;
+    }
+    .ripple-button .ripple {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.52);
+      transform: translate(-50%, -50%) scale(0);
+      animation: ripple calc(560ms / var(--speed)) var(--ease-out) forwards;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes ripple {
+      to { transform: translate(-50%, -50%) scale(16); opacity: 0; }
+    }
+
+    .heart-button, .hamburger-button, .video-play, .toggle-button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      cursor: pointer;
+      min-width: 64px;
+      min-height: 56px;
+      display: grid;
+      place-items: center;
+    }
+    .heart-button svg {
+      width: 42px;
+      height: 42px;
+      overflow: visible;
+    }
+    .heart-path {
+      fill: transparent;
+      stroke: var(--rose);
+      stroke-width: 2.6;
+      transform-origin: center;
+      transition:
+        fill calc(240ms / var(--speed)) var(--ease-out),
+        transform calc(360ms / var(--speed)) var(--spring);
+    }
+    .heart-button[aria-pressed="true"] .heart-path {
+      fill: var(--rose);
+      transform: scale(1.16);
+    }
+
+    .toggle-button {
+      width: 96px;
+      height: 48px;
+      border-radius: 999px;
+      justify-content: start;
+      padding: 5px;
+      background: color-mix(in srgb, var(--muted) 16%, transparent);
+      transition: background var(--t-base) var(--ease-out);
+    }
+    .toggle-button span {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--surface);
+      box-shadow: 0 8px 18px rgba(0,0,0,.16);
+      transition: transform calc(260ms / var(--speed)) var(--spring);
+    }
+    .toggle-button[aria-pressed="true"] { background: color-mix(in srgb, var(--mint) 48%, transparent); }
+    .toggle-button[aria-pressed="true"] span { transform: translateX(48px); }
+
+    .hamburger-button {
+      gap: 5px;
+      padding: 0;
+    }
+    .hamburger-button span {
+      width: 32px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--text);
+      transition:
+        transform calc(260ms / var(--speed)) var(--ease-out),
+        opacity calc(180ms / var(--speed)) var(--ease-out);
+    }
+    .hamburger-button[aria-pressed="true"] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger-button[aria-pressed="true"] span:nth-child(2) { opacity: 0; }
+    .hamburger-button[aria-pressed="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    .loading-action {
+      min-width: 142px;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--rose));
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+    }
+    .loading-action .small-spin {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin calc(.8s / var(--speed)) linear infinite;
+    }
+    .loading-action.is-loading .small-spin { display: inline-block; }
+    .loading-action.is-done { background: linear-gradient(135deg, var(--mint), var(--cyan)); }
+
+    .skeleton-stack {
+      width: min(280px, 100%);
+      display: grid;
+      gap: 12px;
+    }
+    .skeleton-line {
+      height: 16px;
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--muted) 18%, transparent);
+    }
+    .skeleton-line.wide { height: 72px; border-radius: var(--radius-sm); }
+    .skeleton-line::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+      animation: shimmer calc(1.35s / var(--speed)) ease-in-out infinite;
+    }
+    @keyframes shimmer { to { transform: translateX(160%); } }
+
+    .modal-demo {
+      width: min(280px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      padding: 14px;
+      box-shadow: 0 18px 36px rgba(20,30,60,.16);
+      opacity: 0;
+      transform: translateY(20px) scale(.96);
+      pointer-events: none;
+      transition:
+        transform calc(320ms / var(--speed)) var(--spring),
+        opacity calc(220ms / var(--speed)) var(--ease-out);
+    }
+    .modal-demo.is-open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    .modal-demo h4 { margin: 0 0 6px; }
+    .modal-demo p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .toast-demo {
+      min-width: 240px;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--mint);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 12px 14px;
+      box-shadow: 0 14px 30px rgba(20,30,60,.13);
+      opacity: 0;
+      transform: translateY(18px);
+      transition:
+        transform calc(260ms / var(--speed)) var(--ease-out),
+        opacity calc(220ms / var(--speed)) var(--ease-out);
+    }
+    .toast-demo.is-visible { opacity: 1; transform: translateY(0); }
+
+    .accordion-demo {
+      width: min(320px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .accordion-demo button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 14px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .accordion-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows calc(260ms / var(--speed)) var(--ease-out);
+    }
+    .accordion-demo.is-open .accordion-panel { grid-template-rows: 1fr; }
+    .accordion-panel div { overflow: hidden; padding: 0 14px; }
+    .accordion-panel p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+
+    .progress-shell {
+      width: min(320px, 100%);
+      display: grid;
+      gap: 10px;
+    }
+    .progress-track {
+      height: 14px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 17%, transparent);
+      overflow: hidden;
+    }
+    .progress-fill {
+      width: calc(var(--upload-progress) * 1%);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--brand), var(--cyan), var(--mint));
+      transition: width calc(260ms / var(--speed)) var(--ease-out);
+    }
+
+    .scroll-stack {
+      width: 100%;
+      display: grid;
+      gap: 12px;
+    }
+    .scroll-card {
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      opacity: .42;
+      transform: translateY(12px);
+      transition:
+        opacity calc(420ms / var(--speed)) var(--ease-out),
+        transform calc(420ms / var(--speed)) var(--ease-out);
+    }
+    .scroll-card.is-visible { opacity: 1; transform: translateY(0); }
+
+    .view-box {
+      width: min(310px, 100%);
+      min-height: 160px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      view-transition-name: motion-card;
+    }
+    .view-box.is-list {
+      min-height: 90px;
+      grid-template-columns: 72px 1fr;
+      align-items: center;
+    }
+    .view-visual {
+      min-height: 70px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--brand), var(--rose));
+    }
+    .view-box.is-list .view-visual { min-height: 58px; }
+
+    .media-card {
+      width: min(320px, 100%);
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      background:
+        linear-gradient(140deg, rgba(255,255,255,.12), transparent),
+        linear-gradient(135deg, var(--brand), var(--cyan) 45%, var(--mint));
+    }
+    .media-card::after {
+      content: "Motion";
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 24px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.30);
+    }
+    .media-zoom {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(45deg, transparent 0 45%, rgba(255,255,255,.18) 45% 55%, transparent 55%),
+        radial-gradient(circle at 70% 30%, rgba(255,255,255,.28), transparent 30%);
+      transform: scale(1);
+      transition: transform calc(850ms / var(--speed)) var(--ease-out);
+    }
+    .media-card:hover .media-zoom { transform: scale(1.13); }
+    .clip-demo {
+      width: min(320px, 100%);
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--ink-code), var(--brand));
+    }
+    .clip-demo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, var(--yellow), var(--rose));
+      clip-path: circle(var(--clip-size) at 50% 50%);
+      transition: clip-path calc(300ms / var(--speed)) var(--ease-out);
+    }
+    .video-shell {
+      width: min(320px, 100%);
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.46)),
+        linear-gradient(135deg, var(--cyan), var(--brand));
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-shell::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 5px;
+      transform-origin: left;
+      transform: scaleX(.38);
+      background: var(--mint);
+      animation: video-progress calc(4s / var(--speed)) linear infinite;
+    }
+    .video-shell.is-paused::after { animation-play-state: paused; }
+    @keyframes video-progress { to { transform: scaleX(1); } }
+    .video-play {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      color: #fff;
+      background: rgba(255,255,255,.18);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+
+    .svg-board {
+      width: min(320px, 100%);
+      display: grid;
+      place-items: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .svg-stroke {
+      fill: none;
+      stroke: var(--brand);
+      stroke-width: 9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .draw-path {
+      stroke-dasharray: var(--path-length, 1);
+      stroke-dashoffset: var(--path-length, 1);
+      transition: stroke-dashoffset calc(1.4s / var(--speed)) var(--ease-out);
+    }
+    .draw-path.is-drawn { stroke-dashoffset: 0; }
+    .svg-gear {
+      transform-origin: 50% 50%;
+      animation: spin calc(3s / var(--speed)) linear infinite;
+    }
+    .route-dot {
+      offset-path: path("M20 130 C90 20 160 180 250 66");
+      offset-distance: 0%;
+      animation: route-go calc(3.2s / var(--speed)) var(--ease-out) infinite;
+    }
+    @keyframes route-go { to { offset-distance: 100%; } }
+    .blob-a {
+      animation: blob-morph calc(2.8s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    @keyframes blob-morph {
+      to { d: path("M78 12 C124 18 146 56 132 96 C120 132 76 152 38 126 C0 100 12 48 38 28 C50 18 62 10 78 12"); }
+    }
+    .mask-reveal rect {
+      animation: mask-wide calc(1.8s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    @keyframes mask-wide { to { width: 260px; } }
+    .glow-dot {
+      filter: url(#softGlow);
+      animation: pulse calc(1.2s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    @keyframes pulse { to { transform: scale(1.18); opacity: .68; } }
+    .camera-view {
+      transition: transform calc(450ms / var(--speed)) var(--ease-out);
+    }
+    .camera-stage.is-zoomed .camera-view { transform: scale(1.35) translate(-30px, -16px); }
+    .bar {
+      transition: transform calc(420ms / var(--speed)) var(--ease-out);
+      transform-origin: bottom;
+    }
+
+    .payment-button {
+      min-width: 168px;
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 13px 18px;
+      background: var(--brand);
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: background var(--t-base) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    }
+    .payment-button[data-state="loading"] { background: var(--yellow); }
+    .payment-button[data-state="success"] { background: var(--mint); }
+    .payment-button[data-state="error"] {
+      background: var(--rose);
+      animation: shake calc(360ms / var(--speed)) var(--ease-out);
+    }
+    @keyframes shake {
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+    }
+    .dash-card {
+      width: min(330px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .count-up {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--brand);
+    }
+    .empty-state {
+      width: min(320px, 100%);
+      text-align: center;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+    }
+    .empty-box {
+      animation: float-box calc(1.8s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    @keyframes float-box { to { transform: translateY(-10px); } }
+
+    .matrix {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .matrix th, .matrix td {
+      padding: 12px 13px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 14px;
+    }
+    .matrix th {
+      color: var(--muted);
+      background: var(--surface-soft);
+      font-weight: 700;
+    }
+    .matrix tr:last-child td { border-bottom: 0; }
+    .decision {
+      display: grid;
+      gap: 12px;
+    }
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .recommendation {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: var(--surface);
+      color: var(--muted);
+      min-height: 82px;
+    }
+    .recommendation strong { color: var(--text); }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .fps-value {
+      font-size: 44px;
+      line-height: 1;
+      font-weight: 900;
+      color: var(--mint);
+      font-family: var(--font-mono);
+    }
+    .perf-compare {
+      display: grid;
+      gap: 8px;
+    }
+    .bad-move, .good-move {
+      width: 52px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--rose);
+      animation: bad-left calc(1.4s / var(--speed)) ease-in-out infinite alternate;
+    }
+    .good-move {
+      background: var(--mint);
+      animation-name: good-transform;
+    }
+    @keyframes bad-left { to { margin-left: 70%; } }
+    @keyframes good-transform { to { transform: translateX(210px); } }
+    .checklist {
+      display: grid;
+      gap: 8px;
+    }
+    .checklist label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .recipe-card {
+      min-height: 150px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+    .recipe-card code {
+      display: block;
+      color: var(--brand);
+      white-space: normal;
+      font-size: 12px;
+    }
+
+    .copy-toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      color: #fff;
+      background: var(--text);
+      box-shadow: 0 14px 34px rgba(0,0,0,.22);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+    }
+    .copy-toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    html.motion-paused *, html.motion-paused *::before, html.motion-paused *::after {
+      animation-play-state: paused !important;
+    }
+    html.rm-sim *, html.rm-sim *::before, html.rm-sim *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .topbar-inner { grid-template-columns: 1fr; }
+      .global-controls { justify-content: flex-start; }
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: relative;
+        top: auto;
+        max-height: none;
+      }
+      .sidebar nav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .nav-group { margin: 0; }
+    }
+
+    @media (max-width: 860px) {
+      .demo-grid, .overview-grid, .engine-strip, .tools-grid, .recipe-grid {
+        grid-template-columns: 1fr;
+      }
+      .demo-body {
+        grid-template-columns: 1fr;
+      }
+      .sidebar nav {
+        grid-template-columns: 1fr 1fr;
+      }
+      h1 { font-size: 30px; }
+      h2 { font-size: 24px; }
+    }
+
+    @media (max-width: 560px) {
+      .topbar-inner, .app-shell { padding-left: 12px; padding-right: 12px; }
+      .global-controls { display: grid; grid-template-columns: 1fr 1fr; }
+      .control-btn, .speed-select { width: 100%; }
+      .sidebar nav { grid-template-columns: 1fr; }
+      .stage { padding: 18px 12px; }
+      pre { max-height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">본문으로 이동</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="CSS and SVG Motion Lab">
+        <div class="brand-mark" aria-hidden="true">ML</div>
+        <div class="brand-title">
+          <strong>CSS & SVG Motion Lab</strong>
+          <span>CSS&SGV / SVG Motion Lab · 설치 없는 인터랙티브 애니메이션 실험실</span>
+        </div>
+      </div>
+      <div class="global-controls" aria-label="전역 컨트롤">
+        <button class="control-btn" id="themeToggle" type="button" aria-pressed="false" title="라이트/다크 테마 전환">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm9-7h-2a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2ZM5 12a1 1 0 0 0-1-1H3a1 1 0 1 0 0 2h1a1 1 0 0 0 1-1Zm13.7-6.3a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0ZM7.8 17.2a1 1 0 0 0-1.4-1.4l-1.1 1.1a1 1 0 1 0 1.4 1.4l1.1-1.1Zm10.9 1.1a1 1 0 0 1-1.4 0l-1.1-1.1a1 1 0 0 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4ZM7.8 6.8 6.7 5.7a1 1 0 1 0-1.4 1.4l1.1 1.1a1 1 0 0 0 1.4-1.4ZM12 19a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Z"/></svg>
+          테마
+        </button>
+        <button class="control-btn" id="pauseToggle" type="button" aria-pressed="false" title="전체 애니메이션 일시정지">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z"/></svg>
+          정지
+        </button>
+        <label class="sr-only" for="speedSelect">전역 속도</label>
+        <select class="speed-select" id="speedSelect" title="전역 속도 배율">
+          <option value="0.25">0.25x</option>
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+        </select>
+        <button class="control-btn" id="reduceToggle" type="button" aria-pressed="false" title="reduced motion 시뮬레이션">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 11h16v2H4v-2Zm3-6h10v2H7V5Zm0 12h10v2H7v-2Z"/></svg>
+          줄이기
+        </button>
+        <button class="control-btn" id="resetAll" type="button" title="전체 데모 리셋">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5a7 7 0 1 1-6.3 4H3.4a9 9 0 1 0 2.1-3H3v6h6V9H7.2A7 7 0 0 1 12 5Z"/></svg>
+          리셋
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="모듈 네비게이션">
+      <nav>
+        <div class="nav-group">
+          <strong>Start</strong>
+          <a class="nav-link" href="#overview"><span class="nav-dot"></span>Overview</a>
+        </div>
+        <div class="nav-group">
+          <strong>CSS</strong>
+          <a class="nav-link" href="#css-core"><span class="nav-dot"></span>A. 기초 메커니즘</a>
+          <a class="nav-link" href="#micro-interactions"><span class="nav-dot"></span>B. 마이크로 인터랙션</a>
+          <a class="nav-link" href="#ui-components"><span class="nav-dot"></span>C. UI 컴포넌트</a>
+          <a class="nav-link" href="#scroll-view"><span class="nav-dot"></span>D. 스크롤 & 전환</a>
+          <a class="nav-link" href="#media-ui"><span class="nav-dot"></span>E. 미디어 UI</a>
+        </div>
+        <div class="nav-group">
+          <strong>SVG</strong>
+          <a class="nav-link" href="#svg-engines"><span class="nav-dot"></span>F. 엔진 비교</a>
+          <a class="nav-link" href="#svg-techniques"><span class="nav-dot"></span>G. 기법 도감</a>
+          <a class="nav-link" href="#scenarios"><span class="nav-dot"></span>H. 실전 시나리오</a>
+        </div>
+        <div class="nav-group">
+          <strong>Guide</strong>
+          <a class="nav-link" href="#usecase-guide"><span class="nav-dot"></span>I. 선택 가이드</a>
+          <a class="nav-link" href="#perf-a11y"><span class="nav-dot"></span>J. 성능 & 접근성</a>
+          <a class="nav-link" href="#recipes"><span class="nav-dot"></span>Recipe Library</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main id="content">
+      <section id="overview" aria-labelledby="overview-title">
+        <div class="section-head">
+          <span class="eyebrow">Live-first · Honest code</span>
+          <h1 id="overview-title">보고, 만지고, 복사하는 CSS·SVG 애니메이션 도감</h1>
+          <p class="lead">모든 데모는 순수 CSS 또는 네이티브 SVG로 움직입니다. 컨트롤을 바꾸면 화면과 코드가 함께 바뀌고, 복사 버튼은 빈 HTML에서도 재사용할 수 있는 실제 코드를 제공합니다.</p>
+        </div>
+        <div class="overview-grid">
+          <article class="overview-card">
+            <span class="pill">Transition</span>
+            <h3>상태 사이를 부드럽게</h3>
+            <p>hover, focus, class 변경처럼 두 상태를 연결할 때 사용합니다.</p>
+          </article>
+          <article class="overview-card">
+            <span class="pill cyan">@keyframes</span>
+            <h3>시간표가 있는 반복</h3>
+            <p>로딩, shimmer, pulse처럼 스스로 반복되는 모션에 적합합니다.</p>
+          </article>
+          <article class="overview-card">
+            <span class="pill mint">Transform</span>
+            <h3>60fps 우선 움직임</h3>
+            <p>translate, scale, rotate, opacity를 중심으로 레이아웃 흔들림을 줄입니다.</p>
+          </article>
+          <article class="overview-card">
+            <span class="pill rose">Scroll/View</span>
+            <h3>위치와 화면 전환</h3>
+            <p>스크롤 진행률, route swap, 목록에서 상세로 이어지는 전환을 다룹니다.</p>
+          </article>
+          <article class="overview-card">
+            <span class="pill yellow">SVG</span>
+            <h3>선, 경로, 마스크</h3>
+            <p>stroke drawing, animateMotion, filter, viewBox를 라이브로 확인합니다.</p>
+          </article>
+          <article class="overview-card">
+            <span class="pill mint">A11y/Perf</span>
+            <h3>줄이기와 측정</h3>
+            <p>prefers-reduced-motion, pause, FPS, focus-visible을 기본값으로 둡니다.</p>
+          </article>
+        </div>
+        <div class="engine-strip glass">
+          <div class="engine-svg" aria-label="CSS, SMIL, JS, Lottie 엔진 비교 인포그래픽">
+            <svg viewBox="0 0 520 240" role="img" aria-labelledby="engine-title engine-desc">
+              <title id="engine-title">애니메이션 엔진 네 가지</title>
+              <desc id="engine-desc">CSS, SMIL, JavaScript, Lottie를 같은 흐름 위에 배치한 비교 그래픽</desc>
+              <defs>
+                <linearGradient id="engineGrad" x1="0" x2="1">
+                  <stop offset="0" stop-color="var(--brand)"/>
+                  <stop offset=".55" stop-color="var(--cyan)"/>
+                  <stop offset="1" stop-color="var(--mint)"/>
+                </linearGradient>
+              </defs>
+              <path d="M70 120 C150 35 230 205 310 120 S430 36 470 120" fill="none" stroke="url(#engineGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="18 18">
+                <animate attributeName="stroke-dashoffset" values="0;-72" dur="3s" repeatCount="indefinite"/>
+              </path>
+              <g fill="var(--surface)" stroke="var(--line-strong)" stroke-width="2">
+                <circle cx="80" cy="120" r="36"/>
+                <circle cx="200" cy="120" r="36"/>
+                <circle cx="320" cy="120" r="36"/>
+                <circle cx="440" cy="120" r="36"/>
+              </g>
+              <g text-anchor="middle" font-family="ui-monospace, monospace" font-size="18" fill="var(--text)" font-weight="800">
+                <text x="80" y="126">CSS</text>
+                <text x="200" y="126">SMIL</text>
+                <text x="320" y="126">JS</text>
+                <text x="440" y="126">JSON</text>
+              </g>
+            </svg>
+          </div>
+          <ul class="rules-list">
+            <li><strong>목적</strong>이 피드백이면 transition, 반복이면 keyframes, 데이터/상태면 JS 제어.</li>
+            <li><strong>성능</strong>은 transform, opacity, stroke-dashoffset을 우선하고 width/top/left는 피합니다.</li>
+            <li><strong>접근성</strong>은 토글이 아니라 기본값입니다. motion pause와 reduced-motion을 항상 제공합니다.</li>
+            <li><strong>복사 코드</strong>는 프레임워크 없이 붙여 넣어도 돌아가야 합니다.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="css-core" aria-labelledby="css-core-title">
+        <div class="section-head">
+          <span class="eyebrow">Module A</span>
+          <h2 id="css-core-title">CSS 기초 메커니즘</h2>
+          <p class="lead">Transition, @keyframes, transform, timing-function의 차이를 직접 만져봅니다.</p>
+        </div>
+        <div class="demo-grid">
+          <article class="demo-frame" id="demo-transition">
+            <div class="demo-top">
+              <div class="demo-title-row">
+                <h3>버튼 hover transition</h3>
+                <div class="tags"><span class="pill">Transition</span><span class="pill mint">CSS</span></div>
+              </div>
+              <p class="demo-note">duration을 바꾸면 hover 반응과 복사 코드가 함께 갱신됩니다.</p>
+            </div>
+            <div class="demo-body">
+              <div class="stage compact">
+                <span class="stage-label">hover / focus</span>
+                <button class="motion-cta">시작하기</button>
+              </div>
+              <div class="panel">
+                <div class="controls">
+                  <div class="control-row">
+                    <label for="ctaDuration">duration <output id="ctaDurationOut">180ms</output></label>
+                    <input id="ctaDuration" type="range" min="80" max="520" value="180">
+                  </div>
+                </div>
+                <p class="use-case"><strong>적용:</strong> CTA, 저장 버튼, 드롭다운 트리거.</p>
+                <div class="code-panel">
+                  <div class="code-toolbar">
+                    <div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div>
+                    <button class="copy-btn" type="button" data-copy-target="code-cta-css">복사</button>
+                  </div>
+                  <pre><code class="code-block" id="code-cta-css">.motion-cta {
+  transform: translateY(0);
+  transition:
+    transform 180ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 180ms cubic-bezier(.2,.8,.2,1);
+}
+.motion-cta:hover,
+.motion-cta:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(79,91,213,.28);
+}</code></pre>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="demo-frame" id="demo-spinner">
+            <div class="demo-top">
+              <div class="demo-title-row">
+                <h3>@keyframes 로딩 스피너</h3>
+                <div class="tags"><span class="pill cyan">@keyframes</span><span class="pill">linear</span></div>
+              </div>
+              <p class="demo-note">반복 진행은 linear가 가장 예측 가능합니다. 전역 속도 배율을 바꿔보세요.</p>
+            </div>
+            <div class="demo-body">
+              <div class="stage compact"><span class="stage-label">infinite loop</span><div class="spinner" aria-label="처리 중"></div></div>
+              <div class="panel">
+                <p class="use-case"><strong>적용:</strong> 저장 중, 결제 처리, 파일 업로드 대기.</p>
+                <div class="code-panel">
+                  <div class="code-toolbar">
+                    <div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div>
+                    <button class="copy-btn" type="button" data-copy-target="code-spin-css">복사</button>
+                  </div>
+                  <pre><code class="code-block" id="code-spin-css">.spinner {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 7px solid rgba(79,91,213,.16);
+  border-top-color: #4f5bd5;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}</code></pre>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="demo-frame" id="demo-transform">
+            <div class="demo-top">
+              <div class="demo-title-row">
+                <h3>카드 lift transform</h3>
+                <div class="tags"><span class="pill mint">Transform</span><span class="pill">Spring</span></div>
+              </div>
+              <p class="demo-note">레이아웃 속성 대신 translateY와 scale로 카드 반응을 만듭니다.</p>
+            </div>
+            <div class="demo-body">
+              <div class="stage compact">
+                <span class="stage-label">hover card</span>
+                <article class="lift-card" tabindex="0">
+                  <div class="fake-img"></div>
+                  <strong>Product card</strong>
+                  <small>transform + shadow</small>
+                </article>
+              </div>
+              <div class="panel">
+                <div class="controls">
+                  <div class="control-row">
+                    <label for="liftAmount">lift <output id="liftAmountOut">-10px</output></label>
+                    <input id="liftAmount" type="range" min="2" max="22" value="10">
+                  </div>
+                </div>
+                <p class="use-case"><strong>적용:</strong> 커머스 카드, 포트폴리오 타일, 문서 카드.</p>
+                <div class="code-panel">
+                  <div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div><button class="copy-btn" type="button" data-copy-target="code-lift-css">복사</button></div>
+                  <pre><code class="code-block" id="code-lift-css">.card {
+  transform: translateY(0);
+  transition:
+    transform 320ms cubic-bezier(.2,1.4,.38,1),
+    box-shadow 320ms ease;
+}
+.card:hover {
+  transform: translateY(-10px) scale(1.02);
+}</code></pre>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="demo-frame" id="demo-timing">
+            <div class="demo-top">
+              <div class="demo-title-row">
+                <h3>Timing-function 비교</h3>
+                <div class="tags"><span class="pill yellow">Easing</span><span class="pill cyan">Motion token</span></div>
+              </div>
+              <p class="demo-note">같은 거리라도 easing에 따라 의미가 달라집니다.</p>
+            </div>
+            <div class="demo-body">
+              <div class="stage compact">
+                <span class="stage-label">linear / ease-out / spring</span>
+                <div class="ease-row">
+                  <div class="ease-track linear"><span></span></div>
+                  <div class="ease-track out"><span></span></div>
+                  <div class="ease-track spring"><span></span></div>
+                </div>
+              </div>
+              <div class="panel">
+                <p class="use-case"><strong>적용:</strong> 진행률은 linear, 등장은 ease-out, 살아있는 피드백은 spring.</p>
+                <div class="code-panel">
+                  <div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div><button class="copy-btn" type="button" data-copy-target="code-easing-css">복사</button></div>
+                  <pre><code class="code-block" id="code-easing-css">:root {
+  --ease-out: cubic-bezier(.2,.8,.2,1);
+  --spring: cubic-bezier(.2,1.4,.38,1);
+}
+.progress { animation-timing-function: linear; }
+.enter { transition-timing-function: var(--ease-out); }
+.pop { transition-timing-function: var(--spring); }</code></pre>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="micro-interactions" aria-labelledby="micro-title">
+        <div class="section-head">
+          <span class="eyebrow">Module B</span>
+          <h2 id="micro-title">마이크로 인터랙션</h2>
+          <p class="lead">클릭, focus, toggle 같은 작은 입력에 즉각적인 피드백을 줍니다.</p>
+        </div>
+        <div class="demo-grid">
+          <article class="demo-frame">
+            <div class="demo-top"><div class="demo-title-row"><h3>클릭 리플</h3><div class="tags"><span class="pill">Click</span><span class="pill rose">Feedback</span></div></div><p class="demo-note">클릭 좌표에서 원이 퍼지며 입력이 접수되었음을 알려줍니다.</p></div>
+            <div class="demo-body">
+              <div class="stage compact"><button class="ripple-button" type="button">눌러보기</button></div>
+              <div class="panel"><p class="use-case"><strong>적용:</strong> 모바일 버튼, 리스트 아이템, 터치 UI.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">JS+CSS</button></div><button class="copy-btn" data-copy-target="code-ripple" type="button">복사</button></div><pre><code class="code-block" id="code-ripple">button.addEventListener('click', (event) => {
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  ripple.style.left = `${event.offsetX}px`;
+  ripple.style.top = `${event.offsetY}px`;
+  button.append(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+});</code></pre></div></div>
+            </div>
+          </article>
+
+          <article class="demo-frame">
+            <div class="demo-top"><div class="demo-title-row"><h3>좋아요 하트 pop</h3><div class="tags"><span class="pill rose">Toggle</span><span class="pill mint">SVG</span></div></div><p class="demo-note">상태 변화는 색만이 아니라 크기 피드백을 함께 줍니다.</p></div>
+            <div class="demo-body">
+              <div class="stage compact"><button class="heart-button" type="button" aria-pressed="false" aria-label="좋아요"><svg viewBox="0 0 64 64" aria-hidden="true"><path class="heart-path" d="M32 54 C15 40 8 31 10 21 C12 11 25 9 32 20 C39 9 52 11 54 21 C56 31 49 40 32 54Z"/></svg></button></div>
+              <div class="panel"><p class="use-case"><strong>적용:</strong> 좋아요, 즐겨찾기, 저장 토글.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div><button class="copy-btn" data-copy-target="code-heart" type="button">복사</button></div><pre><code class="code-block" id="code-heart">.heart-path {
+  fill: transparent;
+  stroke: #e1495b;
+  transform-origin: center;
+  transition: fill 240ms ease, transform 360ms cubic-bezier(.2,1.4,.38,1);
+}
+button[aria-pressed="true"] .heart-path {
+  fill: #e1495b;
+  transform: scale(1.16);
+}</code></pre></div></div>
+            </div>
+          </article>
+
+          <article class="demo-frame">
+            <div class="demo-top"><div class="demo-title-row"><h3>토글 스위치</h3><div class="tags"><span class="pill">Switch</span><span class="pill mint">ARIA</span></div></div><p class="demo-note">손잡이는 transform으로 이동하고 상태는 aria-pressed에 반영합니다.</p></div>
+            <div class="demo-body">
+              <div class="stage compact"><button class="toggle-button" type="button" aria-pressed="false" aria-label="알림 켜기"><span></span></button></div>
+              <div class="panel"><p class="use-case"><strong>적용:</strong> 설정, 알림, 공개/비공개, 필터 옵션.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div><button class="copy-btn" data-copy-target="code-toggle" type="button">복사</button></div><pre><code class="code-block" id="code-toggle">.switch span {
+  transform: translateX(0);
+  transition: transform 260ms cubic-bezier(.2,1.4,.38,1);
+}
+.switch[aria-pressed="true"] span {
+  transform: translateX(48px);
+}</code></pre></div></div>
+            </div>
+          </article>
+
+          <article class="demo-frame">
+            <div class="demo-top"><div class="demo-title-row"><h3>햄버거에서 X</h3><div class="tags"><span class="pill cyan">Menu</span><span class="pill">Transform</span></div></div><p class="demo-note">세 줄의 opacity와 rotate만으로 메뉴 상태를 표현합니다.</p></div>
+            <div class="demo-body">
+              <div class="stage compact"><button class="hamburger-button" type="button" aria-pressed="false" aria-label="메뉴 열기"><span></span><span></span><span></span></button></div>
+              <div class="panel"><p class="use-case"><strong>적용:</strong> 모바일 내비게이션, 사이드 패널 토글.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">CSS</button></div><button class="copy-btn" data-copy-target="code-hamburger" type="button">복사</button></div><pre><code class="code-block" id="code-hamburger">.menu span {
+  transition: transform 260ms ease, opacity 180ms ease;
+}
+.menu[aria-pressed="true"] span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.menu[aria-pressed="true"] span:nth-child(2) { opacity: 0; }
+.menu[aria-pressed="true"] span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}</code></pre></div></div>
+            </div>
+          </article>
+
+          <article class="demo-frame wide">
+            <div class="demo-top"><div class="demo-title-row"><h3>로딩 버튼 상태</h3><div class="tags"><span class="pill yellow">State</span><span class="pill mint">aria-live</span></div></div><p class="demo-note">idle → loading → success를 순환하며 진행 중에는 버튼을 비활성화합니다.</p></div>
+            <div class="demo-body">
+              <div class="stage compact"><button class="loading-action" id="loadingAction" type="button"><span class="small-spin"></span><span id="loadingLabel">저장하기</span></button></div>
+              <div class="panel"><p class="use-case" aria-live="polite" id="loadingStatus"><strong>상태:</strong> 대기 중</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" type="button" aria-selected="true">JS</button></div><button class="copy-btn" data-copy-target="code-loading" type="button">복사</button></div><pre><code class="code-block" id="code-loading">button.disabled = true;
+button.classList.add('is-loading');
+status.textContent = '처리 중';
+setTimeout(() => {
+  button.classList.remove('is-loading');
+  button.classList.add('is-done');
+  status.textContent = '완료';
+}, 1200);</code></pre></div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="ui-components" aria-labelledby="ui-title">
+        <div class="section-head">
+          <span class="eyebrow">Module C</span>
+          <h2 id="ui-title">UI 컴포넌트 모션</h2>
+          <p class="lead">스켈레톤, 모달, 토스트, 아코디언, 진행률은 실제 서비스 화면에서 가장 자주 쓰이는 모션입니다.</p>
+        </div>
+        <div class="demo-grid">
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Skeleton shimmer</h3><div class="tags"><span class="pill cyan">@keyframes</span></div></div><p class="demo-note">빈 화면 대신 데이터가 들어올 자리를 가볍게 예고합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="skeleton-stack"><div class="skeleton-line wide"></div><div class="skeleton-line"></div><div class="skeleton-line" style="width:72%"></div></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> 피드, 리스트, 상세 페이지 로딩.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-skeleton" type="button">복사</button></div><pre><code class="code-block" id="code-skeleton">.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+  animation: shimmer 1.35s ease-in-out infinite;
+}
+@keyframes shimmer { to { transform: translateX(160%); } }</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Modal enter</h3><div class="tags"><span class="pill">Opacity</span><span class="pill mint">Scale</span></div></div><p class="demo-note">backdrop은 opacity, 본체는 translateY + scale 조합이 안정적입니다.</p></div><div class="demo-body"><div class="stage compact"><div class="modal-demo is-open" id="modalDemo"><h4>작업을 완료할까요?</h4><p>등장은 부드럽게, 내용은 즉시 읽을 수 있게 유지합니다.</p></div></div><div class="panel"><div class="controls"><button class="mini-btn" id="modalToggle" type="button">모달 토글</button></div><p class="use-case"><strong>적용:</strong> 확인 창, 설정 패널, 결제 확인.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-modal" type="button">복사</button></div><pre><code class="code-block" id="code-modal">.modal {
+  opacity: 0;
+  transform: translateY(20px) scale(.96);
+  transition: transform 320ms cubic-bezier(.2,1.4,.38,1), opacity 220ms ease;
+}
+.modal.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Toast enter/exit</h3><div class="tags"><span class="pill rose">Status</span></div></div><p class="demo-note">짧게 나타났다 사라지며 작업 결과를 전달합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="toast-demo is-visible" id="toastDemo"><strong>저장 완료</strong><br><span>변경사항이 반영되었습니다.</span></div></div><div class="panel"><div class="controls"><button class="mini-btn" id="toastToggle" type="button">토스트 재생</button></div><p class="use-case"><strong>적용:</strong> 저장, 삭제, 복사, 네트워크 상태.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-toast" type="button">복사</button></div><pre><code class="code-block" id="code-toast">.toast {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: transform 260ms ease, opacity 220ms ease;
+}
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Accordion grid-fr</h3><div class="tags"><span class="pill yellow">Layout</span><span class="pill">Fallback</span></div></div><p class="demo-note">height:auto 대신 grid-template-rows로 콘텐츠 높이를 자연스럽게 엽니다.</p></div><div class="demo-body"><div class="stage compact"><div class="accordion-demo is-open" id="accordionDemo"><button type="button" id="accordionToggle" aria-expanded="true">모션 원칙 <span>⌄</span></button><div class="accordion-panel"><div><p>transform과 opacity를 우선하고, 크기 변화는 꼭 필요한 곳에 제한합니다.</p></div></div></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> FAQ, 설정 그룹, 필터 섹션.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-accordion" type="button">복사</button></div><pre><code class="code-block" id="code-accordion">.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms ease;
+}
+.accordion.is-open .panel {
+  grid-template-rows: 1fr;
+}
+.panel > div { overflow: hidden; }</code></pre></div></div></div></article>
+
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>진행률 progress</h3><div class="tags"><span class="pill mint">Progress</span><span class="pill cyan">Tweakable</span></div></div><p class="demo-note">슬라이더 값에 맞춰 진행률과 코드가 즉시 바뀝니다.</p></div><div class="demo-body"><div class="stage compact"><div class="progress-shell"><strong id="progressText">62%</strong><div class="progress-track"><div class="progress-fill"></div></div></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="progressRange">progress <output id="progressOut">62%</output></label><input id="progressRange" type="range" min="0" max="100" value="62"></div></div><p class="use-case"><strong>적용:</strong> 파일 업로드, 온보딩 단계, 체크아웃 진행.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-progress" type="button">복사</button></div><pre><code class="code-block" id="code-progress">.progress-fill {
+  width: 62%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4f5bd5, #1aa6c4, #1f9d57);
+  transition: width 260ms cubic-bezier(.2,.8,.2,1);
+}</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="scroll-view" aria-labelledby="scroll-title">
+        <div class="section-head"><span class="eyebrow">Module D</span><h2 id="scroll-title">스크롤 & 화면 전환</h2><p class="lead">최신 기능은 feature detection을 먼저 하고, 모든 브라우저에서 의미가 유지되는 fallback을 둡니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Scroll reveal fallback</h3><div class="tags"><span class="pill">IntersectionObserver</span></div></div><p class="demo-note">Scroll-driven CSS가 없어도 IntersectionObserver fallback으로 보입니다.</p></div><div class="demo-body"><div class="stage"><div class="scroll-stack" id="scrollStack"><div class="scroll-card is-visible">01. 상단 메시지</div><div class="scroll-card">02. 핵심 가치</div><div class="scroll-card">03. 복사 가능한 코드</div></div></div><div class="panel"><div class="controls"><button class="mini-btn" id="revealReset" type="button">다시 재생</button></div><p class="use-case"><strong>적용:</strong> 랜딩 섹션, 문서 목차, 제품 스토리텔링.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-scroll" type="button">복사</button></div><pre><code class="code-block" id="code-scroll">const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    entry.target.classList.toggle('is-visible', entry.isIntersecting);
+  });
+});
+document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>View Transition 감지</h3><div class="tags"><span class="pill rose">Fallback</span><span class="pill cyan">Route</span></div></div><p class="demo-note">지원 브라우저에서는 startViewTransition, 아니면 class 전환으로 유지합니다.</p></div><div class="demo-body"><div class="stage"><article class="view-box" id="viewBox"><div class="view-visual"></div><strong>Gallery item</strong><p class="demo-note">카드 ↔ 리스트</p></article></div><div class="panel"><div class="controls"><button class="mini-btn" id="viewToggle" type="button">레이아웃 전환</button></div><p class="use-case" id="viewSupport"><strong>지원 확인:</strong> 감지 중</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-view" type="button">복사</button></div><pre><code class="code-block" id="code-view">const update = () => card.classList.toggle('is-list');
+if (document.startViewTransition) {
+  document.startViewTransition(update);
+} else {
+  update();
+}</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="media-ui" aria-labelledby="media-title">
+        <div class="section-head"><span class="eyebrow">Module E</span><h2 id="media-title">이미지 & 영상 UI</h2><p class="lead">외부 이미지 없이 gradient와 shape만으로 zoom, reveal, player overlay를 실험합니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>이미지 zoom + caption</h3><div class="tags"><span class="pill">Hover</span><span class="pill mint">Media</span></div></div><p class="demo-note">wrapper는 고정하고 내부 레이어만 scale합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="media-card"><div class="media-zoom"></div></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> 여행 카드, 작품 썸네일, 상품 이미지.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-zoom" type="button">복사</button></div><pre><code class="code-block" id="code-zoom">.media { overflow: hidden; }
+.media img {
+  transform: scale(1);
+  transition: transform 850ms cubic-bezier(.2,.8,.2,1);
+}
+.media:hover img { transform: scale(1.13); }</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>clip-path reveal</h3><div class="tags"><span class="pill rose">clip-path</span><span class="pill cyan">Slider</span></div></div><p class="demo-note">마스크 범위를 조절해 전후 상태를 비교합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="clip-demo" aria-label="클립 패스 리빌 데모"></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="clipRange">circle size <output id="clipOut">48%</output></label><input id="clipRange" type="range" min="4" max="100" value="48"></div></div><p class="use-case"><strong>적용:</strong> before/after, 이미지 공개, 쿠폰 긁기.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-clip" type="button">복사</button></div><pre><code class="code-block" id="code-clip">.reveal::after {
+  clip-path: circle(48% at 50% 50%);
+  transition: clip-path 300ms cubic-bezier(.2,.8,.2,1);
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>영상 플레이어 오버레이</h3><div class="tags"><span class="pill yellow">Video UI</span><span class="pill">Progress</span></div></div><p class="demo-note">재생 상태와 진행률을 opacity, transform, scaleX로 표현합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="video-shell" id="videoShell"><button class="video-play" id="videoPlay" type="button" aria-pressed="false" aria-label="영상 재생">▶</button></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> 강의 플레이어, 릴스 카드, 제품 데모 영상.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-video" type="button">복사</button></div><pre><code class="code-block" id="code-video">.progress {
+  transform-origin: left;
+  transform: scaleX(.38);
+  animation: video-progress 4s linear infinite;
+}
+@keyframes video-progress {
+  to { transform: scaleX(1); }
+}</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="svg-engines" aria-labelledby="svg-engine-title">
+        <div class="section-head"><span class="eyebrow">Module F</span><h2 id="svg-engine-title">SVG 엔진 비교</h2><p class="lead">같은 스피너라도 CSS, SMIL, JavaScript, Lottie 접근 방식은 관리 지점이 다릅니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>CSS vs SMIL vs WAAPI vs Lottie 설명</h3><div class="tags"><span class="pill">CSS</span><span class="pill cyan">SMIL</span><span class="pill mint">WAAPI</span></div></div><p class="demo-note">외부 라이브러리 없이 세 가지는 실제 동작, Lottie는 개념 카드로 비교합니다.</p></div><div class="demo-body"><div class="stage"><div class="svg-board"><svg viewBox="0 0 360 120" role="img" aria-labelledby="engine-demo-title"><title id="engine-demo-title">SVG 엔진 비교 데모</title><g transform="translate(60 60)"><circle r="28" fill="none" stroke="var(--line-strong)" stroke-width="9"/><path d="M0 -28 A28 28 0 0 1 28 0" fill="none" stroke="var(--brand)" stroke-width="9" stroke-linecap="round" class="svg-gear"/></g><g transform="translate(180 60)"><circle r="28" fill="var(--cyan)" opacity=".35"><animate attributeName="r" values="20;34;20" dur="1.4s" repeatCount="indefinite"/></circle><circle r="15" fill="var(--cyan)"/></g><g transform="translate(300 60)" id="waapiSpinner"><circle r="28" fill="none" stroke="var(--line-strong)" stroke-width="9"/><path d="M0 -28 A28 28 0 0 1 28 0" fill="none" stroke="var(--mint)" stroke-width="9" stroke-linecap="round"/></g></svg></div></div><div class="panel"><p class="use-case"><strong>선택:</strong> 단순 반복은 CSS/SMIL, 상태와 데이터 제어는 JS, AE 타임라인은 Lottie를 검토합니다.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">요약</button></div><button class="copy-btn" data-copy-target="code-engines" type="button">복사</button></div><pre><code class="code-block" id="code-engines">CSS: @keyframes / transition으로 빠르게 반복과 피드백을 구현
+SMIL: SVG 파일 안에서 &lt;animate&gt;, &lt;animateMotion&gt;으로 단독 재생
+JS(WAAPI): element.animate()로 상태, 입력, 데이터와 연결
+Lottie: After Effects JSON 렌더링이 필요할 때 선택하되 용량과 접근성을 검토</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="svg-techniques" aria-labelledby="svg-tech-title">
+        <div class="section-head"><span class="eyebrow">Module G</span><h2 id="svg-tech-title">SVG 기법 도감</h2><p class="lead">stroke, animate, transform, path, morph, mask, filter, viewBox, dataviz, Lottie 판단 기준을 한 번에 봅니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Stroke drawing</h3><div class="tags"><span class="pill">getTotalLength</span></div></div><p class="demo-note">실제 path 길이를 측정해 dasharray와 dashoffset에 넣습니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 260 150" role="img" aria-labelledby="stroke-title"><title id="stroke-title">선 그리기 데모</title><path id="drawPath" class="svg-stroke draw-path" d="M30 90 C70 20 120 140 166 76 S220 34 232 100"/></svg></div><div class="panel"><div class="controls"><button class="mini-btn" id="drawReplay" type="button">다시 그리기</button></div><p class="use-case"><strong>적용:</strong> 로고, 서명, 성공 체크, 지도 경로.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-stroke" type="button">복사</button></div><pre><code class="code-block" id="code-stroke">function drawPath(path) {
+  const length = path.getTotalLength();
+  path.style.strokeDasharray = length;
+  path.style.strokeDashoffset = length;
+  path.getBoundingClientRect();
+  path.style.transition = 'stroke-dashoffset 1400ms ease';
+  path.style.strokeDashoffset = 0;
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>&lt;animate&gt; 속성</h3><div class="tags"><span class="pill cyan">SMIL</span></div></div><p class="demo-note">SVG 안에서 속성 자체를 시간에 따라 바꿉니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 180 120" role="img" aria-labelledby="animate-title"><title id="animate-title">SMIL animate 데모</title><rect x="35" y="35" width="110" height="50" rx="6" fill="var(--cyan)"><animate attributeName="rx" values="6;25;6" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".65;1;.65" dur="2s" repeatCount="indefinite"/></rect></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 단독 SVG 배너, 이메일용 작은 장식, 반복 아이콘.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-animate" type="button">복사</button></div><pre><code class="code-block" id="code-animate">&lt;rect width="110" height="50" rx="6"&gt;
+  &lt;animate attributeName="rx" values="6;25;6" dur="2s" repeatCount="indefinite" /&gt;
+&lt;/rect&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>&lt;animateTransform&gt;</h3><div class="tags"><span class="pill cyan">SMIL</span><span class="pill">Rotate</span></div></div><p class="demo-note">회전, 이동, 확대 같은 transform을 SVG 내부에서 재생합니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 160 160" role="img" aria-labelledby="gear-title"><title id="gear-title">톱니 회전 데모</title><g transform="translate(80 80)" fill="var(--yellow)"><polygon points="0,-48 12,-24 38,-30 24,-8 48,0 24,8 38,30 12,24 0,48 -12,24 -38,30 -24,8 -48,0 -24,-8 -38,-30 -12,-24"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/></polygon><circle r="16" fill="var(--surface)"/></g></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 설정, 동기화, 처리 중 아이콘.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-transform-svg" type="button">복사</button></div><pre><code class="code-block" id="code-transform-svg">&lt;polygon points="..."&gt;
+  &lt;animateTransform attributeName="transform"
+    type="rotate" from="0" to="360" dur="3s"
+    repeatCount="indefinite" /&gt;
+&lt;/polygon&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Motion path</h3><div class="tags"><span class="pill mint">offset-path</span></div></div><p class="demo-note">경로가 중요한 화면에서는 점이 선을 따라 움직이는 방식이 직관적입니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 280 160" role="img" aria-labelledby="route-title"><title id="route-title">경로 이동 데모</title><path d="M20 130 C90 20 160 180 250 66" fill="none" stroke="var(--line-strong)" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 10"/></svg><div class="route-dot" style="position:absolute;width:16px;height:16px;border-radius:50%;background:var(--rose);"></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> 배송 경로, 데이터 파이프라인, 온보딩 여정.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-motion-path" type="button">복사</button></div><pre><code class="code-block" id="code-motion-path">.dot {
+  offset-path: path("M20 130 C90 20 160 180 250 66");
+  animation: route-go 3.2s ease infinite;
+}
+@keyframes route-go { to { offset-distance: 100%; } }</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Path morph</h3><div class="tags"><span class="pill rose">Morph</span></div></div><p class="demo-note">같은 명령 구조를 가진 path끼리만 부드럽게 보간합니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 160 160" role="img" aria-labelledby="morph-title"><title id="morph-title">블롭 모프 데모</title><path class="blob-a" fill="var(--brand)" d="M76 14 C112 14 142 42 144 78 C146 114 116 144 78 146 C40 148 16 118 14 82 C12 46 40 14 76 14"/></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 빈 상태 일러스트, 배경 shape, 상태 감정 표현.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-morph" type="button">복사</button></div><pre><code class="code-block" id="code-morph">@keyframes blob-morph {
+  to {
+    d: path("M78 12 C124 18 146 56 132 96 C120 132 76 152 38 126 C0 100 12 48 38 28 C50 18 62 10 78 12");
+  }
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>clipPath reveal</h3><div class="tags"><span class="pill yellow">Mask</span></div></div><p class="demo-note">보여줄 영역만 넓혀 콘텐츠를 열어 보입니다.</p></div><div class="demo-body"><div class="stage compact"><svg class="mask-reveal" viewBox="0 0 280 120" role="img" aria-labelledby="mask-title"><title id="mask-title">SVG 마스크 리빌 데모</title><defs><clipPath id="revealMask"><rect x="10" y="16" width="40" height="88" rx="12"/></clipPath></defs><g clip-path="url(#revealMask)"><rect x="10" y="16" width="260" height="88" rx="12" fill="var(--mint)"/><text x="34" y="72" font-size="32" fill="#fff" font-weight="800">REVEAL</text></g></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 로고 등장, 쿠폰 열림, 차트 영역 공개.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-mask" type="button">복사</button></div><pre><code class="code-block" id="code-mask">&lt;clipPath id="reveal"&gt;
+  &lt;rect width="0" height="120"&gt;
+    &lt;animate attributeName="width" values="0;300" dur="1s" fill="freeze" /&gt;
+  &lt;/rect&gt;
+&lt;/clipPath&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Filter glow</h3><div class="tags"><span class="pill cyan">Filter</span></div></div><p class="demo-note">필터는 작은 영역에 제한하고 장식 SVG에는 aria-hidden을 사용합니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 180 140" role="img" aria-labelledby="filter-title"><title id="filter-title">SVG 글로우 필터 데모</title><defs><filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle class="glow-dot" cx="90" cy="70" r="32" fill="var(--rose)"/></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 알림 pulse, AI 생성 중 상태, 지도 마커.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-filter" type="button">복사</button></div><pre><code class="code-block" id="code-filter">&lt;filter id="glow"&gt;
+  &lt;feGaussianBlur stdDeviation="7" result="blur" /&gt;
+  &lt;feMerge&gt;&lt;feMergeNode in="blur" /&gt;&lt;feMergeNode in="SourceGraphic" /&gt;&lt;/feMerge&gt;
+&lt;/filter&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>viewBox camera</h3><div class="tags"><span class="pill">Camera</span></div></div><p class="demo-note">복잡한 지도나 다이어그램에서 카메라가 이동하는 느낌을 줍니다.</p></div><div class="demo-body"><div class="stage compact camera-stage" id="cameraStage"><svg viewBox="0 0 280 140" role="img" aria-labelledby="camera-title"><title id="camera-title">viewBox 카메라 데모</title><g class="camera-view"><rect x="12" y="20" width="70" height="46" rx="10" fill="var(--brand)"/><rect x="104" y="70" width="70" height="46" rx="10" fill="var(--cyan)"/><rect x="198" y="32" width="70" height="46" rx="10" fill="var(--mint)"/><path d="M82 43 C115 38 92 96 104 93 M174 93 C208 92 190 54 198 55" fill="none" stroke="var(--line-strong)" stroke-width="5"/></g></svg></div><div class="panel"><div class="controls"><button class="mini-btn" id="cameraToggle" type="button">카메라 이동</button></div><p class="use-case"><strong>적용:</strong> 아키텍처 다이어그램, 지도, 플로우 차트.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-viewbox" type="button">복사</button></div><pre><code class="code-block" id="code-viewbox">&lt;svg viewBox="0 0 280 140"&gt;
+  &lt;animate attributeName="viewBox"
+    values="0 0 280 140;80 20 150 75;0 0 280 140"
+    dur="2s" /&gt;
+&lt;/svg&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>Data viz bars</h3><div class="tags"><span class="pill mint">Chart</span></div></div><p class="demo-note">데이터 갱신은 height 대신 scaleY로 보여줍니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 240 140" role="img" aria-labelledby="bar-title"><title id="bar-title">데이터 막대 전환 데모</title><g transform="translate(32 118)"><rect class="bar" data-bar height="80" width="28" x="0" y="-80" rx="6" fill="var(--brand)"/><rect class="bar" data-bar height="58" width="28" x="46" y="-58" rx="6" fill="var(--cyan)"/><rect class="bar" data-bar height="96" width="28" x="92" y="-96" rx="6" fill="var(--mint)"/><rect class="bar" data-bar height="42" width="28" x="138" y="-42" rx="6" fill="var(--rose)"/></g></svg></div><div class="panel"><div class="controls"><button class="mini-btn" id="barsRandom" type="button">데이터 갱신</button></div><p class="use-case"><strong>적용:</strong> 대시보드, 리포트, 실시간 지표.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS</button></div><button class="copy-btn" data-copy-target="code-bars" type="button">복사</button></div><pre><code class="code-block" id="code-bars">.bar {
+  transform-origin: bottom;
+  transition: transform 420ms cubic-bezier(.2,.8,.2,1);
+}
+.bar[data-value=".62"] { transform: scaleY(.62); }</code></pre></div></div></div></article>
+
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>Lottie 판단 카드</h3><div class="tags"><span class="pill rose">Lottie</span><span class="pill yellow">Concept only</span></div></div><p class="demo-note">이 앱은 lottie-web을 로드하지 않습니다. 대신 언제 선택해야 하는지 기준만 제공합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="overview-card" style="max-width:340px"><span class="pill rose">AE → JSON</span><h3>복잡한 일러스트 타임라인</h3><p>온보딩, 빈 상태, 404처럼 디자이너 타임라인을 보존해야 할 때 검토합니다.</p></div></div><div class="panel"><p class="use-case"><strong>주의:</strong> 플레이어 용량, reduced-motion 대체, aria-label 또는 대체 텍스트를 확인합니다.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">Checklist</button></div><button class="copy-btn" data-copy-target="code-lottie" type="button">복사</button></div><pre><code class="code-block" id="code-lottie">Lottie를 선택하기 전 확인:
+1. CSS/SVG로 충분한가?
+2. JSON 용량과 네트워크 비용이 허용되는가?
+3. prefers-reduced-motion에서 정지 이미지 또는 짧은 대체가 있는가?
+4. 의미 있는 상태 설명을 텍스트로 제공하는가?</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="scenarios" aria-labelledby="scenario-title">
+        <div class="section-head"><span class="eyebrow">Module H</span><h2 id="scenario-title">실전 시나리오</h2><p class="lead">단일 기법이 아니라 제품 상태와 사용자 흐름에 모션을 묶습니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>결제 상태머신</h3><div class="tags"><span class="pill yellow">idle → loading → success → error</span></div></div><p class="demo-note">상태 텍스트는 aria-live로 전달하고, loading 중에는 비활성화합니다.</p></div><div class="demo-body"><div class="stage compact"><button class="payment-button" id="paymentButton" data-state="idle" type="button"><span id="paymentIcon">→</span><span id="paymentLabel">결제하기</span></button></div><div class="panel"><p class="use-case" aria-live="polite" id="paymentStatus"><strong>상태:</strong> 대기</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-payment" type="button">복사</button></div><pre><code class="code-block" id="code-payment">const states = ['idle', 'loading', 'success', 'error'];
+button.dataset.state = nextState;
+button.disabled = nextState === 'loading';
+status.textContent = labelByState[nextState];</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>업로드 원형 진행률</h3><div class="tags"><span class="pill mint">Stroke</span></div></div><p class="demo-note">stroke-dashoffset으로 원형 progress를 표시합니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 140 140" role="img" aria-labelledby="upload-title"><title id="upload-title">업로드 진행률</title><circle cx="70" cy="70" r="48" fill="none" stroke="var(--line-strong)" stroke-width="12"/><circle id="uploadRing" cx="70" cy="70" r="48" fill="none" stroke="var(--mint)" stroke-width="12" stroke-linecap="round" transform="rotate(-90 70 70)"/><text id="uploadText" x="70" y="78" text-anchor="middle" fill="var(--text)" font-size="22" font-weight="800">62%</text></svg></div><div class="panel"><div class="controls"><div class="control-row"><label for="uploadRange">upload <output id="uploadOut">62%</output></label><input id="uploadRange" type="range" min="0" max="100" value="62"></div></div><p class="use-case"><strong>적용:</strong> 파일 업로드, 프로필 완성도, 저장 진행.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-upload" type="button">복사</button></div><pre><code class="code-block" id="code-upload">const radius = 48;
+const length = 2 * Math.PI * radius;
+ring.style.strokeDasharray = length;
+ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>대시보드 갱신</h3><div class="tags"><span class="pill cyan">Count-up</span><span class="pill mint">Chart</span></div></div><p class="demo-note">숫자와 차트가 같은 상태 변경에 반응합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="dash-card"><span class="count-up" id="dashCount">128</span><svg viewBox="0 0 220 80" role="img" aria-labelledby="dash-title"><title id="dash-title">대시보드 미니 차트</title><path id="dashLine" d="M10 58 L60 32 L112 42 L164 22 L210 30" fill="none" stroke="var(--brand)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="panel"><div class="controls"><button class="mini-btn" id="dashboardRefresh" type="button">데이터 새로고침</button></div><p class="use-case"><strong>적용:</strong> KPI 카드, 관리자 홈, 매출 리포트.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-dashboard" type="button">복사</button></div><pre><code class="code-block" id="code-dashboard">function animateCount(node, from, to) {
+  const start = performance.now();
+  requestAnimationFrame(function tick(now) {
+    const p = Math.min(1, (now - start) / 500);
+    node.textContent = Math.round(from + (to - from) * p);
+    if (p < 1) requestAnimationFrame(tick);
+  });
+}</code></pre></div></div></div></article>
+
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>배송 경로 스토리</h3><div class="tags"><span class="pill rose">Route</span></div></div><p class="demo-note">경로선, 마커, glow가 함께 움직여 위치 맥락을 줍니다.</p></div><div class="demo-body"><div class="stage compact"><svg viewBox="0 0 280 150" role="img" aria-labelledby="delivery-title"><title id="delivery-title">배송 경로 SVG</title><path d="M24 118 C80 24 142 142 250 38" fill="none" stroke="var(--line-strong)" stroke-width="8" stroke-linecap="round"/><path class="svg-stroke draw-path is-drawn" d="M24 118 C80 24 142 142 250 38" stroke="var(--mint)"/><circle class="glow-dot" cx="250" cy="38" r="12" fill="var(--rose)"/></svg></div><div class="panel"><p class="use-case"><strong>적용:</strong> 배달, 여행 경로, 물류 추적, 데이터 플로우.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">SVG</button></div><button class="copy-btn" data-copy-target="code-delivery" type="button">복사</button></div><pre><code class="code-block" id="code-delivery">&lt;path d="M24 118 C80 24 142 142 250 38"
+  stroke-dasharray="320" stroke-dashoffset="320"&gt;
+&lt;/path&gt;
+&lt;circle&gt;&lt;animateMotion dur="3s" repeatCount="indefinite"&gt;...&lt;/animateMotion&gt;&lt;/circle&gt;</code></pre></div></div></div></article>
+
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>빈 상태 일러스트</h3><div class="tags"><span class="pill yellow">Empty state</span><span class="pill mint">role img</span></div></div><p class="demo-note">반복 모션은 작게, 의미는 텍스트와 SVG title로 같이 전달합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="empty-state"><svg viewBox="0 0 220 140" width="220" role="img" aria-labelledby="empty-title empty-desc"><title id="empty-title">검색 결과 없음</title><desc id="empty-desc">상자가 부드럽게 떠 있고 검색 결과가 없음을 알려주는 빈 상태 일러스트</desc><g class="empty-box"><rect x="62" y="54" width="96" height="58" rx="14" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="3"/><path d="M72 58 L110 82 L148 58" fill="none" stroke="var(--brand)" stroke-width="4" stroke-linecap="round"/></g><circle cx="72" cy="32" r="7" fill="var(--cyan)"/><circle cx="158" cy="30" r="5" fill="var(--rose)"/></svg><strong>아직 결과가 없어요</strong></div></div><div class="panel"><p class="use-case"><strong>적용:</strong> 검색 없음, 첫 데이터 없음, 404, 권한 없음.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">A11y</button></div><button class="copy-btn" data-copy-target="code-empty" type="button">복사</button></div><pre><code class="code-block" id="code-empty">&lt;svg role="img" aria-labelledby="empty-title empty-desc"&gt;
+  &lt;title id="empty-title"&gt;검색 결과 없음&lt;/title&gt;
+  &lt;desc id="empty-desc"&gt;결과가 없음을 알려주는 빈 상태 일러스트&lt;/desc&gt;
+&lt;/svg&gt;</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="usecase-guide" aria-labelledby="guide-title">
+        <div class="section-head"><span class="eyebrow">Module I</span><h2 id="guide-title">적용사례 매트릭스 & 선택 가이드</h2><p class="lead">어디서 무엇을 써야 할지 빠르게 결정할 수 있도록 화면 목적별 추천을 정리했습니다.</p></div>
+        <div class="demo-grid">
+          <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>화면별 추천 매트릭스</h3><div class="tags"><span class="pill">Decision</span></div></div></div><div class="demo-body"><div class="stage"><table class="matrix"><thead><tr><th>화면</th><th>추천 기법</th><th>주의</th></tr></thead><tbody><tr><td>랜딩 히어로</td><td>CSS transition, SVG stroke</td><td>자동 반복은 줄이고 메시지 가독성 유지</td></tr><tr><td>결제/제출</td><td>상태머신, spinner, 성공 체크</td><td>loading 중 disabled, aria-live 제공</td></tr><tr><td>대시보드</td><td>count-up, chart scaleY, line morph</td><td>데이터 변화와 애니메이션 의미 일치</td></tr><tr><td>지도/배송</td><td>motion path, stroke drawing</td><td>경로가 핵심일 때만 반복</td></tr></tbody></table></div><div class="panel"><div class="decision"><strong>결정 트리</strong><div class="choice-row"><button class="choice-btn is-active" data-choice="state" type="button">상태 변화</button><button class="choice-btn" data-choice="scroll" type="button">스크롤</button><button class="choice-btn" data-choice="path" type="button">선/경로</button><button class="choice-btn" data-choice="complex" type="button">복잡한 일러스트</button></div><div class="recommendation" id="recommendation"><strong>추천:</strong> CSS transition부터 시작하세요. 두 상태 사이의 피드백이면 가장 가볍고 유지보수하기 쉽습니다.</div></div><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">Guide</button></div><button class="copy-btn" data-copy-target="code-guide" type="button">복사</button></div><pre><code class="code-block" id="code-guide">1. 상태 사이 전환인가? → transition
+2. 스스로 반복되는가? → @keyframes
+3. 스크롤 위치가 진행률인가? → scroll-driven + IntersectionObserver fallback
+4. 선이 그려지거나 경로를 따라가나? → SVG stroke / animateMotion
+5. 디자이너 타임라인을 그대로 써야 하나? → Lottie 검토</code></pre></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="perf-a11y" aria-labelledby="perf-title">
+        <div class="section-head"><span class="eyebrow">Module J</span><h2 id="perf-title">성능 & 접근성 도구</h2><p class="lead">모션을 만드는 것만큼 멈추고, 줄이고, 측정하고, 설명하는 것도 중요합니다.</p></div>
+        <div class="tools-grid">
+          <article class="tool-card"><h3>FPS 미터</h3><p class="fps-value" id="fpsValue">--</p><p class="demo-note">requestAnimationFrame으로 최근 프레임 수를 측정합니다.</p></article>
+          <article class="tool-card"><h3>나쁜 이동 vs 좋은 이동</h3><div class="perf-compare"><span class="bad-move"></span><span class="good-move"></span></div><p class="demo-note">위: margin-left, 아래: transform. J-1 비교용 예외 데모입니다.</p></article>
+          <article class="tool-card"><h3>접근성 체크리스트</h3><div class="checklist"><label><input type="checkbox" checked> prefers-reduced-motion 지원</label><label><input type="checkbox" checked> pause/resume 전역 토글</label><label><input type="checkbox" checked> SVG title/desc 제공</label><label><input type="checkbox" checked> 키보드 focus-visible</label><label><input type="checkbox" checked> 색상 외 텍스트 상태 병행</label></div></article>
+        </div>
+      </section>
+
+      <section id="recipes" aria-labelledby="recipes-title">
+        <div class="section-head"><span class="eyebrow">Recipe Library</span><h2 id="recipes-title">복사 가능한 레시피 15+</h2><p class="lead">빠르게 가져다 쓸 수 있는 코드 패턴입니다. 각 카드의 키워드는 위 데모의 복사 코드와 연결됩니다.</p></div>
+        <div class="recipe-grid">
+          <article class="recipe-card"><span class="pill">1</span><h3>Button hover</h3><p>150~220ms transform + shadow.</p><code>transition: transform 180ms ease;</code></article>
+          <article class="recipe-card"><span class="pill">2</span><h3>Card lift</h3><p>translateY + scale로 제품 카드 강조.</p><code>transform: translateY(-10px) scale(1.02);</code></article>
+          <article class="recipe-card"><span class="pill">3</span><h3>Spinner</h3><p>진행률이 아닌 대기 상태.</p><code>animation: spin .9s linear infinite;</code></article>
+          <article class="recipe-card"><span class="pill">4</span><h3>Skeleton shimmer</h3><p>데이터 도착 전 레이아웃 힌트.</p><code>transform: translateX(160%);</code></article>
+          <article class="recipe-card"><span class="pill">5</span><h3>Modal enter</h3><p>opacity + translateY + scale.</p><code>transform: translateY(0) scale(1);</code></article>
+          <article class="recipe-card"><span class="pill">6</span><h3>Toast enter</h3><p>짧은 상태 피드백.</p><code>opacity: 1; transform: translateY(0);</code></article>
+          <article class="recipe-card"><span class="pill">7</span><h3>Image zoom</h3><p>wrapper overflow hidden 유지.</p><code>img:hover { transform: scale(1.13); }</code></article>
+          <article class="recipe-card"><span class="pill">8</span><h3>Clip reveal</h3><p>before/after와 공개 효과.</p><code>clip-path: circle(48% at 50% 50%);</code></article>
+          <article class="recipe-card"><span class="pill">9</span><h3>Video overlay</h3><p>play 상태와 progress 표시.</p><code>transform-origin: left;</code></article>
+          <article class="recipe-card"><span class="pill">10</span><h3>Scroll reveal</h3><p>IntersectionObserver fallback.</p><code>entry.target.classList.toggle('is-visible');</code></article>
+          <article class="recipe-card"><span class="pill">11</span><h3>View Transition</h3><p>지원하면 startViewTransition.</p><code>document.startViewTransition(update);</code></article>
+          <article class="recipe-card"><span class="pill">12</span><h3>SVG stroke</h3><p>getTotalLength로 정확한 선 길이.</p><code>path.getTotalLength();</code></article>
+          <article class="recipe-card"><span class="pill">13</span><h3>SVG motion path</h3><p>경로를 따라 마커 이동.</p><code>&lt;animateMotion&gt; 또는 offset-path</code></article>
+          <article class="recipe-card"><span class="pill">14</span><h3>결제 성공 체크</h3><p>상태머신 + stroke drawing.</p><code>idle → loading → success → error</code></article>
+          <article class="recipe-card"><span class="pill">15</span><h3>Reduced motion</h3><p>움직임 줄이기 사용자 선호 존중.</p><code>@media (prefers-reduced-motion: reduce)</code></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="copy-toast" id="copyToast" role="status" aria-live="polite">복사했습니다.</div>
+
+  <script type="module">
+    const storageKey = 'motionlab';
+    const root = document.documentElement;
+    const runtimeAnimations = [];
+    const defaultState = {
+      theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+      paused: false,
+      speed: 1,
+      reduceSim: false,
+      resetCounter: 0
+    };
+    const savedState = (() => {
+      try { return JSON.parse(localStorage.getItem(storageKey) || 'null') || {}; }
+      catch { return {}; }
+    })();
+    const store = {
+      state: { ...defaultState, ...savedState },
+      sync() {
+        root.dataset.theme = this.state.theme;
+        root.classList.toggle('motion-paused', this.state.paused);
+        root.classList.toggle('rm-sim', this.state.reduceSim);
+        root.style.setProperty('--speed', String(this.state.speed));
+        localStorage.setItem(storageKey, JSON.stringify(this.state));
+        document.getElementById('themeToggle').setAttribute('aria-pressed', String(this.state.theme === 'dark'));
+        document.getElementById('pauseToggle').setAttribute('aria-pressed', String(this.state.paused));
+        document.getElementById('reduceToggle').setAttribute('aria-pressed', String(this.state.reduceSim));
+        document.getElementById('speedSelect').value = String(this.state.speed);
+        document.querySelectorAll('svg').forEach((svg) => {
+          if (typeof svg.pauseAnimations === 'function') {
+            this.state.paused ? svg.pauseAnimations() : svg.unpauseAnimations();
+          }
+        });
+        runtimeAnimations.forEach((animation) => {
+          this.state.paused ? animation.pause() : animation.play();
+        });
+      },
+      set(patch) {
+        Object.assign(this.state, patch);
+        this.sync();
+      }
+    };
+
+    store.sync();
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      store.set({ theme: store.state.theme === 'dark' ? 'light' : 'dark' });
+    });
+    document.getElementById('pauseToggle').addEventListener('click', () => {
+      store.set({ paused: !store.state.paused });
+    });
+    document.getElementById('reduceToggle').addEventListener('click', () => {
+      store.set({ reduceSim: !store.state.reduceSim });
+    });
+    document.getElementById('speedSelect').addEventListener('change', (event) => {
+      store.set({ speed: Number(event.target.value) });
+    });
+    document.getElementById('resetAll').addEventListener('click', () => {
+      store.set({ resetCounter: store.state.resetCounter + 1 });
+      window.dispatchEvent(new CustomEvent('motionlab:reset', { detail: store.state.resetCounter }));
+      replayStroke();
+      showCopyToast('모든 데모를 리셋했습니다.');
+    });
+
+    function showCopyToast(message = '복사했습니다.') {
+      const toast = document.getElementById('copyToast');
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      clearTimeout(showCopyToast.timer);
+      showCopyToast.timer = setTimeout(() => toast.classList.remove('is-visible'), 1500);
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.append(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      showCopyToast('코드를 복사했습니다.');
+    }
+
+    document.querySelectorAll('[data-copy-target]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = document.getElementById(button.dataset.copyTarget);
+        if (target) copyText(target.innerText.trim());
+      });
+    });
+
+    const ctaDuration = document.getElementById('ctaDuration');
+    const ctaDurationOut = document.getElementById('ctaDurationOut');
+    const codeCta = document.getElementById('code-cta-css');
+    function updateCta() {
+      const value = ctaDuration.value;
+      root.style.setProperty('--cta-duration', `${value}ms`);
+      ctaDurationOut.textContent = `${value}ms`;
+      codeCta.textContent = `.motion-cta {
+  transform: translateY(0);
+  transition:
+    transform ${value}ms cubic-bezier(.2,.8,.2,1),
+    box-shadow ${value}ms cubic-bezier(.2,.8,.2,1);
+}
+.motion-cta:hover,
+.motion-cta:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(79,91,213,.28);
+}`;
+    }
+    ctaDuration.addEventListener('input', updateCta);
+
+    const liftAmount = document.getElementById('liftAmount');
+    const liftAmountOut = document.getElementById('liftAmountOut');
+    const codeLift = document.getElementById('code-lift-css');
+    function updateLift() {
+      const value = Number(liftAmount.value);
+      root.style.setProperty('--lift-y', `-${value}px`);
+      liftAmountOut.textContent = `-${value}px`;
+      codeLift.textContent = `.card {
+  transform: translateY(0);
+  transition:
+    transform 320ms cubic-bezier(.2,1.4,.38,1),
+    box-shadow 320ms ease;
+}
+.card:hover {
+  transform: translateY(-${value}px) scale(1.02);
+}`;
+    }
+    liftAmount.addEventListener('input', updateLift);
+
+    document.querySelectorAll('.ripple-button').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        const rect = button.getBoundingClientRect();
+        ripple.style.left = `${event.clientX - rect.left}px`;
+        ripple.style.top = `${event.clientY - rect.top}px`;
+        button.append(ripple);
+        ripple.addEventListener('animationend', () => ripple.remove());
+      });
+    });
+
+    document.querySelectorAll('.heart-button, .toggle-button, .hamburger-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const pressed = button.getAttribute('aria-pressed') === 'true';
+        button.setAttribute('aria-pressed', String(!pressed));
+      });
+    });
+
+    const loadingAction = document.getElementById('loadingAction');
+    loadingAction.addEventListener('click', () => {
+      loadingAction.disabled = true;
+      loadingAction.classList.remove('is-done');
+      loadingAction.classList.add('is-loading');
+      document.getElementById('loadingLabel').textContent = '처리 중';
+      document.getElementById('loadingStatus').innerHTML = '<strong>상태:</strong> 처리 중';
+      setTimeout(() => {
+        loadingAction.classList.remove('is-loading');
+        loadingAction.classList.add('is-done');
+        loadingAction.disabled = false;
+        document.getElementById('loadingLabel').textContent = '완료';
+        document.getElementById('loadingStatus').innerHTML = '<strong>상태:</strong> 완료';
+      }, 1200 / store.state.speed);
+    });
+
+    document.getElementById('modalToggle').addEventListener('click', () => {
+      document.getElementById('modalDemo').classList.toggle('is-open');
+    });
+    document.getElementById('toastToggle').addEventListener('click', () => {
+      const toast = document.getElementById('toastDemo');
+      toast.classList.remove('is-visible');
+      requestAnimationFrame(() => toast.classList.add('is-visible'));
+    });
+    document.getElementById('accordionToggle').addEventListener('click', (event) => {
+      const accordion = document.getElementById('accordionDemo');
+      accordion.classList.toggle('is-open');
+      event.currentTarget.setAttribute('aria-expanded', String(accordion.classList.contains('is-open')));
+    });
+
+    const progressRange = document.getElementById('progressRange');
+    function updateProgress() {
+      const value = progressRange.value;
+      root.style.setProperty('--upload-progress', value);
+      document.getElementById('progressOut').textContent = `${value}%`;
+      document.getElementById('progressText').textContent = `${value}%`;
+      document.getElementById('code-progress').textContent = `.progress-fill {
+  width: ${value}%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4f5bd5, #1aa6c4, #1f9d57);
+  transition: width 260ms cubic-bezier(.2,.8,.2,1);
+}`;
+    }
+    progressRange.addEventListener('input', updateProgress);
+
+    function revealCards() {
+      document.querySelectorAll('#scrollStack .scroll-card').forEach((card, index) => {
+        card.classList.remove('is-visible');
+        setTimeout(() => card.classList.add('is-visible'), index * 160);
+      });
+    }
+    document.getElementById('revealReset').addEventListener('click', revealCards);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('is-visible');
+      });
+    }, { threshold: .5 });
+    document.querySelectorAll('#scrollStack .scroll-card').forEach((card) => observer.observe(card));
+
+    const viewSupport = document.getElementById('viewSupport');
+    viewSupport.innerHTML = `<strong>지원 확인:</strong> ${document.startViewTransition ? 'View Transition 사용 가능' : 'fallback class 전환 사용'}`;
+    document.getElementById('viewToggle').addEventListener('click', () => {
+      const viewBox = document.getElementById('viewBox');
+      const update = () => viewBox.classList.toggle('is-list');
+      if (document.startViewTransition) {
+        document.startViewTransition(update);
+      } else {
+        update();
+      }
+    });
+
+    const clipRange = document.getElementById('clipRange');
+    clipRange.addEventListener('input', () => {
+      const value = clipRange.value;
+      root.style.setProperty('--clip-size', `${value}%`);
+      document.getElementById('clipOut').textContent = `${value}%`;
+      document.getElementById('code-clip').textContent = `.reveal::after {
+  clip-path: circle(${value}% at 50% 50%);
+  transition: clip-path 300ms cubic-bezier(.2,.8,.2,1);
+}`;
+    });
+
+    document.getElementById('videoPlay').addEventListener('click', (event) => {
+      const shell = document.getElementById('videoShell');
+      const pressed = event.currentTarget.getAttribute('aria-pressed') === 'true';
+      event.currentTarget.setAttribute('aria-pressed', String(!pressed));
+      event.currentTarget.textContent = pressed ? '▶' : 'Ⅱ';
+      shell.classList.toggle('is-paused', pressed);
+    });
+
+    const waapiSpinner = document.getElementById('waapiSpinner');
+    if (waapiSpinner?.animate) {
+      const waapiSpin = waapiSpinner.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], {
+        duration: 1100,
+        iterations: Infinity
+      });
+      runtimeAnimations.push(waapiSpin);
+      if (store.state.paused) waapiSpin.pause();
+    }
+
+    const drawPath = document.getElementById('drawPath');
+    function replayStroke() {
+      if (!drawPath) return;
+      const length = drawPath.getTotalLength();
+      drawPath.style.setProperty('--path-length', length);
+      drawPath.classList.remove('is-drawn');
+      drawPath.getBoundingClientRect();
+      drawPath.classList.add('is-drawn');
+    }
+    document.getElementById('drawReplay').addEventListener('click', replayStroke);
+    replayStroke();
+
+    document.getElementById('cameraToggle').addEventListener('click', () => {
+      document.getElementById('cameraStage').classList.toggle('is-zoomed');
+    });
+
+    document.getElementById('barsRandom').addEventListener('click', () => {
+      document.querySelectorAll('[data-bar]').forEach((bar) => {
+        const scale = (Math.random() * .65 + .35).toFixed(2);
+        bar.style.transform = `scaleY(${scale})`;
+      });
+    });
+
+    const states = ['idle', 'loading', 'success', 'error'];
+    const labelByState = {
+      idle: ['→', '결제하기', '대기'],
+      loading: ['◌', '처리 중', '처리 중'],
+      success: ['✓', '완료', '성공'],
+      error: ['!', '다시 시도', '오류']
+    };
+    let paymentIndex = 0;
+    document.getElementById('paymentButton').addEventListener('click', () => {
+      paymentIndex = (paymentIndex + 1) % states.length;
+      const state = states[paymentIndex];
+      const [icon, label, status] = labelByState[state];
+      const button = document.getElementById('paymentButton');
+      button.dataset.state = state;
+      button.disabled = state === 'loading';
+      document.getElementById('paymentIcon').textContent = icon;
+      document.getElementById('paymentLabel').textContent = label;
+      document.getElementById('paymentStatus').innerHTML = `<strong>상태:</strong> ${status}`;
+      if (state === 'loading') {
+        setTimeout(() => {
+          button.disabled = false;
+        }, 850 / store.state.speed);
+      }
+    });
+
+    const uploadRange = document.getElementById('uploadRange');
+    const uploadRing = document.getElementById('uploadRing');
+    const uploadLength = 2 * Math.PI * 48;
+    uploadRing.style.strokeDasharray = uploadLength;
+    function updateUpload() {
+      const value = Number(uploadRange.value);
+      uploadRing.style.strokeDashoffset = uploadLength * (1 - value / 100);
+      document.getElementById('uploadText').textContent = `${value}%`;
+      document.getElementById('uploadOut').textContent = `${value}%`;
+    }
+    uploadRange.addEventListener('input', updateUpload);
+    updateUpload();
+
+    let currentCount = 128;
+    function animateCount(node, from, to) {
+      const start = performance.now();
+      requestAnimationFrame(function tick(now) {
+        const p = Math.min(1, (now - start) / 500);
+        node.textContent = String(Math.round(from + (to - from) * p));
+        if (p < 1) requestAnimationFrame(tick);
+      });
+    }
+    document.getElementById('dashboardRefresh').addEventListener('click', () => {
+      const next = Math.round(80 + Math.random() * 220);
+      animateCount(document.getElementById('dashCount'), currentCount, next);
+      currentCount = next;
+      const y = () => Math.round(18 + Math.random() * 46);
+      document.getElementById('dashLine').setAttribute('d', `M10 ${y()} L60 ${y()} L112 ${y()} L164 ${y()} L210 ${y()}`);
+    });
+
+    const recommendations = {
+      state: '<strong>추천:</strong> CSS transition부터 시작하세요. 두 상태 사이의 피드백이면 가장 가볍고 유지보수하기 쉽습니다.',
+      scroll: '<strong>추천:</strong> Scroll-driven CSS를 feature detect하고 IntersectionObserver fallback을 준비하세요.',
+      path: '<strong>추천:</strong> SVG stroke-dashoffset 또는 animateMotion을 사용하세요. 경로의 의미가 중요한 화면에 적합합니다.',
+      complex: '<strong>추천:</strong> 순수 CSS/SVG로 어려운 디자이너 타임라인이면 Lottie를 검토하되, 용량과 접근성 대체를 먼저 확인하세요.'
+    };
+    document.querySelectorAll('[data-choice]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-choice]').forEach((item) => item.classList.remove('is-active'));
+        button.classList.add('is-active');
+        document.getElementById('recommendation').innerHTML = recommendations[button.dataset.choice];
+      });
+    });
+
+    const fpsValue = document.getElementById('fpsValue');
+    let frames = 0;
+    let last = performance.now();
+    function fpsLoop(now) {
+      frames += 1;
+      if (now - last >= 1000) {
+        fpsValue.textContent = String(Math.round((frames * 1000) / (now - last)));
+        frames = 0;
+        last = now;
+      }
+      requestAnimationFrame(fpsLoop);
+    }
+    requestAnimationFrame(fpsLoop);
+
+    const sectionIds = ['overview', 'css-core', 'micro-interactions', 'ui-components', 'scroll-view', 'media-ui', 'svg-engines', 'svg-techniques', 'scenarios', 'usecase-guide', 'perf-a11y', 'recipes'];
+    const sectionObserver = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      const id = visible.target.id;
+      document.querySelectorAll('.nav-link').forEach((link) => {
+        link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`);
+      });
+      if (history.replaceState) history.replaceState(null, '', `#${id}`);
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: [.1, .35, .6] });
+    sectionIds.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) sectionObserver.observe(section);
+    });
+
+    window.addEventListener('motionlab:reset', () => {
+      ctaDuration.value = '180';
+      liftAmount.value = '10';
+      progressRange.value = '62';
+      clipRange.value = '48';
+      uploadRange.value = '62';
+      updateCta();
+      updateLift();
+      updateProgress();
+      updateUpload();
+      document.querySelectorAll('.heart-button, .toggle-button, .hamburger-button').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+      document.getElementById('modalDemo').classList.add('is-open');
+      document.getElementById('toastDemo').classList.add('is-visible');
+      document.getElementById('accordionDemo').classList.add('is-open');
+      revealCards();
+    });
+  </script>
+</body>
+</html>

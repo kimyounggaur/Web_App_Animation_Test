@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSS Animation Practical Wireframe Lab</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b1020;
+      --surface: rgba(255,255,255,0.08);
+      --surface-2: rgba(255,255,255,0.13);
+      --surface-3: rgba(255,255,255,0.19);
+      --text: #f6f8ff;
+      --muted: #b7c2dc;
+      --line: rgba(255,255,255,0.15);
+      --brand: #7c8cff;
+      --brand-2: #7ee5c6;
+      --brand-3: #ffcc70;
+      --danger: #ff7a90;
+      --shadow: 0 20px 80px rgba(0,0,0,0.35);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius: 14px;
+      --duration-fast: 180ms;
+      --duration: 420ms;
+      --duration-slow: 900ms;
+      --easing: cubic-bezier(.2,.8,.2,1);
+      --spring: cubic-bezier(.2,1.4,.38,1);
+      --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f7ff;
+        --surface: rgba(255,255,255,0.82);
+        --surface-2: rgba(255,255,255,0.96);
+        --surface-3: rgba(20,30,70,0.08);
+        --text: #111827;
+        --muted: #5d6881;
+        --line: rgba(20,30,70,0.13);
+        --shadow: 0 20px 80px rgba(27,43,84,0.16);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(124,140,255,.35), transparent 28rem),
+        radial-gradient(circle at 90% 8%, rgba(126,229,198,.24), transparent 30rem),
+        linear-gradient(145deg, var(--bg), #12172e 55%, #101421);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .35;
+      background-image:
+        linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at 50% 20%, #000, transparent 72%);
+    }
+
+    body.light {
+      --bg: #f4f7ff;
+      --surface: rgba(255,255,255,0.82);
+      --surface-2: rgba(255,255,255,0.96);
+      --surface-3: rgba(20,30,70,0.08);
+      --text: #111827;
+      --muted: #5d6881;
+      --line: rgba(20,30,70,0.13);
+      --shadow: 0 20px 80px rgba(27,43,84,0.16);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(124,140,255,.22), transparent 28rem),
+        radial-gradient(circle at 90% 8%, rgba(126,229,198,.20), transparent 30rem),
+        linear-gradient(145deg, #f4f7ff, #eef5ff 55%, #ffffff);
+    }
+
+    body.reduce-motion *,
+    body.reduce-motion *::before,
+    body.reduce-motion *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 1ms !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+    }
+
+    a { color: inherit; }
+    .wrap { width: min(1180px, calc(100vw - 36px)); margin: 0 auto; position: relative; }
+
+    .hero {
+      padding: 72px 0 36px;
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      backdrop-filter: blur(12px);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%; background: var(--brand-2);
+      box-shadow: 0 0 0 7px rgba(126,229,198,.13);
+      animation: pulse 1.7s ease-in-out infinite;
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 76px);
+      line-height: .96;
+      letter-spacing: -0.06em;
+      margin: 0 0 18px;
+    }
+    .grad {
+      background: linear-gradient(90deg, var(--brand), var(--brand-2), var(--brand-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .lead {
+      font-size: clamp(16px, 2.2vw, 20px);
+      line-height: 1.8;
+      color: var(--muted);
+      margin: 0 0 28px;
+      max-width: 720px;
+    }
+    .hero-actions, .control-row, .button-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+    button, .pill-link {
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+      color: var(--text);
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      padding: 11px 15px;
+      box-shadow: none;
+      transition: transform var(--duration-fast) var(--easing), background var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
+      text-decoration: none;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    button:hover, .pill-link:hover { transform: translateY(-2px); border-color: rgba(124,140,255,.45); box-shadow: 0 12px 30px rgba(0,0,0,.16); }
+    button:active, .pill-link:active { transform: translateY(0) scale(.98); }
+    .primary { background: linear-gradient(135deg, var(--brand), #986ff8); color: white; border-color: transparent; }
+    .ghost { background: transparent; }
+    .small { padding: 7px 10px; font-size: 12px; }
+    .active-chip { background: rgba(124,140,255,.24); border-color: rgba(124,140,255,.48); }
+
+    .hero-stage {
+      min-height: 440px;
+      position: relative;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 22px;
+      backdrop-filter: blur(18px);
+      isolation: isolate;
+    }
+    .hero-stage::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: conic-gradient(from 90deg, transparent, rgba(124,140,255,.16), transparent, rgba(126,229,198,.16), transparent);
+      animation: spin 12s linear infinite;
+      z-index: -1;
+    }
+    .browser {
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(5,10,24,.62);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 42px 1fr;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+    body.light .browser { background: rgba(255,255,255,.72); }
+    .browser-bar {
+      display: flex; gap: 8px; align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding: 0 14px;
+    }
+    .traffic { width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); }
+    .mini-url { flex: 1; height: 20px; border-radius: 999px; background: var(--surface); margin-left: 8px; position: relative; overflow: hidden; }
+    .mini-url::after { content:""; position:absolute; inset:0; width:36%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); animation: shimmer 2.2s ease-in-out infinite; }
+    .stage-content { padding: 22px; display: grid; grid-template-columns: .92fr 1fr; gap: 18px; align-items: stretch; }
+    .phone {
+      border-radius: 28px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); padding: 16px; min-height: 320px; position: relative; overflow:hidden;
+      animation: float 5.4s ease-in-out infinite;
+    }
+    .notch { width: 90px; height: 9px; margin: 0 auto 18px; border-radius: 999px; background: var(--surface-3); }
+    .hero-card { border-radius: 18px; background: linear-gradient(135deg, rgba(124,140,255,.48), rgba(126,229,198,.25)); height: 112px; padding: 14px; position: relative; overflow: hidden; }
+    .hero-card::before { content:""; position:absolute; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,.22); right:-36px; top:-28px; animation: scaleBreath 3s ease-in-out infinite; }
+    .line { height: 10px; border-radius: 999px; background: var(--surface-3); margin: 14px 0; }
+    .line.w70 { width: 70%; } .line.w45 { width:45%; } .line.w88 { width:88%; }
+    .floating-chip { position: absolute; display:flex; align-items:center; gap:8px; border-radius:999px; background: var(--surface-2); border:1px solid var(--line); padding:8px 11px; font-size:12px; box-shadow: var(--shadow); }
+    .chip-a { right: 18px; top: 88px; animation: float 4.7s ease-in-out infinite .3s; }
+    .chip-b { left: 30px; bottom: 34px; animation: float 5.2s ease-in-out infinite .6s; }
+    .analytics { display:grid; gap: 14px; align-content:center; }
+    .bar-card { border-radius: 18px; border:1px solid var(--line); background: var(--surface); padding: 16px; }
+    .bar { height: 10px; border-radius: 999px; background: rgba(255,255,255,.12); overflow:hidden; }
+    .bar span { display:block; height:100%; width: var(--w, 40%); border-radius:inherit; background: linear-gradient(90deg, var(--brand), var(--brand-2)); transform-origin:left; animation: grow 1.4s var(--easing) both; }
+    .bar-card:nth-child(2) .bar span { animation-delay: .2s; }
+    .bar-card:nth-child(3) .bar span { animation-delay: .4s; }
+
+    .toolbar {
+      margin: 8px 0 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 12px;
+      z-index: 20;
+      box-shadow: 0 10px 35px rgba(0,0,0,.08);
+    }
+
+    .tabs { display:flex; flex-wrap:wrap; gap:8px; }
+    .tab-btn[aria-selected="true"] { background: rgba(124,140,255,.25); border-color: rgba(124,140,255,.6); }
+
+    main { padding: 14px 0 72px; }
+    .panel { display: none; animation: fadeUp var(--duration) var(--easing) both; }
+    .panel.active { display: block; }
+
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:20px; margin: 42px 0 18px; }
+    .section-head h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing:-.04em; margin: 0; }
+    .section-head p { margin: 6px 0 0; color: var(--muted); line-height:1.7; max-width: 680px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, 1fr); }
+    .grid.four { grid-template-columns: repeat(4, 1fr); }
+    .card, .demo-card, .code-card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+    }
+    .card { padding: 20px; }
+    .card h3, .demo-card h3, .code-card h3 { margin: 0 0 8px; font-size: 19px; letter-spacing:-.02em; }
+    .card p, .demo-card p, .code-card p { color: var(--muted); line-height: 1.7; margin: 0; font-size: 14px; }
+    .tag { display:inline-flex; align-items:center; gap:6px; font-size: 12px; color: var(--muted); padding: 5px 9px; border:1px solid var(--line); border-radius:999px; background:var(--surface); margin-bottom: 12px; }
+    .tag::before { content:""; width:7px; height:7px; border-radius:50%; background: var(--brand-2); }
+
+    .demo-card { padding: 0; }
+    .demo-top { padding: 18px 18px 0; }
+    .demo-area { min-height: 220px; padding: 18px; display:grid; place-items:center; position:relative; overflow:hidden; }
+    .demo-area.tall { min-height: 320px; }
+    .code-card { padding: 18px; }
+    pre { margin: 12px 0 0; padding: 16px; border-radius: 16px; overflow:auto; background: rgba(2,6,23,.72); border:1px solid rgba(255,255,255,.11); color: #dbeafe; font-family: var(--mono); font-size: 12px; line-height: 1.6; white-space: pre; }
+    body.light pre { background: #101729; color: #dbeafe; }
+
+    .transition-product {
+      width: min(260px, 100%);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.05));
+      border: 1px solid var(--line);
+      padding: 14px;
+      transform: translateY(0) scale(1);
+      transition: transform 320ms var(--spring), box-shadow 320ms var(--easing), border-color 320ms, background 320ms;
+    }
+    .transition-product:hover { transform: translateY(-10px) scale(1.025); box-shadow: 0 28px 60px rgba(0,0,0,.24); border-color: rgba(126,229,198,.55); background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08)); }
+    .product-image { height: 132px; border-radius: 18px; background: radial-gradient(circle at 30% 25%, #fff8, transparent 18%), linear-gradient(135deg, #7c8cff, #7ee5c6); position:relative; overflow:hidden; }
+    .product-image::after { content:""; position:absolute; inset: 18px 54px; border-radius: 28px; background: rgba(255,255,255,.36); box-shadow: 0 36px 0 rgba(255,255,255,.16); transform: rotate(-12deg); transition: transform 320ms var(--spring); }
+    .transition-product:hover .product-image::after { transform: rotate(-4deg) translateY(-6px) scale(1.08); }
+    .price-row { display:flex; align-items:center; justify-content:space-between; margin-top: 14px; }
+    .price-row strong { font-size: 18px; }
+    .cart-btn { width: 42px; height: 42px; padding:0; background:var(--brand); color:white; }
+
+    .keyframe-loader { width: 124px; height: 124px; border-radius: 50%; position:relative; }
+    .keyframe-loader::before, .keyframe-loader::after { content:""; position:absolute; inset:0; border-radius:inherit; border: 10px solid transparent; }
+    .keyframe-loader::before { border-top-color: var(--brand); animation: spin .95s linear infinite; }
+    .keyframe-loader::after { border-right-color: var(--brand-2); animation: spin 1.4s linear infinite reverse; inset: 18px; }
+    .loader-center { position:absolute; inset:34px; border-radius:50%; display:grid; place-items:center; background:var(--surface-2); font-weight:700; }
+
+    .skeleton-feed { width: min(320px, 100%); display:grid; gap: 12px; }
+    .sk-row { display:grid; grid-template-columns: 48px 1fr; gap: 12px; align-items:center; padding: 12px; border:1px solid var(--line); border-radius:18px; background:var(--surface); }
+    .sk-avatar, .sk-line { position:relative; overflow:hidden; background:rgba(255,255,255,.13); }
+    .sk-avatar { width:48px; height:48px; border-radius:50%; }
+    .sk-line { height: 12px; border-radius:999px; margin: 8px 0; }
+    .sk-avatar::after, .sk-line::after { content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent); animation: shimmer 1.4s ease-in-out infinite; }
+
+    .micro-area { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width:100%; }
+    .micro-item { border:1px solid var(--line); background:var(--surface); border-radius:18px; padding:14px; min-height:120px; display:grid; place-items:center; gap:10px; text-align:center; }
+    .like-heart { width: 62px; height:62px; border-radius:50%; font-size: 30px; display:grid; place-items:center; background:var(--surface-2); transition: transform 250ms var(--spring), background 250ms; }
+    .like-heart.liked { background: rgba(255,122,144,.22); animation: pop 450ms var(--spring); }
+    .switch { width: 76px; height: 42px; border-radius:999px; padding:4px; background:var(--surface-3); border:1px solid var(--line); transition: background 250ms; }
+    .switch::before { content:""; display:block; width:32px; height:32px; border-radius:50%; background:white; transition: transform 250ms var(--spring); }
+    .switch.on { background: rgba(126,229,198,.38); }
+    .switch.on::before { transform: translateX(34px); }
+    .toast-demo { position:relative; height: 96px; width:100%; display:grid; place-items:center; }
+    .toast { position:absolute; left:50%; bottom:10px; transform:translate(-50%, 16px); opacity:0; border:1px solid var(--line); border-radius:999px; background:var(--surface-2); padding:9px 14px; box-shadow: var(--shadow); transition: transform 260ms var(--spring), opacity 260ms; white-space:nowrap; }
+    .toast.show { opacity:1; transform:translate(-50%, 0); }
+
+    .image-stage { width:min(420px, 100%); aspect-ratio: 4/3; border-radius: 28px; border:1px solid var(--line); overflow:hidden; position:relative; background:#101729; box-shadow:var(--shadow); }
+    .image-stage svg { width:100%; height:100%; display:block; transform: scale(1); transition: transform 900ms var(--easing), filter 900ms; }
+    .image-stage:hover svg, .image-stage.zoomed svg { transform: scale(1.13); filter: saturate(1.18) contrast(1.05); }
+    .image-caption { position:absolute; left:16px; right:16px; bottom:16px; border-radius:20px; background: rgba(8,12,28,.72); border:1px solid rgba(255,255,255,.18); padding:14px; color:white; transform: translateY(18px); opacity: .88; transition: transform 350ms var(--spring), opacity 350ms; backdrop-filter: blur(12px); }
+    .image-stage:hover .image-caption, .image-stage.zoomed .image-caption { transform: translateY(0); opacity:1; }
+    .kenburns { animation: kenburns 7s ease-in-out infinite alternate; transform-origin: 50% 45%; }
+
+    .gallery-wire { display:grid; grid-template-columns: 1fr 84px; gap: 12px; width:100%; max-width:520px; }
+    .gallery-main { min-height: 292px; border-radius: 24px; border:1px solid var(--line); overflow:hidden; position:relative; background:linear-gradient(135deg,#7c8cff,#7ee5c6); }
+    .gallery-main::before { content:""; position:absolute; inset:0; background: radial-gradient(circle at 65% 28%, rgba(255,255,255,.35), transparent 20%), linear-gradient(135deg, transparent, rgba(0,0,0,.25)); transition: transform 560ms var(--easing); }
+    .gallery-main:hover::before { transform: scale(1.08); }
+    .gallery-thumbs { display:grid; gap: 10px; }
+    .thumb { border-radius:16px; border:1px solid var(--line); background:var(--surface-3); transition: transform 240ms var(--spring), border-color 240ms, background 240ms; }
+    .thumb:hover, .thumb.active { transform: translateX(-6px); border-color: var(--brand-2); background:rgba(126,229,198,.22); }
+
+    .mask-reveal { width: min(420px, 100%); min-height: 250px; border-radius: 28px; position:relative; overflow:hidden; border:1px solid var(--line); background:linear-gradient(135deg, #0f172a, #1e293b); }
+    .mask-layer { position:absolute; inset:0; background: linear-gradient(135deg, #ffcc70, #ff7a90 50%, #7c8cff); clip-path: circle(0% at var(--x, 50%) var(--y, 50%)); transition: clip-path 700ms var(--easing); }
+    .mask-reveal:hover .mask-layer, .mask-reveal.open .mask-layer { clip-path: circle(76% at var(--x, 50%) var(--y, 50%)); }
+    .mask-copy { position:absolute; inset:auto 18px 18px; color:white; z-index:2; text-shadow: 0 2px 16px rgba(0,0,0,.45); }
+
+    .video-shell { width:min(520px, 100%); border-radius: 28px; border: 1px solid var(--line); background: #050816; overflow:hidden; box-shadow: var(--shadow); color:white; }
+    .video-frame { height: 292px; position:relative; overflow:hidden; background: linear-gradient(135deg, #101729, #26355f); }
+    .video-frame::before { content:""; position:absolute; inset:-20%; background: radial-gradient(circle at 30% 25%, rgba(126,229,198,.35), transparent 20%), radial-gradient(circle at 70% 60%, rgba(124,140,255,.34), transparent 22%), linear-gradient(135deg, transparent, rgba(255,255,255,.09)); animation: cameraPan 7s ease-in-out infinite alternate; }
+    .video-shell:not(.is-playing) .video-frame::before { animation-play-state: paused; }
+    .play-button { position:absolute; inset:0; margin:auto; width:72px; height:72px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.17); border:1px solid rgba(255,255,255,.26); backdrop-filter: blur(8px); transition: transform 240ms var(--spring), opacity 240ms; }
+    .play-button::before { content:""; width:0; height:0; border-top:13px solid transparent; border-bottom:13px solid transparent; border-left:20px solid white; margin-left:5px; }
+    .video-shell.is-playing .play-button { transform: scale(.72); opacity:0; }
+    .video-controls { padding: 14px; display:grid; gap: 12px; background: rgba(255,255,255,.06); }
+    .progress-track { height: 8px; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; }
+    .progress-track span { display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--brand), var(--brand-2)); border-radius:inherit; }
+    .video-shell.is-playing .progress-track span { animation: videoProgress 8s linear infinite; }
+    .control-icons { display:flex; align-items:center; gap: 10px; justify-content:space-between; color:#dbeafe; font-size:13px; }
+    .subtitle { position:absolute; left:24px; right:24px; bottom:22px; text-align:center; padding:10px 12px; border-radius:999px; background:rgba(0,0,0,.48); transform: translateY(12px); opacity:0; transition: transform 320ms var(--spring), opacity 320ms; }
+    .video-shell.is-playing .subtitle { transform: translateY(0); opacity:1; animation: subtitleBlink 3.5s ease-in-out infinite; }
+
+    .reel-list { width:min(390px,100%); height: 470px; border-radius: 32px; border:1px solid var(--line); overflow:hidden; position:relative; background: #050816; box-shadow: var(--shadow); }
+    .reel { position:absolute; inset:0; padding: 18px; display:flex; flex-direction:column; justify-content:end; gap:14px; color:white; background: linear-gradient(160deg, var(--a), var(--b)); transform: translateY(100%); animation: reelCycle 12s infinite; }
+    .reel:nth-child(1) { --a:#1d4ed8; --b:#7c3aed; animation-delay:0s; transform: translateY(0); }
+    .reel:nth-child(2) { --a:#065f46; --b:#14b8a6; animation-delay:4s; }
+    .reel:nth-child(3) { --a:#be123c; --b:#f59e0b; animation-delay:8s; }
+    .reel-title { font-size:26px; font-weight:800; letter-spacing:-.04em; }
+    .reel-ui { display:flex; gap:8px; }
+    .reel-ui span { height:9px; border-radius:999px; background:rgba(255,255,255,.28); flex:1; }
+
+    .scroll-lab { position:relative; border-radius: var(--radius-xl); border:1px solid var(--line); background:var(--surface); overflow:hidden; min-height: 640px; }
+    .scroll-progress { position: sticky; top: 0; z-index:5; height: 6px; background:rgba(255,255,255,.12); }
+    .scroll-progress span { display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--brand), var(--brand-2), var(--brand-3)); }
+    .scroll-inner { padding: 28px; display:grid; gap: 48px; }
+    .scroll-step { min-height: 360px; display:grid; grid-template-columns: .9fr 1.1fr; gap: 22px; align-items:center; }
+    .scroll-art { border-radius: 28px; min-height: 260px; border:1px solid var(--line); background: linear-gradient(135deg, rgba(124,140,255,.34), rgba(126,229,198,.14)); position:relative; overflow:hidden; }
+    .scroll-art::before { content:""; position:absolute; width:190px; height:190px; border-radius:50%; background:rgba(255,255,255,.18); left:15%; top:18%; transform: scale(.75); }
+    .scroll-copy { padding: 18px; }
+    .scroll-copy h3 { font-size: 30px; margin: 0 0 10px; letter-spacing:-.04em; }
+
+    @supports (animation-timeline: view()) {
+      .scroll-step { animation: fadeUp linear both; animation-timeline: view(); animation-range: entry 8% cover 38%; }
+      .scroll-art::before { animation: parallaxCircle linear both; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+    }
+
+    .route-app { width:min(520px,100%); border-radius:28px; border:1px solid var(--line); background:var(--surface-2); overflow:hidden; box-shadow:var(--shadow); view-transition-name: route-card; }
+    .route-app-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+    .route-screen { min-height: 310px; padding: 18px; position:relative; overflow:hidden; }
+    .route-state { display:none; animation: fadeUp 420ms var(--easing) both; }
+    .route-app[data-route="home"] .home-state,
+    .route-app[data-route="detail"] .detail-state { display:block; }
+    .route-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:12px; }
+    .route-tile { height:120px; border-radius:20px; background:linear-gradient(135deg, rgba(124,140,255,.42), rgba(126,229,198,.16)); border:1px solid var(--line); padding:12px; transition: transform 260ms var(--spring); }
+    .route-tile:hover { transform: translateY(-6px); }
+    .detail-hero { height:150px; border-radius:24px; background:linear-gradient(135deg, #7c8cff, #7ee5c6); margin-bottom:16px; view-transition-name: detail-hero; }
+    ::view-transition-group(route-card), ::view-transition-group(detail-hero) { animation-duration: 420ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+    .fallback-swap { animation: fadeUp 420ms var(--easing) both; }
+
+    .modal-zone { width:100%; min-height:300px; display:grid; place-items:center; position:relative; }
+    .mock-page { width:min(420px,100%); border-radius:24px; border:1px solid var(--line); background:var(--surface); padding:16px; display:grid; gap:10px; }
+    .modal-backdrop { position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.0); opacity:0; pointer-events:none; transition: opacity 240ms, background 240ms; }
+    .modal-card { width:min(330px, calc(100% - 32px)); border-radius:24px; border:1px solid var(--line); background:var(--surface-2); padding:18px; box-shadow:var(--shadow); transform: translateY(20px) scale(.94); opacity:0; transition: transform 320ms var(--spring), opacity 260ms; }
+    .modal-backdrop.open { opacity:1; pointer-events:auto; background:rgba(0,0,0,.38); }
+    .modal-backdrop.open .modal-card { transform: translateY(0) scale(1); opacity:1; }
+
+    .svg-check { width: 170px; height: 170px; }
+    .svg-check circle { fill: none; stroke: rgba(126,229,198,.22); stroke-width: 10; }
+    .svg-check path { fill:none; stroke: var(--brand-2); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; stroke-dashoffset: 120; animation: drawCheck 2s var(--easing) infinite; }
+
+    .matrix { width:100%; border-collapse: collapse; overflow:hidden; border-radius: 18px; border:1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+    .matrix th, .matrix td { text-align:left; padding: 15px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55; }
+    .matrix th { background: var(--surface-2); font-size: 13px; color: var(--muted); }
+    .matrix tr:last-child td { border-bottom:0; }
+    .matrix strong { display:block; margin-bottom:4px; }
+
+    .checklist { display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .check-item { padding: 18px; border:1px solid var(--line); background:var(--surface); border-radius:20px; }
+    .check-item b { display:block; margin-bottom:8px; }
+    .check-item p { color: var(--muted); line-height:1.7; margin:0; }
+
+    footer { padding: 34px 0 60px; color: var(--muted); text-align:center; }
+
+    @keyframes pulse { 0%,100%{ transform:scale(1); opacity:1;} 50%{ transform:scale(.72); opacity:.62;} }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 100% { transform: translateX(160%); } }
+    @keyframes float { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-14px);} }
+    @keyframes scaleBreath { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.18);} }
+    @keyframes grow { from { transform: scaleX(0);} to { transform: scaleX(1);} }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px);} to { opacity: 1; transform: translateY(0);} }
+    @keyframes pop { 0% { transform: scale(.78); } 55% { transform: scale(1.18); } 100% { transform: scale(1); } }
+    @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.13) translate(-2%, -1%); } }
+    @keyframes cameraPan { from { transform: translateX(-4%) scale(1.02); } to { transform: translateX(5%) scale(1.1); } }
+    @keyframes videoProgress { from { width:0%; } to { width:100%; } }
+    @keyframes subtitleBlink { 0%,100% { opacity: .92;} 50% { opacity:.62;} }
+    @keyframes reelCycle {
+      0% { transform: translateY(100%); opacity: 0; }
+      6%, 30% { transform: translateY(0); opacity: 1; }
+      36%, 100% { transform: translateY(-100%); opacity: 0; }
+    }
+    @keyframes parallaxCircle { from { transform: translateY(48px) scale(.72); } to { transform: translateY(-56px) scale(1.3); } }
+    @keyframes drawCheck { 0% { stroke-dashoffset: 120; opacity: .6; } 45%, 70% { stroke-dashoffset: 0; opacity:1; } 100% { stroke-dashoffset: 0; opacity:.35; } }
+
+    @media (max-width: 940px) {
+      .hero, .stage-content, .scroll-step { grid-template-columns: 1fr; }
+      .grid, .grid.two, .grid.four, .checklist { grid-template-columns: 1fr; }
+      .micro-area { grid-template-columns: 1fr; }
+      .hero-stage { min-height: auto; }
+      .toolbar { position: static; }
+      .section-head { display:block; }
+      .gallery-wire { grid-template-columns: 1fr; }
+      .gallery-thumbs { grid-template-columns: repeat(4, 1fr); }
+      .thumb { min-height: 64px; }
+    }
+
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 24px, 1180px); }
+      .hero { padding-top: 42px; }
+      .stage-content, .demo-area, .scroll-inner { padding: 14px; }
+      .matrix { display:block; overflow:auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap hero" id="top">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> CSS Animation Practical Wireframe Lab</div>
+      <h1>CSS 애니메이션을 <span class="grad">실제 UI</span>로 이해하기</h1>
+      <p class="lead">전환, 키프레임, 스크롤 기반, 이미지/영상 UI, 라우트 전환, 접근성까지 한 페이지에서 직접 눌러보고, hover하고, 스크롤하며 확인하는 인터랙티브 와이어프레임입니다.</p>
+      <div class="hero-actions">
+        <a class="pill-link primary" href="#lab">데모 바로 보기</a>
+        <a class="pill-link" href="#matrix">적용사례 표 보기</a>
+        <button type="button" id="themeToggle">라이트/다크 전환</button>
+      </div>
+    </div>
+
+    <div class="hero-stage" aria-label="애니메이션 와이어프레임 미리보기">
+      <div class="browser">
+        <div class="browser-bar"><span class="traffic"></span><span class="traffic"></span><span class="traffic"></span><span class="mini-url"></span></div>
+        <div class="stage-content">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="hero-card"></div>
+            <div class="line w88"></div>
+            <div class="line w70"></div>
+            <div class="line w45"></div>
+            <button class="primary" style="width:100%; margin-top:18px;">CTA micro-interaction</button>
+            <span class="floating-chip chip-a">↗ hover lift</span>
+            <span class="floating-chip chip-b">● keyframes</span>
+          </div>
+          <div class="analytics">
+            <div class="bar-card"><div class="tag">transform</div><div class="bar"><span style="--w:78%"></span></div></div>
+            <div class="bar-card"><div class="tag">opacity</div><div class="bar"><span style="--w:62%"></span></div></div>
+            <div class="bar-card"><div class="tag">view / scroll timeline</div><div class="bar"><span style="--w:88%"></span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap toolbar" id="lab">
+    <div class="tabs" role="tablist" aria-label="CSS 애니메이션 데모 탭">
+      <button class="tab-btn" role="tab" aria-selected="true" data-tab="types">종류별 핵심</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="image">이미지 UI</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="video">영상 UI</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="interactive">인터랙션/와이어프레임</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="scroll">스크롤/라우팅</button>
+    </div>
+    <div class="control-row">
+      <button class="small" type="button" id="motionToggle" aria-pressed="false">모션 줄이기</button>
+      <a class="pill-link small" href="#checklist">체크리스트</a>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section class="panel active" id="types" role="tabpanel">
+      <div class="section-head">
+        <div>
+          <h2>1. CSS 애니메이션의 종류</h2>
+          <p>실무에서는 “무엇이 애니메이션을 시작시키는가”와 “시간을 누가 제어하는가”로 분류하면 설계가 쉬워집니다.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card"><span class="tag">State change</span><h3>Transition</h3><p>hover, focus, checked, class 변경처럼 두 상태 사이를 자연스럽게 보간합니다. 버튼, 카드, 드롭다운, 토글에 가장 많이 씁니다.</p></article>
+        <article class="card"><span class="tag">Timeline</span><h3>@keyframes Animation</h3><p>0%→100% 단계가 있는 독립적인 시간표입니다. 로더, 스켈레톤, 알림 뱃지, 배경 움직임처럼 자동 실행/반복 UI에 적합합니다.</p></article>
+        <article class="card"><span class="tag">Input-linked</span><h3>Scroll-driven</h3><p>시간이 아니라 스크롤 위치가 진행률이 됩니다. 읽기 진행바, 패럴랙스, 섹션 등장, 제품 스토리텔링에 좋습니다.</p></article>
+        <article class="card"><span class="tag">Media</span><h3>Image / Video UI</h3><p>이미지 zoom, reveal, mask, gallery, 영상 오버레이, progress, subtitle, reel 전환처럼 콘텐츠 몰입도를 높입니다.</p></article>
+        <article class="card"><span class="tag">Navigation</span><h3>View Transition</h3><p>목록→상세, 라우트 이동, 페이지 전환에서 이전/다음 뷰를 스냅샷으로 연결해 화면이 끊기지 않게 합니다.</p></article>
+        <article class="card"><span class="tag">Drawing</span><h3>SVG / Stroke</h3><p>아이콘 체크, 로고 드로잉, 경로 애니메이션에 사용합니다. stroke-dasharray와 stroke-dashoffset 조합이 핵심입니다.</p></article>
+      </div>
+
+      <div class="section-head">
+        <div><h2>Transition vs Keyframes 체감</h2><p>왼쪽은 hover로 상태가 변할 때만 움직이고, 오른쪽은 독립적으로 계속 재생됩니다.</p></div>
+      </div>
+      <div class="grid two">
+        <article class="demo-card">
+          <div class="demo-top"><h3>Transition: 상품 카드 hover</h3><p>실제 적용: 커머스 카드, 추천 상품, 가격/장바구니 CTA.</p></div>
+          <div class="demo-area">
+            <div class="transition-product" tabindex="0">
+              <div class="product-image"></div>
+              <div class="price-row"><strong>Air Desk Lamp</strong><button class="cart-btn" type="button" aria-label="장바구니">＋</button></div>
+              <p style="margin-top:8px;">hover하면 lift, shadow, 내부 이미지 각도가 동시에 전환됩니다.</p>
+            </div>
+          </div>
+        </article>
+        <article class="demo-card">
+          <div class="demo-top"><h3>@keyframes: 로딩/상태 표시</h3><p>실제 적용: 결제 처리, 파일 업로드, 데이터 fetching.</p></div>
+          <div class="demo-area">
+            <div class="keyframe-loader" aria-label="로딩 애니메이션"><div class="loader-center">CSS</div></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid two" style="margin-top:16px;">
+        <article class="code-card">
+          <h3>Transition 기본형</h3>
+          <p>두 상태를 정의하고, 원래 상태에 transition을 둡니다.</p>
+          <pre><code>.card {
+  transform: translateY(0) scale(1);
+  transition:
+    transform 320ms cubic-bezier(.2, 1.4, .38, 1),
+    box-shadow 320ms ease;
+}
+.card:hover {
+  transform: translateY(-10px) scale(1.025);
+  box-shadow: 0 28px 60px rgba(0,0,0,.24);
+}</code></pre>
+        </article>
+        <article class="code-card">
+          <h3>@keyframes 기본형</h3>
+          <p>반복, 방향, 지연, fill-mode까지 제어할 수 있습니다.</p>
+          <pre><code>@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loader {
+  animation: spin .95s linear infinite;
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="image" role="tabpanel">
+      <div class="section-head">
+        <div><h2>2. 이미지에 자주 쓰는 CSS 애니메이션</h2><p>이미지는 layout을 흔들지 않도록 transform, opacity, clip-path, mask 계열로 다루는 것이 일반적입니다.</p></div>
+      </div>
+      <div class="grid two">
+        <article class="demo-card">
+          <div class="demo-top"><h3>이미지 zoom + caption reveal</h3><p>실제 적용: 여행/숙소 카드, 매거진 썸네일, 포트폴리오 프로젝트 카드.</p></div>
+          <div class="demo-area tall">
+            <div class="image-stage" id="imageStage">
+              <svg class="kenburns" viewBox="0 0 800 600" role="img" aria-label="산과 호수 이미지 와이어프레임">
+                <defs>
+                  <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#8ec5ff"/><stop offset="55%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#fcd34d"/></linearGradient>
+                  <linearGradient id="lake" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#14b8a6"/></linearGradient>
+                </defs>
+                <rect width="800" height="600" fill="url(#sky)"/>
+                <circle cx="620" cy="120" r="58" fill="rgba(255,255,255,.75)"/>
+                <path d="M0 420 L170 220 L310 420 Z" fill="#1e3a8a" opacity=".92"/>
+                <path d="M180 420 L420 130 L690 420 Z" fill="#312e81" opacity=".96"/>
+                <path d="M390 420 L560 250 L800 420 Z" fill="#0f766e" opacity=".85"/>
+                <rect y="420" width="800" height="180" fill="url(#lake)"/>
+                <path d="M0 470 C170 430 300 520 480 470 C640 430 710 455 800 440" fill="none" stroke="rgba(255,255,255,.34)" stroke-width="18"/>
+              </svg>
+              <div class="image-caption"><b>Ken Burns + Reveal</b><br><span style="color:#dbeafe">이미지는 scale만, 텍스트는 translateY+opacity로 등장</span></div>
+            </div>
+          </div>
+          <div class="button-row" style="padding:0 18px 18px;"><button type="button" id="imageZoomBtn">이미지 상태 토글</button></div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-top"><h3>Gallery thumbnail transition</h3><p>실제 적용: 상세페이지 이미지 갤러리, 룩북, 부동산/호텔 사진 탐색.</p></div>
+          <div class="demo-area tall">
+            <div class="gallery-wire">
+              <div class="gallery-main"></div>
+              <div class="gallery-thumbs" aria-label="썸네일 목록">
+                <button class="thumb active" type="button" aria-label="썸네일 1"></button>
+                <button class="thumb" type="button" aria-label="썸네일 2"></button>
+                <button class="thumb" type="button" aria-label="썸네일 3"></button>
+                <button class="thumb" type="button" aria-label="썸네일 4"></button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid two" style="margin-top:16px;">
+        <article class="demo-card">
+          <div class="demo-top"><h3>clip-path mask reveal</h3><p>실제 적용: before/after 비교, 기능 공개, 캠페인 랜딩 인터랙션.</p></div>
+          <div class="demo-area tall">
+            <div class="mask-reveal" id="maskReveal">
+              <div class="mask-layer"></div>
+              <div class="mask-copy"><h3 style="margin:0 0 6px;">Hover / Move cursor</h3><p style="margin:0;color:#e5e7eb">마우스 위치를 CSS 변수로 받아 원형 마스크를 확장합니다.</p></div>
+            </div>
+          </div>
+        </article>
+        <article class="code-card">
+          <h3>이미지 애니메이션 설계 포인트</h3>
+          <p>이미지를 직접 width/height로 키우기보다, wrapper는 고정하고 내부 이미지만 transform합니다.</p>
+          <pre><code>.image-card { overflow: hidden; }
+.image-card img {
+  transform: scale(1);
+  transition: transform 900ms cubic-bezier(.2,.8,.2,1);
+}
+.image-card:hover img { transform: scale(1.12); }
+.caption {
+  transform: translateY(18px);
+  opacity: 0;
+  transition: transform 350ms, opacity 350ms;
+}
+.image-card:hover .caption {
+  transform: translateY(0);
+  opacity: 1;
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="video" role="tabpanel">
+      <div class="section-head">
+        <div><h2>3. 영상 UI에 자주 쓰는 CSS 애니메이션</h2><p>영상 자체의 재생은 HTML video/JS가 맡고, CSS는 오버레이, progress, subtitle, carousel/reel 전환, preview hover를 담당하는 경우가 많습니다.</p></div>
+      </div>
+      <div class="grid two">
+        <article class="demo-card">
+          <div class="demo-top"><h3>Video player overlay</h3><p>실제 적용: 강의 플랫폼, OTT 카드, 제품 소개 hero video.</p></div>
+          <div class="demo-area tall">
+            <div class="video-shell" id="videoShell">
+              <div class="video-frame">
+                <button class="play-button" type="button" id="playButton" aria-label="영상 재생"></button>
+                <div class="subtitle">CSS로 자막, 오버레이, progress 상태를 전환합니다.</div>
+              </div>
+              <div class="video-controls">
+                <div class="progress-track"><span></span></div>
+                <div class="control-icons"><span>00:18</span><span>HD · Preview</span><span>03:40</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="button-row" style="padding:0 18px 18px;"><button type="button" id="videoToggle">재생/일시정지 토글</button></div>
+        </article>
+        <article class="demo-card">
+          <div class="demo-top"><h3>Short-form reel transition</h3><p>실제 적용: 숏폼 피드, 뉴스 카드, 제품 하이라이트 carousel.</p></div>
+          <div class="demo-area tall">
+            <div class="reel-list" aria-label="숏폼 릴 와이어프레임">
+              <div class="reel"><div class="reel-title">Scene 01</div><p>등장: translateY + opacity</p><div class="reel-ui"><span></span><span></span><span></span></div></div>
+              <div class="reel"><div class="reel-title">Scene 02</div><p>전환: timeline keyframes</p><div class="reel-ui"><span></span><span></span><span></span></div></div>
+              <div class="reel"><div class="reel-title">Scene 03</div><p>퇴장: 위로 밀림</p><div class="reel-ui"><span></span><span></span><span></span></div></div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="grid two" style="margin-top:16px;">
+        <article class="code-card">
+          <h3>영상 overlay 패턴</h3>
+          <p>재생 상태 class 하나로 play button, progress, subtitle을 동시에 제어합니다.</p>
+          <pre><code>.video.is-playing .play-button {
+  transform: scale(.72);
+  opacity: 0;
+}
+.video.is-playing .progress span {
+  animation: videoProgress 8s linear infinite;
+}
+@keyframes videoProgress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}</code></pre>
+        </article>
+        <article class="code-card">
+          <h3>Preview hover 패턴</h3>
+          <p>목록 카드에서는 hover/focus 때만 영상 미리보기 레이어를 켜는 식으로 비용을 줄입니다.</p>
+          <pre><code>.video-card .preview {
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 220ms, transform 600ms;
+}
+.video-card:hover .preview,
+.video-card:focus-within .preview {
+  opacity: 1;
+  transform: scale(1);
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="interactive" role="tabpanel">
+      <div class="section-head">
+        <div><h2>4. 인터랙티브 와이어프레임 패턴</h2><p>실무 UI에서 CSS 애니메이션은 “피드백”입니다. 사용자가 눌렀는지, 저장됐는지, 처리 중인지 즉시 보여줍니다.</p></div>
+      </div>
+      <div class="grid two">
+        <article class="demo-card">
+          <div class="demo-top"><h3>Micro-interactions</h3><p>좋아요, 토글, 토스트처럼 작은 피드백을 빠르게 줍니다.</p></div>
+          <div class="demo-area tall">
+            <div class="micro-area">
+              <div class="micro-item"><button class="like-heart" id="likeBtn" type="button" aria-label="좋아요">♡</button><span>pop animation</span></div>
+              <div class="micro-item"><button class="switch" id="switchBtn" type="button" aria-label="스위치" aria-pressed="false"></button><span>toggle transition</span></div>
+              <div class="micro-item"><div class="toast-demo"><button id="toastBtn" type="button">저장</button><div class="toast" id="toast">저장 완료 ✓</div></div><span>toast enter/exit</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="demo-card">
+          <div class="demo-top"><h3>Modal enter/exit</h3><p>실제 적용: 로그인, 장바구니, 공유, 확인 다이얼로그.</p></div>
+          <div class="demo-area tall">
+            <div class="modal-zone">
+              <div class="mock-page"><div class="line w88"></div><div class="line w70"></div><button id="openModal" type="button" class="primary">모달 열기</button><div class="line w45"></div></div>
+              <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+                <div class="modal-card" role="dialog" aria-label="모달 데모">
+                  <h3>확인 모달</h3>
+                  <p>backdrop은 opacity, 모달은 translateY + scale로 등장합니다.</p>
+                  <div class="button-row" style="margin-top:16px;"><button id="closeModal" type="button">닫기</button><button class="primary" type="button">확인</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid two" style="margin-top:16px;">
+        <article class="demo-card">
+          <div class="demo-top"><h3>Skeleton loading</h3><p>실제 적용: 리스트/카드 데이터가 로드되기 전 레이아웃 안정화.</p></div>
+          <div class="demo-area">
+            <div class="skeleton-feed">
+              <div class="sk-row"><div class="sk-avatar"></div><div><div class="sk-line" style="width:80%"></div><div class="sk-line" style="width:55%"></div></div></div>
+              <div class="sk-row"><div class="sk-avatar"></div><div><div class="sk-line" style="width:65%"></div><div class="sk-line" style="width:90%"></div></div></div>
+              <div class="sk-row"><div class="sk-avatar"></div><div><div class="sk-line" style="width:76%"></div><div class="sk-line" style="width:45%"></div></div></div>
+            </div>
+          </div>
+        </article>
+        <article class="demo-card">
+          <div class="demo-top"><h3>SVG stroke draw</h3><p>실제 적용: 결제 성공 체크, 업로드 완료, 로고 드로잉.</p></div>
+          <div class="demo-area">
+            <svg class="svg-check" viewBox="0 0 160 160" aria-label="체크 드로잉 애니메이션"><circle cx="80" cy="80" r="62"></circle><path d="M47 82 L70 106 L116 55"></path></svg>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="scroll" role="tabpanel">
+      <div class="section-head">
+        <div><h2>5. 스크롤 기반 / 라우팅 전환</h2><p>스크롤은 읽는 흐름을 설명하는 데, 라우팅 전환은 화면 구조가 바뀌는 순간을 연결하는 데 강합니다.</p></div>
+      </div>
+      <div class="grid two">
+        <article class="demo-card">
+          <div class="demo-top"><h3>View Transition: 목록 → 상세</h3><p>지원 브라우저에서는 document.startViewTransition을 사용하고, 미지원 환경에서는 일반 DOM 업데이트로 fallback합니다.</p></div>
+          <div class="demo-area tall">
+            <div class="route-app" id="routeApp" data-route="home">
+              <div class="route-app-head"><strong>Product Explorer</strong><button id="routeToggle" type="button">화면 전환</button></div>
+              <div class="route-screen">
+                <div class="route-state home-state">
+                  <div class="route-grid"><div class="route-tile">Item A</div><div class="route-tile">Item B</div><div class="route-tile">Item C</div><div class="route-tile">Item D</div></div>
+                </div>
+                <div class="route-state detail-state">
+                  <div class="detail-hero"></div>
+                  <h3 style="margin:0 0 8px;">Item Detail</h3><p>같은 요소처럼 이어지는 시각적 전환을 구성합니다.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="code-card">
+          <h3>View Transition 최소 예시</h3>
+          <p>라우터나 상태 업데이트 함수를 callback으로 감싸는 구조입니다.</p>
+          <pre><code>function updateView() {
+  app.dataset.route =
+    app.dataset.route === 'home' ? 'detail' : 'home';
+}
+
+if (!document.startViewTransition) {
+  updateView();
+} else {
+  document.startViewTransition(updateView);
+}</code></pre>
+        </article>
+      </div>
+
+      <div class="section-head">
+        <div><h2>Scroll-driven storytelling</h2><p>아래 박스 안을 스크롤하면 상단 progress가 차고, 지원 브라우저에서는 각 섹션이 viewport 진입률에 맞춰 등장합니다.</p></div>
+      </div>
+      <section class="scroll-lab" id="scrollLab" aria-label="스크롤 기반 애니메이션 데모">
+        <div class="scroll-progress"><span id="scrollProgress"></span></div>
+        <div class="scroll-inner">
+          <div class="scroll-step"><div class="scroll-art"></div><div class="scroll-copy"><h3>01. Problem</h3><p>스크롤 기반 애니메이션은 긴 랜딩 페이지에서 사용자가 어디까지 읽었는지, 다음 내용이 무엇인지 알려주는 안내 장치로 쓰입니다.</p></div></div>
+          <div class="scroll-step"><div class="scroll-art"></div><div class="scroll-copy"><h3>02. Product</h3><p>제품의 구조나 기능을 단계적으로 보여줄 때, 요소가 한 번에 튀어나오는 것보다 viewport 진입에 맞춰 등장하는 편이 자연스럽습니다.</p></div></div>
+          <div class="scroll-step"><div class="scroll-art"></div><div class="scroll-copy"><h3>03. Result</h3><p>마지막 CTA 근처에서는 과한 모션보다 명확한 focus, contrast, button feedback이 더 중요합니다.</p></div></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="matrix">
+      <div class="section-head">
+        <div><h2>실제 적용사례 매트릭스</h2><p>“무엇을 움직일지”보다 “왜 움직일지”가 먼저입니다. 아래 기준으로 선택하면 과한 장식이 아니라 기능적인 애니메이션이 됩니다.</p></div>
+      </div>
+      <table class="matrix">
+        <thead><tr><th>상황</th><th>추천 종류</th><th>구체 적용</th><th>주의점</th></tr></thead>
+        <tbody>
+          <tr><td><strong>버튼/카드 hover</strong>커머스, SaaS CTA, 포트폴리오</td><td>transition</td><td>transform: translateY(-4px), scale(1.02), box-shadow, opacity</td><td>hover에만 의존하지 말고 focus-visible도 함께 설계</td></tr>
+          <tr><td><strong>데이터 로딩</strong>피드, 대시보드, 결제 처리</td><td>@keyframes</td><td>spinner, skeleton shimmer, progress pulse</td><td>무한 반복은 피로도가 높으므로 실제 완료 상태로 빠르게 전환</td></tr>
+          <tr><td><strong>이미지 카드</strong>여행, 패션, 매거진, 부동산</td><td>transition + transform</td><td>이미지 scale, caption reveal, mask reveal, thumbnail active</td><td>wrapper overflow hidden, layout 변경 속성은 피하기</td></tr>
+          <tr><td><strong>영상 플레이어</strong>OTT, 강의, 제품 소개</td><td>transition + keyframes</td><td>play overlay fade, progress animation, subtitle enter, preview hover</td><td>영상 디코딩 비용과 CSS 모션 비용을 분리해서 생각</td></tr>
+          <tr><td><strong>긴 랜딩 페이지</strong>브랜드 스토리, 제품 설명</td><td>scroll-driven</td><td>reading progress, section reveal, parallax, sticky stepper</td><td>미지원 브라우저 fallback, prefers-reduced-motion 고려</td></tr>
+          <tr><td><strong>목록→상세 전환</strong>SPA/MPA 라우팅, 갤러리</td><td>View Transition</td><td>thumbnail이 hero image로 이어짐, caption 별도 전환</td><td>지원 여부 확인 후 fallback으로 DOM 업데이트는 항상 보장</td></tr>
+          <tr><td><strong>성공/완료 피드백</strong>결제, 업로드, 저장</td><td>SVG stroke + keyframes</td><td>check path drawing, confetti-lite, status badge pop</td><td>짧게 400~900ms 안에서 종료</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="checklist">
+      <div class="section-head">
+        <div><h2>실무 체크리스트</h2><p>애니메이션을 넣기 전, 아래 질문에 답하면 품질이 크게 올라갑니다.</p></div>
+      </div>
+      <div class="checklist">
+        <div class="check-item"><b>1. 목적이 있는가?</b><p>상태 변화, 방향 안내, 계층 강조, 피드백 중 하나를 명확히 합니다. 목적 없는 배경 움직임은 가장 먼저 줄입니다.</p></div>
+        <div class="check-item"><b>2. transform/opacity로 가능한가?</b><p>위치 이동은 top/left보다 translate, 크기 변화는 width/height보다 scale을 먼저 검토합니다.</p></div>
+        <div class="check-item"><b>3. 시간은 짧은가?</b><p>마이크로 인터랙션은 대개 150~300ms, 모달/카드 전환은 240~450ms, 히어로/스크롤 연출은 600ms 이상도 가능하지만 반복을 줄입니다.</p></div>
+        <div class="check-item"><b>4. 접근성을 반영했는가?</b><p>prefers-reduced-motion, pause/stop, focus 상태, hover 없는 터치 환경을 고려합니다.</p></div>
+        <div class="check-item"><b>5. fallback이 있는가?</b><p>scroll-driven, view transition처럼 최신 기능은 @supports나 JS feature detection으로 일반 동작을 보장합니다.</p></div>
+        <div class="check-item"><b>6. 운영/성능 검증을 했는가?</b><p>DevTools Performance, CPU throttling, low-end mobile에서 jank가 없는지 확인합니다.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">CSS Animation Wireframe Lab · self-contained HTML · no external libraries</footer>
+
+  <script>
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+    $$('.tab-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+        $$('.tab-btn').forEach((b) => b.setAttribute('aria-selected', 'false'));
+        button.setAttribute('aria-selected', 'true');
+        $$('.panel').forEach((panel) => panel.classList.remove('active'));
+        $('#' + button.dataset.tab).classList.add('active');
+        document.getElementById('lab').scrollIntoView({ behavior: document.body.classList.contains('reduce-motion') ? 'auto' : 'smooth', block: 'start' });
+      });
+    });
+
+    $('#themeToggle').addEventListener('click', () => document.body.classList.toggle('light'));
+
+    $('#motionToggle').addEventListener('click', (e) => {
+      document.body.classList.toggle('reduce-motion');
+      const pressed = document.body.classList.contains('reduce-motion');
+      e.currentTarget.setAttribute('aria-pressed', String(pressed));
+      e.currentTarget.textContent = pressed ? '모션 원래대로' : '모션 줄이기';
+    });
+
+    $('#imageZoomBtn')?.addEventListener('click', () => $('#imageStage').classList.toggle('zoomed'));
+
+    $$('.thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        $$('.thumb').forEach((t) => t.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+
+    const mask = $('#maskReveal');
+    mask?.addEventListener('pointermove', (event) => {
+      const rect = mask.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width * 100).toFixed(2) + '%';
+      const y = ((event.clientY - rect.top) / rect.height * 100).toFixed(2) + '%';
+      mask.style.setProperty('--x', x);
+      mask.style.setProperty('--y', y);
+    });
+    mask?.addEventListener('click', () => mask.classList.toggle('open'));
+
+    function toggleVideo() {
+      $('#videoShell').classList.toggle('is-playing');
+    }
+    $('#videoToggle')?.addEventListener('click', toggleVideo);
+    $('#playButton')?.addEventListener('click', toggleVideo);
+
+    $('#likeBtn')?.addEventListener('click', (e) => {
+      e.currentTarget.classList.toggle('liked');
+      e.currentTarget.textContent = e.currentTarget.classList.contains('liked') ? '♥' : '♡';
+    });
+    $('#switchBtn')?.addEventListener('click', (e) => {
+      e.currentTarget.classList.toggle('on');
+      e.currentTarget.setAttribute('aria-pressed', e.currentTarget.classList.contains('on'));
+    });
+    let toastTimer;
+    $('#toastBtn')?.addEventListener('click', () => {
+      const toast = $('#toast');
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+    });
+
+    $('#openModal')?.addEventListener('click', () => {
+      $('#modalBackdrop').classList.add('open');
+      $('#modalBackdrop').setAttribute('aria-hidden', 'false');
+    });
+    $('#closeModal')?.addEventListener('click', () => {
+      $('#modalBackdrop').classList.remove('open');
+      $('#modalBackdrop').setAttribute('aria-hidden', 'true');
+    });
+    $('#modalBackdrop')?.addEventListener('click', (e) => {
+      if (e.target.id === 'modalBackdrop') $('#closeModal').click();
+    });
+
+    $('#routeToggle')?.addEventListener('click', () => {
+      const app = $('#routeApp');
+      const update = () => { app.dataset.route = app.dataset.route === 'home' ? 'detail' : 'home'; };
+      if (!document.startViewTransition || document.body.classList.contains('reduce-motion')) {
+        update();
+        app.classList.remove('fallback-swap');
+        void app.offsetWidth;
+        app.classList.add('fallback-swap');
+        return;
+      }
+      document.startViewTransition(update);
+    });
+
+    const scrollLab = $('#scrollLab');
+    const progress = $('#scrollProgress');
+    function updateProgress() {
+      if (!scrollLab || !progress) return;
+      const rect = scrollLab.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const seen = Math.min(Math.max(-rect.top, 0), total);
+      const pct = total > 0 ? seen / total * 100 : 0;
+      progress.style.width = pct.toFixed(1) + '%';
+    }
+    addEventListener('scroll', updateProgress, { passive: true });
+    addEventListener('resize', updateProgress);
+    updateProgress();
+  </script>
+</body>
+</html>

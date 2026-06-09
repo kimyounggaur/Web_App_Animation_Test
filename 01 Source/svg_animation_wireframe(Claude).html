@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SVG 애니메이션 종류와 적용사례 — 인터랙티브 와이어프레임</title>
+<style>
+  :root{
+    --bg:#07111f;
+    --panel:#101b2d;
+    --panel2:#152238;
+    --ink:#eef6ff;
+    --muted:#a9b8cd;
+    --line:#263a56;
+    --accent:#75e6ff;
+    --accent2:#9af28b;
+    --accent3:#ffcf70;
+    --danger:#ff7e8a;
+    --radius:22px;
+    --shadow: 0 20px 80px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(circle at 18% 8%, rgba(117,230,255,.18), transparent 32rem),
+      radial-gradient(circle at 88% 14%, rgba(154,242,139,.12), transparent 28rem),
+      linear-gradient(180deg,#07111f 0%,#0a1221 70%,#08101d 100%);
+    color:var(--ink);
+  }
+  a{color:inherit}
+  .wrap{max-width:1240px;margin:0 auto;padding:34px 22px 80px}
+  .hero{
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap:24px;
+    align-items:stretch;
+    margin-bottom:26px;
+  }
+  .heroCard,.panel,.caseCard,.wirePanel,.typeCard{
+    background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    backdrop-filter: blur(8px);
+  }
+  .heroCard{padding:32px;min-height:420px;position:relative;overflow:hidden}
+  .eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--accent);font-weight:750;letter-spacing:.02em;margin-bottom:12px}
+  h1{font-size: clamp(38px,5vw,72px);line-height:.95;margin:0 0 20px;letter-spacing:-.06em}
+  h2{font-size: clamp(26px,3vw,42px);line-height:1.05;margin:0 0 16px;letter-spacing:-.04em}
+  h3{margin:0 0 10px;font-size:21px;letter-spacing:-.02em}
+  p{color:var(--muted);line-height:1.72;margin:0 0 12px}
+  .heroList{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}
+  .pill{border:1px solid var(--line);background:rgba(0,0,0,.18);border-radius:999px;padding:10px 12px;color:#dcecff;font-size:14px;text-align:center}
+  .heroSvg{position:absolute;right:-20px;bottom:-30px;width:53%;min-width:340px;opacity:.92}
+  .drawPath{stroke-dasharray:900;stroke-dashoffset:900;animation:draw 4.2s ease-in-out infinite alternate}
+  .softPulse{animation:softPulse 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  .orbit{animation:orbit 8s linear infinite;transform-origin:300px 210px}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes softPulse{50%{transform:scale(1.12);opacity:.72}}
+  @keyframes orbit{to{transform:rotate(360deg)}}
+  .panel{padding:24px;margin:22px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .types{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+  .typeCard{padding:16px;min-height:210px;position:relative;overflow:hidden}
+  .typeCard .tag{font-size:12px;color:#07111f;background:var(--accent);display:inline-block;padding:4px 8px;border-radius:999px;font-weight:800;margin-bottom:12px}
+  .typeCard p{font-size:14px;line-height:1.55;margin:0}
+  .miniSvg{width:100%;height:86px;margin-top:10px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}
+  .spin{animation:spin 1.2s linear infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .dashLine{stroke-dasharray:180;stroke-dashoffset:180;animation:dash 2.4s ease-in-out infinite alternate}
+  @keyframes dash{to{stroke-dashoffset:0}}
+  .float{animation:float 2.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes float{50%{transform:translateY(-10px)}}
+  .glow{filter:url(#globalGlow);animation:softPulse 2s ease-in-out infinite}
+  .skeleton{animation:slide 1.4s linear infinite}
+  @keyframes slide{from{transform:translateX(-120px)}to{transform:translateX(190px)}}
+  .tabbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 20px}
+  button,.ghostBtn{
+    appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:var(--ink);
+    padding:10px 14px;border-radius:999px;font-weight:750;cursor:pointer;transition:.2s ease;
+  }
+  button:hover,.ghostBtn:hover{transform:translateY(-1px);background:rgba(255,255,255,.12)}
+  button.active{background:var(--accent);color:#06111f;border-color:transparent}
+  .demoGrid{display:grid;grid-template-columns: 1.05fr .95fr;gap:18px;align-items:stretch}
+  .stage{background:#07111f;border:1px solid var(--line);border-radius:22px;padding:16px;min-height:370px;display:grid;place-items:center;overflow:hidden}
+  .explain{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:18px}
+  .code{font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#050b14;border:1px solid #253752;border-radius:14px;padding:14px;color:#cde7ff;white-space:pre-wrap;font-size:13px;line-height:1.48;max-height:230px;overflow:auto;margin-top:12px}
+  .caseGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .caseCard{padding:18px;min-height:250px}
+  .caseCard strong{color:#fff}
+  .caseCard ul{margin:10px 0 0 18px;padding:0;color:var(--muted);line-height:1.65}
+  .wirePanel{padding:18px}
+  .phoneWrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:18px;align-items:center}
+  .phone{width:100%;max-width:350px;margin:0 auto;display:block;filter:drop-shadow(0 28px 40px rgba(0,0,0,.35))}
+  .phone .btnFill{transition:fill .35s ease}
+  .phone .spinner{display:none;animation:spin 1s linear infinite;transform-box:fill-box;transform-origin:center}
+  .phone .check{stroke-dasharray:80;stroke-dashoffset:80;opacity:0;transition:opacity .2s ease}
+  .phone .errorMark{opacity:0;transition:opacity .2s ease}
+  .phone.loading .spinner{display:block}
+  .phone.success .btnFill{fill:#9af28b}
+  .phone.success .check{animation:check .7s ease forwards;opacity:1}
+  .phone.error .btnFill{fill:#ff7e8a}
+  .phone.error .errorMark{opacity:1;animation:shake .36s ease 1}
+  @keyframes check{to{stroke-dashoffset:0}}
+  @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
+  .note{font-size:13px;color:#9fb2ca}
+  .stepPath{stroke-dasharray:500;stroke-dashoffset:500;animation:dash 3.5s ease-in-out infinite alternate}
+  .sliderRow{display:flex;gap:12px;align-items:center;margin:12px 0}
+  input[type="range"]{width:220px;accent-color:#75e6ff}
+  .bar{transition:height .45s cubic-bezier(.2,.9,.2,1), fill .2s ease}
+  .barLabel{font-size:11px;fill:#bcd2eb}
+  .footnotes{font-size:13px;color:#9fb2ca;line-height:1.75}
+  .footnotes a{color:#d8f8ff}
+  .callout{border-left:4px solid var(--accent);background:rgba(117,230,255,.08);padding:14px 16px;border-radius:14px;margin:14px 0;color:#dcecff}
+  .matrix{width:100%;border-collapse:collapse;margin-top:12px;overflow:hidden;border-radius:16px}
+  .matrix th,.matrix td{border:1px solid rgba(255,255,255,.1);padding:12px;vertical-align:top;color:#c5d6eb;text-align:left;font-size:14px;line-height:1.55}
+  .matrix th{background:rgba(255,255,255,.08);color:#fff}
+  .matrix td:first-child{color:#fff;font-weight:800;white-space:nowrap}
+  .logoDraw{stroke-dasharray:620;stroke-dashoffset:620;animation:draw 4s ease-in-out infinite alternate}
+  .morphPath{animation:morphFill 5s ease-in-out infinite}
+  @keyframes morphFill{50%{opacity:.75}}
+  .videoStrip{display:flex;gap:10px;align-items:stretch;margin-top:14px;overflow-x:auto;padding-bottom:6px}
+  .frame{min-width:150px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);padding:10px;text-align:center;color:#bcd2eb;font-size:12px}
+  .frame svg{width:100%;height:80px;display:block}
+  .frame:nth-child(1){animation:focusFrame 8s linear infinite}
+  .frame:nth-child(2){animation:focusFrame 8s linear infinite 1.3s}
+  .frame:nth-child(3){animation:focusFrame 8s linear infinite 2.6s}
+  .frame:nth-child(4){animation:focusFrame 8s linear infinite 3.9s}
+  .frame:nth-child(5){animation:focusFrame 8s linear infinite 5.2s}
+  @keyframes focusFrame{0%,16%{outline:2px solid var(--accent);transform:translateY(-2px)}17%,100%{outline:0;transform:none}}
+  @media (max-width:980px){.hero,.two,.demoGrid,.phoneWrap{grid-template-columns:1fr}.types{grid-template-columns:repeat(2,1fr)}.caseGrid,.three{grid-template-columns:1fr}.heroSvg{position:static;width:100%;min-width:0}.heroList{grid-template-columns:1fr}}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="globalGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="gradA" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#75e6ff"/>
+      <stop offset="1" stop-color="#9af28b"/>
+    </linearGradient>
+    <linearGradient id="gradB" x1="0" x2="1">
+      <stop offset="0" stop-color="#ffcf70"/>
+      <stop offset="1" stop-color="#ff7e8a"/>
+    </linearGradient>
+  </defs>
+</svg>
+<div class="wrap">
+  <section class="hero">
+    <div class="heroCard">
+      <div class="eyebrow">SVG Animation Lab · 이미지 · 영상 · 와이어프레임</div>
+      <h1>SVG 애니메이션을<br>실제 UI로 이해하기</h1>
+      <p>로고가 그려지고, 선이 경로를 따라 움직이고, 카드 결제 버튼이 로딩에서 성공/오류 상태로 바뀌는 흐름을 한 페이지에서 테스트합니다.</p>
+      <p>SGV라고 쓰신 부분은 SVG로 해석했습니다. SVG는 DOM 요소라서 CSS, SMIL, JavaScript, 디자인 툴 내보내기 방식으로 모두 움직일 수 있습니다.</p>
+      <div class="heroList">
+        <div class="pill">1. 종류별 원리</div>
+        <div class="pill">2. 실제 적용사례</div>
+        <div class="pill">3. 인터랙티브 프로토타입</div>
+      </div>
+      <svg class="heroSvg" viewBox="0 0 520 420" role="img" aria-labelledby="heroTitle heroDesc">
+        <title id="heroTitle">SVG 애니메이션 대표 예시</title>
+        <desc id="heroDesc">선 그리기, 궤도 이동, 상태 전환을 보여주는 추상 그래픽</desc>
+        <rect x="42" y="42" width="390" height="286" rx="34" fill="#101b2d" stroke="#2b4667"/>
+        <path class="drawPath" d="M91 245 C145 128 219 305 286 176 S398 113 431 218" fill="none" stroke="url(#gradA)" stroke-width="10" stroke-linecap="round"/>
+        <g class="orbit">
+          <circle cx="300" cy="80" r="10" fill="#ffcf70"/>
+        </g>
+        <circle class="softPulse" cx="124" cy="102" r="34" fill="#75e6ff" opacity=".26"/>
+        <rect x="92" y="290" width="260" height="18" rx="9" fill="#1b2b45"/>
+        <rect x="92" y="290" width="150" height="18" rx="9" fill="url(#gradA)">
+          <animate attributeName="width" values="40;260;110;220;40" dur="5s" repeatCount="indefinite"/>
+        </rect>
+        <g transform="translate(347 252)">
+          <circle r="38" fill="#0b1525" stroke="#2f4a69"/>
+          <path class="dashLine" d="M-18 2 L-4 16 L22 -18" fill="none" stroke="#9af28b" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </svg>
+    </div>
+    <div class="panel">
+      <h2>한눈에 보는 선택 기준</h2>
+      <p>SVG 애니메이션은 “어디를 움직일 것인가”보다 “누가 제어할 것인가”로 분류하면 실무 판단이 빨라집니다.</p>
+      <table class="matrix">
+        <tr><th>방식</th><th>가장 잘 맞는 상황</th><th>주의점</th></tr>
+        <tr><td>CSS</td><td>아이콘, 버튼, 로더, hover/focus, 선 그리기</td><td>복잡한 타임라인·상태 분기는 어렵습니다.</td></tr>
+        <tr><td>SMIL</td><td>HTML 없이 SVG 파일만 열어도 재생되는 단순 반복</td><td>팀 표준이 React/JS라면 관리 방식이 분리될 수 있습니다.</td></tr>
+        <tr><td>JavaScript</td><td>클릭, 스크롤, 데이터 변화, 조건부 상태 전환</td><td>DOM 조작이 많으면 성능 설계가 필요합니다.</td></tr>
+        <tr><td>Lottie</td><td>After Effects 기반 복잡한 일러스트/온보딩</td><td>플레이어, 접근성 텍스트, 파일 용량 관리가 필요합니다.</td></tr>
+      </table>
+      <div class="callout">추천 흐름: 먼저 CSS로 해결 → 상태/데이터가 붙으면 JS → 모션 디자이너 타임라인이 필요하면 Lottie/SVGator → 차트는 D3.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="types">
+    <h2>SVG 애니메이션의 대표 종류 10가지</h2>
+    <p>아래 카드는 실제 서비스 UI에서 반복적으로 쓰이는 패턴입니다. 각 카드는 독립 SVG이므로 확대해도 깨지지 않고, 일부는 HTML 파일 안에서 직접 움직입니다.</p>
+    <div class="types">
+      <article class="typeCard">
+        <span class="tag">01 CSS transform</span>
+        <h3>아이콘·버튼 상태 전환</h3>
+        <p>햄버거→닫기, 좋아요, 토글, hover 피드백에 적합합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><g class="spin" transform="translate(90 45)"><circle r="24" fill="none" stroke="#2a405f" stroke-width="8"/><path d="M0 -24 A24 24 0 0 1 23 8" fill="none" stroke="#75e6ff" stroke-width="8" stroke-linecap="round"/></g></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">02 Stroke draw</span>
+        <h3>로고·서명 그리기</h3>
+        <p>stroke-dasharray/offset으로 선이 그려지는 듯한 효과를 만듭니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><path class="dashLine" d="M25 63 C54 10 84 87 113 31 S151 39 157 20" fill="none" stroke="#9af28b" stroke-width="7" stroke-linecap="round"/></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">03 SMIL animate</span>
+        <h3>SVG 자체 반복 애니메이션</h3>
+        <p>&lt;animate&gt;, &lt;animateTransform&gt;, &lt;animateMotion&gt;로 SVG 내부에서 선언합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><circle cx="42" cy="45" r="16" fill="#75e6ff"><animate attributeName="cx" values="42;138;42" dur="2.4s" repeatCount="indefinite"/></circle><rect x="74" y="28" width="34" height="34" rx="8" fill="#ffcf70"><animateTransform attributeName="transform" type="rotate" from="0 91 45" to="360 91 45" dur="3s" repeatCount="indefinite"/></rect></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">04 Motion path</span>
+        <h3>경로 이동</h3>
+        <p>지도 경로, 배송 위치, 온보딩 여정, 과학 시뮬레이션에 좋습니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><path id="miniRoute" d="M20 66 C54 16 92 75 127 25 S156 48 164 34" fill="none" stroke="#293f5d" stroke-width="5" stroke-linecap="round"/><circle r="7" fill="#ff7e8a"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#miniRoute"/></animateMotion></circle></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">05 Path morph</span>
+        <h3>형태 변형</h3>
+        <p>플레이↔일시정지, 검색↔닫기, blob 배경처럼 형태가 바뀌는 모션입니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><path fill="url(#gradA)" opacity=".9"><animate attributeName="d" dur="4s" repeatCount="indefinite" values="M90 16 L138 45 L90 74 L42 45 Z;M52 18 H128 V72 H52 Z;M90 16 L138 45 L90 74 L42 45 Z"/></path></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">06 Mask / clip</span>
+        <h3>리빌·스켈레톤</h3>
+        <p>콘텐츠가 닦이듯 나타나거나 이미지 안쪽만 채워지는 효과를 구현합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><defs><clipPath id="clipMini"><rect x="20" y="22" width="0" height="48" rx="12"><animate attributeName="width" values="0;140;0" dur="3s" repeatCount="indefinite"/></rect></clipPath></defs><rect width="180" height="90" rx="16" fill="#0b1525"/><rect x="20" y="22" width="140" height="48" rx="12" fill="#263a56"/><g clip-path="url(#clipMini)"><rect x="20" y="22" width="140" height="48" rx="12" fill="url(#gradB)"/></g></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">07 Filter</span>
+        <h3>글로우·블러·고무질감</h3>
+        <p>알림, 음악 비주얼라이저, 히어로 배경에 분위기를 더합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><circle class="glow" cx="68" cy="45" r="20" fill="#75e6ff"/><circle class="glow" cx="112" cy="45" r="20" fill="#9af28b" opacity=".78"/></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">08 viewBox</span>
+        <h3>줌·카메라 워크</h3>
+        <p>복잡한 다이어그램에서 특정 영역으로 확대 이동하는 설명 영상형 UI입니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><svg x="0" y="0" width="180" height="90" viewBox="0 0 180 90"><animate attributeName="viewBox" values="0 0 180 90;60 18 70 35;0 0 180 90" dur="4s" repeatCount="indefinite"/><rect x="20" y="20" width="40" height="24" rx="8" fill="#75e6ff"/><rect x="72" y="48" width="40" height="24" rx="8" fill="#9af28b"/><rect x="124" y="20" width="40" height="24" rx="8" fill="#ffcf70"/><path d="M60 32 L72 60 M112 60 L124 32" stroke="#6f88aa" stroke-width="3"/></svg></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">09 Data viz</span>
+        <h3>차트 전환</h3>
+        <p>새 데이터가 들어올 때 막대, 선, 축을 부드럽게 보간합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><rect x="30" y="54" width="20" height="18" rx="4" fill="#75e6ff"><animate attributeName="height" values="18;44;18" dur="2.6s" repeatCount="indefinite"/><animate attributeName="y" values="54;28;54" dur="2.6s" repeatCount="indefinite"/></rect><rect x="70" y="36" width="20" height="36" rx="4" fill="#9af28b"><animate attributeName="height" values="36;18;36" dur="2.6s" repeatCount="indefinite"/><animate attributeName="y" values="36;54;36" dur="2.6s" repeatCount="indefinite"/></rect><rect x="110" y="22" width="20" height="50" rx="4" fill="#ffcf70"><animate attributeName="height" values="50;28;50" dur="2.6s" repeatCount="indefinite"/><animate attributeName="y" values="22;44;22" dur="2.6s" repeatCount="indefinite"/></rect></svg>
+      </article>
+      <article class="typeCard">
+        <span class="tag">10 Lottie/SVG</span>
+        <h3>툴 기반 복합 모션</h3>
+        <p>After Effects에서 제작한 일러스트 타임라인을 앱/웹에 재생합니다.</p>
+        <svg class="miniSvg" viewBox="0 0 180 90"><rect width="180" height="90" rx="16" fill="#0b1525"/><g class="float"><circle cx="90" cy="38" r="20" fill="url(#gradA)"/><path d="M75 62 Q90 74 105 62" fill="none" stroke="#ffcf70" stroke-width="6" stroke-linecap="round"/></g><text x="90" y="80" text-anchor="middle" fill="#bcd2eb" font-size="11">JSON → SVG renderer</text></svg>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" id="playground">
+    <h2>인터랙티브 데모: 종류별로 눌러보기</h2>
+    <p>탭을 누르면 같은 SVG 무대가 다른 목적의 애니메이션으로 바뀝니다. “이미지형 / 영상형 / 와이어프레임형” 차이를 빠르게 비교할 수 있습니다.</p>
+    <div class="tabbar" role="tablist" aria-label="SVG animation demos">
+      <button class="active" data-demo="image">이미지형: 로고 리빌</button>
+      <button data-demo="video">영상형: 경로 스토리</button>
+      <button data-demo="wire">와이어프레임: 상태 전환</button>
+      <button data-demo="data">데이터형: 차트 갱신</button>
+    </div>
+    <div class="demoGrid">
+      <div class="stage" id="demoStage"></div>
+      <div class="explain">
+        <h3 id="demoTitle">이미지형 SVG 애니메이션</h3>
+        <p id="demoText">정적인 벡터 이미지를 선 그리기, 마스크, 글로우로 살립니다. 랜딩 페이지 히어로, 브랜드 로고 리빌, 빈 상태 일러스트에 가장 많이 씁니다.</p>
+        <div class="code" id="demoCode">.logo path {
+  stroke-dasharray: 620;
+  stroke-dashoffset: 620;
+  animation: draw 3s ease forwards;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="wireframe">
+    <h2>실제 적용 와이어프레임: 결제 버튼/진행상태/피드백</h2>
+    <p>아래는 서비스에서 바로 볼 수 있는 SVG 마이크로인터랙션 예시입니다. 버튼 상태는 JS로, 체크마크는 stroke-dashoffset으로, 로딩 스피너는 CSS transform으로 처리했습니다.</p>
+    <div class="wirePanel phoneWrap">
+      <svg id="phoneSvg" class="phone" viewBox="0 0 360 720" role="img" aria-labelledby="phoneTitle phoneDesc">
+        <title id="phoneTitle">결제 플로우 와이어프레임</title>
+        <desc id="phoneDesc">SVG로 만든 모바일 결제 화면. 버튼을 누르면 로딩, 성공, 오류 상태가 애니메이션으로 바뀐다.</desc>
+        <rect x="30" y="18" width="300" height="684" rx="44" fill="#07111f" stroke="#304b6e" stroke-width="5"/>
+        <rect x="55" y="54" width="250" height="608" rx="30" fill="#0f1b2d"/>
+        <circle cx="180" cy="82" r="5" fill="#567394"/>
+        <rect x="78" y="118" width="204" height="120" rx="24" fill="#152944"/>
+        <path d="M98 204 C130 143 165 232 198 166 S252 172 264 140" fill="none" stroke="url(#gradA)" stroke-width="8" stroke-linecap="round" class="stepPath"/>
+        <text x="78" y="282" fill="#eaf5ff" font-size="22" font-weight="700">프리미엄 플랜</text>
+        <text x="78" y="312" fill="#9fb2ca" font-size="14">월 9,900원 · 언제든 해지 가능</text>
+        <rect x="78" y="346" width="204" height="56" rx="18" fill="#14243a" stroke="#2f4665"/>
+        <text x="100" y="381" fill="#cfe1f6" font-size="15">카드 **** 3281</text>
+        <rect x="78" y="426" width="204" height="56" rx="18" fill="#14243a" stroke="#2f4665"/>
+        <text x="100" y="461" fill="#cfe1f6" font-size="15">쿠폰 SVG-2026</text>
+        <rect class="btnFill" x="78" y="534" width="204" height="62" rx="22" fill="#75e6ff"/>
+        <text id="buttonLabel" x="180" y="572" fill="#06111f" font-size="17" font-weight="800" text-anchor="middle">결제하기</text>
+        <g class="spinner" transform="translate(180 565)">
+          <circle r="17" fill="none" stroke="rgba(6,17,31,.25)" stroke-width="6"/>
+          <path d="M0 -17 A17 17 0 0 1 16 6" fill="none" stroke="#06111f" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <path class="check" d="M148 562 L169 583 L214 535" fill="none" stroke="#06111f" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+        <g class="errorMark" transform="translate(180 565)" stroke="#06111f" stroke-width="10" stroke-linecap="round">
+          <path d="M-18 -18 L18 18"/><path d="M18 -18 L-18 18"/>
+        </g>
+      </svg>
+      <div>
+        <h3>상태 전환 컨트롤</h3>
+        <p>실제 앱에서는 API 요청 상태에 맞춰 <strong>idle → loading → success/error</strong>로 변합니다. SVG 내부 요소에 클래스를 붙이면 로딩, 체크, 오류 모션을 한 컴포넌트에서 처리할 수 있습니다.</p>
+        <div class="controls">
+          <button onclick="setPhoneState('loading')">로딩</button>
+          <button onclick="setPhoneState('success')">성공</button>
+          <button onclick="setPhoneState('error')">오류</button>
+          <button onclick="setPhoneState('idle')">초기화</button>
+        </div>
+        <p class="note">접근성 팁: 자동 반복 모션은 사용자가 줄이기를 요청한 경우 멈추거나 간소화해야 합니다. 이 파일도 prefers-reduced-motion을 반영합니다.</p>
+        <div class="code">function setPhoneState(state) {
+  phone.className.baseVal = 'phone ' + state;
+  label.textContent = {
+    idle:'결제하기', loading:'처리 중',
+    success:'완료', error:'다시 시도'
+  }[state];
+}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="video">
+    <h2>영상형 구성: SVG로 만드는 짧은 설명 시퀀스</h2>
+    <p>SVG는 영상 파일처럼 고정 프레임을 굽는 대신, 도형과 타임라인을 브라우저가 실시간으로 그립니다. 그래서 짧은 제품 설명, 온보딩, 로딩 대기 화면은 MP4보다 작은 파일로도 충분할 때가 많습니다.</p>
+    <div class="videoStrip" aria-label="SVG animation storyboard">
+      <div class="frame"><svg viewBox="0 0 140 80"><rect width="140" height="80" rx="12" fill="#0b1525"/><circle cx="38" cy="40" r="16" fill="#75e6ff"/><text x="76" y="45" fill="#cfe1f6" font-size="13">문제</text></svg>1. 문제 제시</div>
+      <div class="frame"><svg viewBox="0 0 140 80"><rect width="140" height="80" rx="12" fill="#0b1525"/><path d="M22 60 C50 10 80 68 118 22" fill="none" stroke="#9af28b" stroke-width="6" stroke-linecap="round" class="dashLine"/></svg>2. 경로 설명</div>
+      <div class="frame"><svg viewBox="0 0 140 80"><rect width="140" height="80" rx="12" fill="#0b1525"/><rect x="28" y="48" width="18" height="18" fill="#75e6ff"/><rect x="60" y="28" width="18" height="38" fill="#9af28b"/><rect x="92" y="16" width="18" height="50" fill="#ffcf70"/></svg>3. 데이터 변화</div>
+      <div class="frame"><svg viewBox="0 0 140 80"><rect width="140" height="80" rx="12" fill="#0b1525"/><g class="spin" transform="translate(70 40)"><circle r="22" fill="none" stroke="#2a405f" stroke-width="8"/><path d="M0 -22 A22 22 0 0 1 21 8" fill="none" stroke="#75e6ff" stroke-width="8" stroke-linecap="round"/></g></svg>4. 처리 중</div>
+      <div class="frame"><svg viewBox="0 0 140 80"><rect width="140" height="80" rx="12" fill="#0b1525"/><path d="M44 40 L62 58 L98 22" fill="none" stroke="#9af28b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" class="dashLine"/></svg>5. 완료 피드백</div>
+    </div>
+  </section>
+
+  <section class="panel" id="cases">
+    <h2>실제 적용사례를 화면 단위로 해석하기</h2>
+    <p>브랜드명보다 중요한 것은 “어떤 문제를 해결하려고 움직였는가”입니다. 아래는 현업에서 곧바로 요구사항으로 바뀌는 사례입니다.</p>
+    <div class="caseGrid">
+      <article class="caseCard"><h3>1. 랜딩 페이지 히어로 이미지</h3><p><strong>목표:</strong> 첫 화면에서 서비스의 원리를 3초 안에 설명.</p><ul><li>선 그리기: 데이터 흐름/배송 경로/연결망 표현</li><li>마스크 리빌: 제품 스크린샷이 닦이듯 등장</li><li>viewBox 줌: 복잡한 구조에서 핵심 기능으로 카메라 이동</li></ul></article>
+      <article class="caseCard"><h3>2. 앱 온보딩/빈 상태</h3><p><strong>목표:</strong> 사용자가 다음 행동을 이해하도록 시각적 맥락 제공.</p><ul><li>Lottie/SVG renderer: 디자이너의 After Effects 타임라인을 재생</li><li>반복은 2~3초 이하로 가볍게</li><li>title/desc 또는 aria-label로 의미 제공</li></ul></article>
+      <article class="caseCard"><h3>3. 결제·저장·업로드 피드백</h3><p><strong>목표:</strong> 기다림, 성공, 오류를 명확히 안내.</p><ul><li>CSS spinner: 요청 중 상태</li><li>stroke-dashoffset 체크: 성공 완료</li><li>shake + 색 전환: 오류와 재시도 유도</li></ul></article>
+      <article class="caseCard"><h3>4. 데이터 대시보드</h3><p><strong>목표:</strong> 숫자 변화의 방향과 크기를 즉시 인지.</p><ul><li>D3 transition으로 막대/선/축 보간</li><li>새 데이터 로딩 시 skeleton shimmer</li><li>차트 포커스 영역은 clipPath로 강조</li></ul></article>
+      <article class="caseCard"><h3>5. 지도·물류·모빌리티</h3><p><strong>목표:</strong> 이동 경로와 현재 위치를 직관적으로 전달.</p><ul><li>animateMotion: 객체가 경로를 따라 이동</li><li>dash animation: 아직 지나가지 않은 경로와 완료 경로 구분</li><li>카메라 이동: viewBox 또는 그룹 transform</li></ul></article>
+      <article class="caseCard"><h3>6. 교육·기술 문서 다이어그램</h3><p><strong>목표:</strong> 단계와 원리를 순서대로 설명.</p><ul><li>회로, 파이프라인, API 흐름을 path draw로 설명</li><li>클릭 시 단계별 레이어 표시</li><li>정적인 PNG보다 확대 품질과 수정성이 좋음</li></ul></article>
+    </div>
+  </section>
+
+  <section class="panel" id="recommendation">
+    <h2>실무 적용 체크리스트</h2>
+    <div class="two">
+      <div>
+        <h3>디자인 단계</h3>
+        <p>도형 이름을 의미 있게 정하고, 애니메이션을 “장식”이 아니라 “상태 전달”로 정의합니다. 반복 모션은 사용자가 오래 보는 화면에서 피로감을 줄 수 있으므로 짧고 멈출 수 있게 설계합니다.</p>
+        <div class="code">// 권장 네이밍 예시
+svg#payment-feedback
+  g#loading-spinner
+  path#success-check
+  g#error-cross
+  path#route-progress</div>
+      </div>
+      <div>
+        <h3>개발 단계</h3>
+        <p>SVG는 인라인으로 넣어야 내부 path, rect, circle을 CSS/JS로 제어하기 쉽습니다. 파일로만 불러오면 DOM 내부에 접근하기 어렵습니다.</p>
+        <div class="code">@media (prefers-reduced-motion: reduce) {
+  .animated { animation: none; }
+}
+
+svg[role="img"] > title + desc {
+  /* 의미 있는 SVG에는 title/desc를 둡니다 */
+}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel footnotes">
+    <h2>참고한 공개 문서</h2>
+    <p>이 데모의 구현 방식은 MDN의 SVG animate/animateMotion/animateTransform, CSS animation, prefers-reduced-motion 문서를 기준으로 했고, Lottie·D3·GSAP·Motion.dev·Material Design의 공개 문서에 나온 실무 패턴을 반영했습니다. 자세한 출처는 답변 본문에 함께 첨부했습니다.</p>
+  </section>
+</div>
+<script>
+const demoStage = document.getElementById('demoStage');
+const demoTitle = document.getElementById('demoTitle');
+const demoText = document.getElementById('demoText');
+const demoCode = document.getElementById('demoCode');
+const demos = {
+  image: {
+    title:'이미지형 SVG 애니메이션',
+    text:'정적인 벡터 이미지를 선 그리기, 마스크, 글로우로 살립니다. 랜딩 페이지 히어로, 브랜드 로고 리빌, 빈 상태 일러스트에 가장 많이 씁니다.',
+    code:'.logo path {\n  stroke-dasharray: 620;\n  stroke-dashoffset: 620;\n  animation: draw 3s ease forwards;\n}\n@keyframes draw { to { stroke-dashoffset: 0; } }',
+    svg:`<svg viewBox="0 0 520 320" width="100%" height="330" role="img" aria-label="로고 리빌 데모">
+      <rect x="34" y="34" width="452" height="252" rx="34" fill="#101b2d" stroke="#2b4667"/>
+      <path class="logoDraw" d="M116 204 C142 82 205 234 242 126 S328 83 365 166 S428 230 440 112" fill="none" stroke="url(#gradA)" stroke-width="14" stroke-linecap="round"/>
+      <circle class="glow" cx="122" cy="202" r="16" fill="#75e6ff"/>
+      <circle class="glow" cx="440" cy="112" r="16" fill="#9af28b"/>
+      <text x="260" y="264" text-anchor="middle" fill="#cfe1f6" font-size="18">stroke-dashoffset로 로고가 그려지는 효과</text>
+    </svg>`
+  },
+  video: {
+    title:'영상형 SVG 애니메이션',
+    text:'고정 영상 파일 대신 SVG 도형을 타임라인으로 움직여 짧은 설명 시퀀스를 만듭니다. 경로 이동, 확대, 단계별 등장에 적합합니다.',
+    code:'<path id="route" d="M..." />\n<circle r="10">\n  <animateMotion dur="4s" repeatCount="indefinite">\n    <mpath href="#route"/>\n  </animateMotion>\n</circle>',
+    svg:`<svg viewBox="0 0 520 320" width="100%" height="330" role="img" aria-label="경로 스토리 데모">
+      <rect x="34" y="34" width="452" height="252" rx="34" fill="#101b2d" stroke="#2b4667"/>
+      <path id="routeBig" d="M82 220 C148 70 208 246 280 136 S395 84 438 190" fill="none" stroke="#263d5c" stroke-width="12" stroke-linecap="round"/>
+      <path class="dashLine" d="M82 220 C148 70 208 246 280 136 S395 84 438 190" fill="none" stroke="url(#gradA)" stroke-width="8" stroke-linecap="round"/>
+      <g><circle r="14" fill="#ffcf70"/><circle r="26" fill="#ffcf70" opacity=".14" class="softPulse"/><animateMotion dur="4s" repeatCount="indefinite" rotate="auto"><mpath href="#routeBig"/></animateMotion></g>
+      <text x="260" y="264" text-anchor="middle" fill="#cfe1f6" font-size="18">animateMotion + path drawing으로 설명 영상 구성</text>
+    </svg>`
+  },
+  wire: {
+    title:'와이어프레임형 SVG 애니메이션',
+    text:'실제 앱 화면의 상태를 SVG로 표현합니다. 클릭, 로딩, 성공, 오류, 진행률처럼 사용자 행동에 반응하는 화면에 적합합니다.',
+    code:'button.addEventListener("click", () => {\n  icon.classList.add("loading");\n  request().then(() => icon.classList.add("success"));\n});',
+    svg:`<svg viewBox="0 0 520 320" width="100%" height="330" role="img" aria-label="와이어프레임 상태 전환 데모">
+      <rect x="160" y="30" width="200" height="260" rx="28" fill="#101b2d" stroke="#2b4667"/>
+      <rect x="188" y="68" width="144" height="28" rx="10" fill="#213657"/>
+      <rect x="188" y="116" width="144" height="72" rx="18" fill="#14243a"/>
+      <rect x="204" y="134" width="80" height="8" rx="4" fill="#365373"/>
+      <rect x="204" y="156" width="104" height="8" rx="4" fill="#365373"/>
+      <rect x="188" y="218" width="144" height="44" rx="18" fill="#75e6ff"/>
+      <g class="spin" transform="translate(260 240)"><circle r="15" fill="none" stroke="rgba(6,17,31,.24)" stroke-width="6"/><path d="M0 -15 A15 15 0 0 1 15 0" fill="none" stroke="#06111f" stroke-width="6" stroke-linecap="round"/></g>
+      <text x="260" y="300" text-anchor="middle" fill="#cfe1f6" font-size="18">상태 클래스에 따라 버튼 내부 SVG만 교체</text>
+    </svg>`
+  },
+  data: {
+    title:'데이터형 SVG 애니메이션',
+    text:'새 데이터가 들어오면 막대 높이, 선 좌표, 축 눈금을 보간합니다. 사용자는 단순 숫자보다 변화 방향과 규모를 더 빨리 이해합니다.',
+    code:'d3.selectAll("rect.bar")\n  .data(next)\n  .transition()\n  .duration(650)\n  .attr("y", d => y(d))\n  .attr("height", d => h - y(d));',
+    svg:`<svg id="chartDemo" viewBox="0 0 520 320" width="100%" height="330" role="img" aria-label="차트 갱신 데모">
+      <rect x="34" y="34" width="452" height="252" rx="34" fill="#101b2d" stroke="#2b4667"/>
+      <line x1="82" y1="238" x2="438" y2="238" stroke="#365373" stroke-width="3"/>
+      <rect class="bar" x="110" y="166" width="42" height="72" rx="8" fill="#75e6ff"/>
+      <rect class="bar" x="190" y="112" width="42" height="126" rx="8" fill="#9af28b"/>
+      <rect class="bar" x="270" y="144" width="42" height="94" rx="8" fill="#ffcf70"/>
+      <rect class="bar" x="350" y="88" width="42" height="150" rx="8" fill="#ff7e8a"/>
+      <text x="260" y="280" text-anchor="middle" fill="#cfe1f6" font-size="18">버튼을 누를 때마다 값이 부드럽게 보간됩니다</text>
+    </svg>`
+  }
+};
+function renderDemo(key){
+  const d = demos[key];
+  demoStage.innerHTML = d.svg;
+  demoTitle.textContent = d.title;
+  demoText.textContent = d.text;
+  demoCode.textContent = d.code;
+  if(key === 'data') animateBars();
+}
+document.querySelectorAll('[data-demo]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-demo]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDemo(btn.dataset.demo);
+  });
+});
+function animateBars(){
+  const bars = demoStage.querySelectorAll('.bar');
+  const sets = [[72,126,94,150],[142,62,172,104],[92,158,54,184]];
+  let i = 0;
+  const apply = () => {
+    const data = sets[i % sets.length];
+    bars.forEach((b,idx)=>{
+      b.setAttribute('height', data[idx]);
+      b.setAttribute('y', 238 - data[idx]);
+    });
+    i++;
+  };
+  apply();
+  clearInterval(window._barTimer);
+  window._barTimer = setInterval(apply, 1400);
+}
+renderDemo('image');
+function setPhoneState(state){
+  const phone = document.getElementById('phoneSvg');
+  const label = document.getElementById('buttonLabel');
+  phone.classList.remove('loading','success','error');
+  if(state !== 'idle') phone.classList.add(state);
+  label.textContent = ({idle:'결제하기', loading:'처리 중', success:'완료', error:'다시 시도'})[state];
+}
+</script>
+</body>
+</html>

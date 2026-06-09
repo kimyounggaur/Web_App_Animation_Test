@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS 모션 랩 — 애니메이션 종류와 실전 패턴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --paper:#F3F5F9;
+    --grid:#E3E8F0;
+    --ink:#141A24;
+    --ink-soft:#3C4658;
+    --muted:#727E93;
+    --line:#E4E9F1;
+    --surface:#FFFFFF;
+    --primary:#4338CA;
+    --primary-2:#6366F1;
+    --primary-wash:#EEF0FE;
+    --live:#E0349B;
+    --live-wash:#FCE7F3;
+    --ok:#0EA66B;
+    --warn:#E08A1E;
+    --code-bg:#11151F;
+    --code-fg:#D8DEEC;
+    --code-p:#8FB7FF;   /* property */
+    --code-v:#F4A7B9;   /* value */
+    --code-k:#C5A8FF;   /* keyword */
+    --code-c:#6A7689;   /* comment */
+    --code-n:#7BD7B4;   /* number */
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow-sm:0 1px 2px rgba(20,26,36,.05), 0 2px 6px rgba(20,26,36,.05);
+    --shadow:0 18px 44px -18px rgba(34,28,90,.28);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --display:'Space Grotesk','Pretendard',sans-serif;
+    --body:'Pretendard',system-ui,-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:var(--body);
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--grid) 1.1px, transparent 1.1px);
+    background-size:26px 26px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  ::selection{background:var(--live-wash);color:var(--live)}
+  a{color:inherit}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    backdrop-filter:saturate(140%) blur(10px);
+    background:rgba(243,245,249,.82);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-in{
+    max-width:1060px;margin:0 auto;padding:13px 22px;
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;letter-spacing:-.01em}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--live);box-shadow:0 0 0 4px var(--live-wash);animation:beat 1.6s ease-in-out infinite}
+  .brand small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted);letter-spacing:0}
+  .nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+  .nav a{
+    font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink-soft);
+    padding:7px 11px;border-radius:8px;transition:background .2s ease,color .2s ease;
+  }
+  .nav a:hover{background:var(--primary-wash);color:var(--primary)}
+  .pausebtn{
+    font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:9px;
+    padding:7px 12px;display:inline-flex;align-items:center;gap:7px;
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  .pausebtn:hover{border-color:var(--primary-2);box-shadow:var(--shadow-sm)}
+  .pausebtn .ico{width:8px;height:9px;position:relative}
+  .pausebtn .ico::before,.pausebtn .ico::after{content:"";position:absolute;top:0;width:2.5px;height:9px;background:var(--ink);border-radius:1px}
+  .pausebtn .ico::before{left:0}.pausebtn .ico::after{right:0}
+  body.is-paused .pausebtn .ico::before{height:0;top:4.5px;border-left:5px solid var(--ink);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;width:0;background:none}
+  body.is-paused .pausebtn .ico::after{display:none}
+
+  /* ---------- LAYOUT ---------- */
+  main{max-width:1060px;margin:0 auto;padding:0 22px 90px}
+  section{padding-top:60px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--live);text-transform:uppercase}
+  .sec-title{font-family:var(--display);font-size:clamp(22px,4.4vw,30px);font-weight:700;letter-spacing:-.02em;margin:8px 0 6px}
+  .sec-lead{color:var(--ink-soft);max-width:62ch;margin:0 0 26px}
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);overflow:hidden;
+  }
+  .card-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:18px 20px 0}
+  .card-head h3{font-family:var(--display);font-size:18px;font-weight:600;margin:0;letter-spacing:-.01em}
+  .tag{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;background:var(--primary-wash);color:var(--primary)}
+  .tag.k{background:var(--live-wash);color:var(--live)}
+  .card-note{padding:6px 20px 0;color:var(--muted);font-size:13.5px}
+
+  .stage{
+    position:relative;margin:16px 20px 0;border-radius:var(--radius-sm);
+    background:
+      linear-gradient(0deg,rgba(99,102,241,.03),rgba(99,102,241,.03)),
+      repeating-linear-gradient(0deg,transparent 0 25px,rgba(20,26,36,.035) 25px 26px),
+      repeating-linear-gradient(90deg,transparent 0 25px,rgba(20,26,36,.035) 25px 26px);
+    border:1px dashed var(--line);
+    min-height:150px;display:flex;align-items:center;justify-content:center;
+    padding:26px;overflow:hidden;
+  }
+  .stage .hint{position:absolute;top:9px;left:12px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+
+  /* code readout */
+  pre.code{
+    margin:14px 20px 20px;background:var(--code-bg);color:var(--code-fg);
+    border-radius:var(--radius-sm);padding:14px 16px;overflow-x:auto;
+    font-family:var(--mono);font-size:12.5px;line-height:1.7;
+  }
+  .code .p{color:var(--code-p)}.code .v{color:var(--code-v)}.code .k{color:var(--code-k)}
+  .code .c{color:var(--code-c)}.code .n{color:var(--code-n)}.code .sel{color:#E7ECF7;font-weight:500}
+
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+
+  .btn{
+    font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer;
+    background:var(--primary);color:#fff;border:0;border-radius:10px;padding:10px 18px;
+    transition:transform .18s ease,box-shadow .25s ease,background .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px -8px rgba(67,56,202,.6)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:var(--surface);color:var(--primary);border:1px solid var(--line)}
+  .btn.ghost:hover{box-shadow:var(--shadow-sm);border-color:var(--primary-2)}
+  .ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:0 20px;margin-top:14px}
+  :focus-visible{outline:3px solid var(--primary-2);outline-offset:2px;border-radius:6px}
+
+  /* ===================================================== HERO */
+  .hero{padding:54px 0 8px;text-align:left}
+  .hero h1{font-family:var(--display);font-weight:700;letter-spacing:-.03em;line-height:1.04;
+    font-size:clamp(34px,7vw,62px);margin:14px 0 0}
+  .hero h1 .mv{display:inline-block;color:var(--live);animation:floaty 3.2s ease-in-out infinite}
+  .hero p.sub{font-size:clamp(15px,2.5vw,18px);color:var(--ink-soft);max-width:60ch;margin:18px 0 0}
+  .hero .meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:14px}
+  .ambient{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+  .chip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:9px 16px 9px 12px;box-shadow:var(--shadow-sm);font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  .mini-spin{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--primary-wash);border-top-color:var(--primary);animation:spin .8s linear infinite}
+  .mini-pulse{width:14px;height:14px;border-radius:50%;background:var(--live);animation:pulse 1.4s ease-in-out infinite}
+  .mini-bar{width:42px;height:6px;border-radius:4px;background:var(--primary-wash);overflow:hidden;position:relative}
+  .mini-bar::after{content:"";position:absolute;inset:0;width:40%;background:var(--primary);border-radius:4px;animation:indet 1.4s ease-in-out infinite}
+  .mini-bounce{width:13px;height:13px;border-radius:4px;background:var(--primary-2);animation:bounce 1s ease-in-out infinite}
+
+  /* ===================================================== 1. MECHANISMS */
+  .stack{display:flex;flex-direction:column;gap:20px}
+
+  /* transition demo */
+  .tr-box{
+    width:120px;height:120px;border-radius:18px;background:var(--primary-2);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:12px;
+    box-shadow:0 6px 16px -8px rgba(99,102,241,.7);cursor:pointer;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1),background-color .35s ease,box-shadow .35s ease,border-radius .35s ease;
+  }
+  .tr-box:hover{transform:translateY(-14px) scale(1.08) rotate(-4deg);background:var(--live);border-radius:50%;box-shadow:0 22px 40px -14px rgba(224,52,155,.7)}
+
+  /* keyframes gallery */
+  .kf{display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 10px}
+  .kf .label{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .kf .name{font-family:var(--mono);font-size:11px;color:var(--primary);background:var(--primary-wash);padding:2px 7px;border-radius:5px}
+  .k-spin{width:42px;height:42px;border-radius:50%;border:4px solid var(--primary-wash);border-top-color:var(--primary);animation:spin 1s linear infinite}
+  .k-pulse{width:38px;height:38px;border-radius:50%;background:var(--live)}
+  .k-pulse{animation:pulse 1.5s ease-in-out infinite}
+  .k-bounce{width:32px;height:32px;border-radius:9px;background:var(--primary-2);animation:bounce 1s ease-in-out infinite}
+  .k-shake{width:38px;height:38px;border-radius:9px;background:var(--warn);animation:shake 1.4s ease-in-out infinite}
+  .k-flip{width:40px;height:40px;border-radius:9px;background:var(--ok);animation:flip 2s ease-in-out infinite}
+  .k-grad{width:46px;height:46px;border-radius:12px;background:linear-gradient(120deg,var(--primary),var(--live),var(--primary-2),var(--primary));background-size:300% 300%;animation:grad 3s ease infinite}
+
+  /* transform playground */
+  .tf-wrap{display:grid;grid-template-columns:1fr;gap:14px}
+  .tf-target{width:108px;height:108px;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:11px;will-change:transform}
+  .sliders{display:grid;gap:11px;padding:0 20px 4px}
+  .sliders .row{display:grid;grid-template-columns:78px 1fr 62px;align-items:center;gap:12px}
+  .sliders label{font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  .sliders output{font-family:var(--mono);font-size:12px;color:var(--primary);text-align:right}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--primary-wash);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--primary);cursor:pointer;box-shadow:0 1px 4px rgba(67,56,202,.5);transition:transform .15s ease}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:var(--primary);cursor:pointer}
+
+  /* timing comparison */
+  .timing{display:grid;gap:11px;padding:8px 20px 4px}
+  .track{display:grid;grid-template-columns:120px 1fr;align-items:center;gap:14px}
+  .track .tname{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
+  .rail{position:relative;height:30px;border-radius:8px;background:var(--primary-wash);overflow:hidden}
+  .ball{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--primary);
+    transition:transform 1.3s;transform:translateX(0)}
+  .ball.live{background:var(--live)}
+  .timing.run .ball{transform:translateX(calc(100% + 120px - 30px))}
+  .t-lin{transition-timing-function:linear}
+  .t-in{transition-timing-function:cubic-bezier(.42,0,1,1)}
+  .t-out{transition-timing-function:cubic-bezier(0,0,.58,1)}
+  .t-io{transition-timing-function:cubic-bezier(.42,0,.58,1)}
+  .t-spring{transition-timing-function:cubic-bezier(.68,-0.6,.32,1.6)}
+
+  /* ===================================================== 2. MICRO */
+  .mi-card{padding:18px 20px 20px}
+  .mi-card h4{font-family:var(--display);font-size:15px;margin:0 0 3px;font-weight:600}
+  .mi-card .d{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+  .mi-stage{min-height:96px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+
+  .b-grid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .mb{position:relative;font-family:var(--body);font-weight:600;font-size:13px;cursor:pointer;border-radius:9px;padding:9px 15px;border:1.5px solid var(--primary);background:transparent;color:var(--primary);overflow:hidden;isolation:isolate}
+  .mb--lift{transition:transform .2s ease,box-shadow .25s ease,background .2s ease,color .2s ease}
+  .mb--lift:hover{background:var(--primary);color:#fff;transform:translateY(-3px);box-shadow:0 9px 18px -7px rgba(67,56,202,.6)}
+  .mb--sweep{transition:color .25s ease}
+  .mb--sweep::before{content:"";position:absolute;inset:0;background:var(--primary);transform:translateX(-101%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:-1}
+  .mb--sweep:hover{color:#fff}.mb--sweep:hover::before{transform:translateX(0)}
+  .mb--glow{transition:box-shadow .3s ease,color .25s ease,background .25s ease}
+  .mb--glow:hover{background:var(--primary);color:#fff;box-shadow:0 0 0 4px var(--primary-wash),0 0 22px rgba(99,102,241,.7)}
+
+  /* ripple */
+  .ripple-btn{position:relative;overflow:hidden;background:var(--primary);color:#fff;border:0;border-radius:10px;padding:13px 26px;font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer}
+  .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.55);transform:scale(0);pointer-events:none;animation:ripple .6s ease-out forwards}
+
+  /* heart */
+  .heart-wrap{position:relative;width:64px;height:64px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .heart{font-size:38px;line-height:1;filter:grayscale(1);transform:scale(1);transition:transform .2s ease}
+  .heart-wrap.liked .heart{filter:none;animation:heartpop .42s cubic-bezier(.34,1.56,.64,1)}
+  .heart-wrap .spark{position:absolute;top:50%;left:50%;width:6px;height:6px;border-radius:50%;background:var(--live);opacity:0}
+  .heart-wrap.liked .spark{animation:spark .5s ease-out forwards}
+  .heart-wrap .s1{--tx:-26px;--ty:-22px;background:var(--live)}
+  .heart-wrap .s2{--tx:26px;--ty:-22px;background:var(--warn)}
+  .heart-wrap .s3{--tx:-30px;--ty:14px;background:var(--primary-2)}
+  .heart-wrap .s4{--tx:30px;--ty:14px;background:var(--ok)}
+  .heart-wrap .s5{--tx:0px;--ty:-32px;background:var(--live)}
+
+  /* toggle */
+  .toggle{width:58px;height:32px;border-radius:999px;background:#CBD2E0;position:relative;cursor:pointer;transition:background .3s ease}
+  .toggle .knob{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+  .toggle.on{background:var(--ok)}
+  .toggle.on .knob{transform:translateX(26px)}
+
+  /* hamburger */
+  .burger{width:38px;height:30px;position:relative;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:7px}
+  .burger span{display:block;height:3px;border-radius:3px;background:var(--ink);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .25s ease,width .35s ease}
+  .burger.open span:nth-child(1){transform:translateY(10px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0;width:0}
+  .burger.open span:nth-child(3){transform:translateY(-10px) rotate(-45deg)}
+
+  /* loading button */
+  .load-btn{position:relative;min-width:140px;height:44px;border:0;border-radius:11px;background:var(--primary);color:#fff;font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer;overflow:hidden;transition:background .3s ease}
+  .load-btn .lb-label,.load-btn .lb-spin,.load-btn .lb-check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .25s ease,transform .25s ease}
+  .load-btn .lb-spin,.load-btn .lb-check{opacity:0}
+  .load-btn .lb-spin span{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite}
+  .load-btn.loading .lb-label{opacity:0}.load-btn.loading .lb-spin{opacity:1}
+  .load-btn.done{background:var(--ok)}
+  .load-btn.done .lb-label,.load-btn.done .lb-spin{opacity:0}.load-btn.done .lb-check{opacity:1}
+  .load-btn .lb-check svg{width:22px;height:22px;animation:pop .3s ease}
+
+  /* ===================================================== 3. UI COMPONENTS */
+  /* skeleton */
+  .sk-card{width:100%;max-width:330px;display:flex;flex-direction:column;gap:12px}
+  .sk-row{display:flex;align-items:center;gap:12px}
+  .sk-box{background:linear-gradient(90deg,#E9EDF4 25%,#F4F7FB 37%,#E9EDF4 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:8px}
+  .sk-avatar{width:46px;height:46px;border-radius:50%;flex:none}
+  .sk-line{height:12px;border-radius:6px}
+  .sk-w70{width:70%}.sk-w40{width:40%}.sk-w100{width:100%}.sk-w90{width:90%}
+  .real{display:flex;flex-direction:column;gap:12px;animation:fadeUp .5s ease}
+  .real .r-row{display:flex;align-items:center;gap:12px}
+  .real .r-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--live));flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:var(--display)}
+  .real .r-name{font-weight:700}.real .r-sub{font-size:12px;color:var(--muted)}
+  .real p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+  .hidden{display:none !important}
+
+  /* modal */
+  .modal-stage{position:relative;min-height:220px;display:flex;align-items:center;justify-content:center}
+  .modal-overlay{position:absolute;inset:0;border-radius:var(--radius-sm);background:rgba(20,26,36,.45);opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;transition:opacity .3s ease;backdrop-filter:blur(0px)}
+  .modal-stage.show .modal-overlay{opacity:1;pointer-events:auto;backdrop-filter:blur(2px)}
+  .modal-card{width:84%;max-width:300px;background:#fff;border-radius:14px;padding:22px;box-shadow:var(--shadow);
+    transform:scale(.9) translateY(14px);opacity:0;transition:transform .32s cubic-bezier(.34,1.56,.64,1),opacity .25s ease}
+  .modal-stage.show .modal-card{transform:scale(1) translateY(0);opacity:1;transition-delay:.05s}
+  .modal-card h5{font-family:var(--display);margin:0 0 6px;font-size:17px}
+  .modal-card p{margin:0 0 16px;font-size:13.5px;color:var(--ink-soft)}
+  .modal-card .row{display:flex;gap:8px;justify-content:flex-end}
+
+  /* toast */
+  .toast-stage{position:relative;min-height:150px;display:flex;align-items:center;justify-content:center}
+  .toast{position:absolute;right:16px;bottom:16px;display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;
+    padding:12px 16px;border-radius:11px;box-shadow:var(--shadow);font-size:13.5px;max-width:260px;animation:toastIn .4s cubic-bezier(.34,1.56,.64,1)}
+  .toast.out{animation:toastOut .35s ease forwards}
+  .toast .tk{width:22px;height:22px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;flex:none}
+  .toast .tk svg{width:13px;height:13px}
+
+  /* accordion */
+  .acc{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px}
+  .acc-item{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+  .acc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;cursor:pointer;font-weight:600;font-size:14px;user-select:none;transition:background .2s ease}
+  .acc-head:hover{background:var(--primary-wash)}
+  .acc-head .chev{width:10px;height:10px;border-right:2px solid var(--ink-soft);border-bottom:2px solid var(--ink-soft);transform:rotate(45deg);transition:transform .3s ease;flex:none}
+  .acc-item.open .acc-head .chev{transform:rotate(-135deg)}
+  .acc-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.4,0,.2,1)}
+  .acc-item.open .acc-content{grid-template-rows:1fr}
+  .acc-content>div{overflow:hidden;min-height:0}
+  .acc-content p{margin:0;padding:0 16px 15px;font-size:13px;color:var(--ink-soft)}
+
+  /* tabs */
+  .tabs{width:100%;max-width:420px}
+  .tab-row{position:relative;display:flex;gap:4px;border-bottom:1.5px solid var(--line);padding-bottom:0}
+  .tab{position:relative;background:none;border:0;font-family:var(--body);font-weight:600;font-size:14px;color:var(--muted);padding:11px 16px;cursor:pointer;transition:color .25s ease}
+  .tab.active{color:var(--primary)}
+  .tab-ink{position:absolute;bottom:-1.5px;left:0;height:2.5px;width:0;background:var(--primary);border-radius:3px;transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1)}
+  .tab-pane{display:none;padding:16px 4px 4px;font-size:13.5px;color:var(--ink-soft)}
+  .tab-pane.active{display:block;animation:fadeUp .35s ease}
+
+  /* progress */
+  .prog-wrap{width:100%;max-width:380px;display:flex;flex-direction:column;gap:18px}
+  .prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  .prog{height:12px;border-radius:8px;background:var(--primary-wash);overflow:hidden}
+  .prog-fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--primary),var(--primary-2));transition:width .25s linear}
+  .prog-indet{height:8px;border-radius:8px;background:var(--primary-wash);overflow:hidden;position:relative}
+  .prog-indet::after{content:"";position:absolute;inset:0;width:35%;border-radius:8px;background:linear-gradient(90deg,var(--primary),var(--live));animation:indet 1.4s ease-in-out infinite}
+  .prog-cap{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+  /* reveal */
+  [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  [data-reveal].in{opacity:1;transform:none}
+
+  /* footer */
+  footer{max-width:1060px;margin:0 auto;padding:30px 22px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+  footer .mono{font-family:var(--mono);font-size:11.5px}
+
+  /* ===================================================== KEYFRAMES */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(.7)}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.55}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px) rotate(-6deg)}40%{transform:translateX(7px) rotate(6deg)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  @keyframes flip{0%,40%{transform:rotateY(0)}50%,90%{transform:rotateY(180deg)}100%{transform:rotateY(360deg)}}
+  @keyframes grad{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-9px) rotate(-3deg)}}
+  @keyframes indet{0%{transform:translateX(-110%)}100%{transform:translateX(330%)}}
+  @keyframes ripple{to{transform:scale(2.6);opacity:0}}
+  @keyframes heartpop{0%{transform:scale(1)}35%{transform:scale(1.4)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+  @keyframes spark{0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) translate(var(--tx),var(--ty)) scale(.3)}}
+  @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes toastIn{from{transform:translateY(40px) scale(.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+  @keyframes toastOut{to{transform:translateY(20px);opacity:0}}
+
+  /* global pause */
+  body.is-paused .mini-spin,body.is-paused .mini-pulse,body.is-paused .mini-bounce,
+  body.is-paused .mini-bar::after,body.is-paused .brand .dot,body.is-paused .hero h1 .mv,
+  body.is-paused .k-spin,body.is-paused .k-pulse,body.is-paused .k-bounce,body.is-paused .k-shake,
+  body.is-paused .k-flip,body.is-paused .k-grad,body.is-paused .sk-box,body.is-paused .prog-indet::after,
+  body.is-paused .load-btn .lb-spin span{animation-play-state:paused}
+
+  /* reduced motion: calm the ambient/looping stuff, keep click demos usable */
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .mini-spin,.mini-pulse,.mini-bounce,.mini-bar::after,.brand .dot,.hero h1 .mv,
+    .k-spin,.k-pulse,.k-bounce,.k-shake,.k-flip,.k-grad,.sk-box,.prog-indet::after{animation:none}
+    [data-reveal]{opacity:1;transform:none;transition:none}
+  }
+
+  @media (max-width:560px){
+    .track{grid-template-columns:88px 1fr}
+    .sliders .row{grid-template-columns:64px 1fr 54px}
+    .nav{width:100%;order:3}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="dot"></span>CSS 모션 랩&nbsp;<small>// motion.lab</small></div>
+    <nav class="nav">
+      <a href="#mech">01 메커니즘</a>
+      <a href="#micro">02 인터랙션</a>
+      <a href="#ui">03 컴포넌트</a>
+    </nav>
+    <button class="pausebtn" id="pauseBtn" aria-pressed="false"><span class="ico"></span><span id="pauseTxt">모션 일시정지</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" style="padding-top:54px">
+    <span class="eyebrow">interactive reference · 직접 동작하는 자료</span>
+    <h1>움직임은 읽는 게 아니라<br><span class="mv">만져보는</span> 것이다</h1>
+    <p class="sub">CSS 애니메이션의 모든 종류와 실전 UI 패턴을 라이브 데모로 정리했습니다. 박스에 마우스를 올리고, 버튼을 누르고, 슬라이더를 움직여 보세요. 각 데모 아래에는 실제 CSS 코드가 함께 있습니다.</p>
+    <div class="ambient">
+      <span class="chip"><span class="mini-spin"></span>spinner</span>
+      <span class="chip"><span class="mini-pulse"></span>pulse</span>
+      <span class="chip"><span class="mini-bar"></span>indeterminate</span>
+      <span class="chip"><span class="mini-bounce"></span>bounce</span>
+    </div>
+    <p class="meta">↑ 헤더의 “모션 일시정지”는 animation-play-state: paused 를 토글합니다.</p>
+  </section>
+
+  <!-- ============ 1. MECHANISMS ============ -->
+  <section id="mech" data-reveal>
+    <span class="eyebrow">Part 01</span>
+    <h2 class="sec-title">3가지 핵심 메커니즘</h2>
+    <p class="sec-lead">CSS 애니메이션은 결국 셋의 조합입니다. <b>transition</b>(상태가 바뀔 때 반응), <b>@keyframes</b>(타임라인 위에서 스스로 재생), 그리고 둘이 실제로 움직이는 대상인 <b>transform</b>. 여기에 움직임의 ‘느낌’을 결정하는 <b>타이밍 함수</b>가 더해집니다.</p>
+
+    <div class="stack">
+
+      <!-- TRANSITION -->
+      <article class="card">
+        <div class="card-head"><h3>① Transition — 상태 전환</h3><span class="tag">hover / focus / class 토글</span></div>
+        <p class="card-note">시작 상태와 끝 상태 ‘둘’ 사이를 부드럽게 잇습니다. 트리거(주로 :hover나 JS의 클래스 변경)가 있어야 작동하고, 트리거가 풀리면 자동으로 되돌아옵니다.</p>
+        <div class="stage"><span class="hint">// 박스에 마우스를 올려보세요</span>
+          <div class="tr-box">hover me</div>
+        </div>
+        <pre class="code"><span class="sel">.box</span> {
+  <span class="p">transition</span>: <span class="p">transform</span> <span class="n">.35s</span> <span class="k">cubic-bezier</span>(.34,1.56,.64,1),
+              <span class="p">background</span> <span class="n">.35s</span> <span class="v">ease</span>,
+              <span class="p">border-radius</span> <span class="n">.35s</span> <span class="v">ease</span>;
+}
+<span class="sel">.box:hover</span> {
+  <span class="p">transform</span>: <span class="v">translateY</span>(-14px) <span class="v">scale</span>(1.08) <span class="v">rotate</span>(-4deg);
+  <span class="p">background</span>: <span class="v">hotpink</span>;
+  <span class="p">border-radius</span>: <span class="n">50%</span>;
+}</pre>
+      </article>
+
+      <!-- KEYFRAMES -->
+      <article class="card">
+        <div class="card-head"><h3>② @keyframes — 타임라인 애니메이션</h3><span class="tag k">자동 재생 · 무한 반복 가능</span></div>
+        <p class="card-note">0%~100% 구간에 여러 단계를 정의해 스스로 재생됩니다. 트리거가 필요 없고 무한 반복(infinite)할 수 있어 로더·강조·앰비언트 모션에 씁니다.</p>
+        <div class="stage" style="padding:8px">
+          <div class="grid3" style="width:100%">
+            <div class="kf"><div class="k-spin"></div><span class="name">spin</span><span class="label">rotate 360°</span></div>
+            <div class="kf"><div class="k-pulse"></div><span class="name">pulse</span><span class="label">scale + opacity</span></div>
+            <div class="kf"><div class="k-bounce"></div><span class="name">bounce</span><span class="label">translateY</span></div>
+            <div class="kf"><div class="k-shake"></div><span class="name">shake</span><span class="label">translateX + rotate</span></div>
+            <div class="kf"><div class="k-flip"></div><span class="name">flip</span><span class="label">rotateY (3D)</span></div>
+            <div class="kf"><div class="k-grad"></div><span class="name">gradient</span><span class="label">background-position</span></div>
+          </div>
+        </div>
+        <pre class="code"><span class="k">@keyframes</span> <span class="sel">spin</span> { <span class="n">to</span> { <span class="p">transform</span>: <span class="v">rotate</span>(360deg) } }
+<span class="k">@keyframes</span> <span class="sel">pulse</span> {
+  <span class="n">0%</span>,<span class="n">100%</span> { <span class="p">transform</span>:<span class="v">scale</span>(1); <span class="p">opacity</span>:1 }
+  <span class="n">50%</span>      { <span class="p">transform</span>:<span class="v">scale</span>(1.25); <span class="p">opacity</span>:.55 }
+}
+<span class="sel">.loader</span> { <span class="p">animation</span>: <span class="v">spin</span> <span class="n">1s</span> <span class="v">linear</span> <span class="v">infinite</span>; }
+<span class="c">/* animation: name | 시간 | 타이밍 | 반복 | 방향 | fill-mode */</span></pre>
+      </article>
+
+      <!-- TRANSFORM -->
+      <article class="card">
+        <div class="card-head"><h3>③ Transform — 움직임의 재료</h3><span class="tag">GPU 가속 · 60fps</span></div>
+        <p class="card-note">위 둘이 실제로 ‘무엇을’ 움직이느냐. translate·scale·rotate·skew는 레이아웃을 다시 계산하지 않아 가장 부드럽습니다. 슬라이더로 직접 조합해 보세요.</p>
+        <div class="stage"><span class="hint">// 실시간 transform</span>
+          <div class="tf-target" id="tfTarget">transform</div>
+        </div>
+        <div class="sliders">
+          <div class="row"><label>translateX</label><input type="range" id="tfTx" min="-80" max="80" value="0"><output id="oTx">0px</output></div>
+          <div class="row"><label>rotate</label><input type="range" id="tfRot" min="-180" max="180" value="0"><output id="oRot">0°</output></div>
+          <div class="row"><label>scale</label><input type="range" id="tfSc" min="40" max="160" value="100"><output id="oSc">1.0</output></div>
+          <div class="row"><label>skewX</label><input type="range" id="tfSk" min="-40" max="40" value="0"><output id="oSk">0°</output></div>
+        </div>
+        <pre class="code"><span class="sel">.target</span> { <span class="p">transform</span>: <span class="v">translateX</span>(<span id="cTx">0px</span>) <span class="v">rotate</span>(<span id="cRot">0deg</span>) <span class="v">scale</span>(<span id="cSc">1</span>) <span class="v">skewX</span>(<span id="cSk">0deg</span>); }</pre>
+      </article>
+
+      <!-- TIMING -->
+      <article class="card">
+        <div class="card-head"><h3>④ Timing function — 가속/감속의 ‘성격’</h3><span class="tag k">같은 거리, 다른 느낌</span></div>
+        <p class="card-note">같은 1.3초·같은 거리라도 타이밍 함수가 인상을 좌우합니다. ‘재생’을 눌러 다섯 곡선을 동시에 비교해 보세요.</p>
+        <div class="ctl"><button class="btn" id="timingPlay">▶ 동시에 재생</button></div>
+        <div class="timing" id="timing">
+          <div class="track"><span class="tname">linear</span><div class="rail"><div class="ball t-lin"></div></div></div>
+          <div class="track"><span class="tname">ease-in</span><div class="rail"><div class="ball t-in"></div></div></div>
+          <div class="track"><span class="tname">ease-out</span><div class="rail"><div class="ball t-out"></div></div></div>
+          <div class="track"><span class="tname">ease-in-out</span><div class="rail"><div class="ball t-io"></div></div></div>
+          <div class="track"><span class="tname">spring 🪄</span><div class="rail"><div class="ball live t-spring"></div></div></div>
+        </div>
+        <pre class="code"><span class="p">transition-timing-function</span>: <span class="v">linear</span>;       <span class="c">/* 일정 속도 — 로더, 진행률 */</span>
+<span class="p">transition-timing-function</span>: <span class="v">ease-in</span>;      <span class="c">/* 천천히 출발 — 화면에서 사라질 때 */</span>
+<span class="p">transition-timing-function</span>: <span class="v">ease-out</span>;     <span class="c">/* 빨리 출발·부드러운 정지 — 등장(가장 자연스러움) */</span>
+<span class="p">transition-timing-function</span>: <span class="k">cubic-bezier</span>(.68,-.6,.32,1.6); <span class="c">/* 스프링 — 통통 튀는 느낌 */</span></pre>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 2. MICRO-INTERACTIONS ============ -->
+  <section id="micro" data-reveal>
+    <span class="eyebrow">Part 02</span>
+    <h2 class="sec-title">마이크로 인터랙션</h2>
+    <p class="sec-lead">버튼·토글·좋아요처럼 ‘손끝의 반응’을 만드는 작은 모션들. 사용자에게 “네 동작이 먹혔어”라는 피드백을 주고 제품의 완성도를 끌어올립니다. 전부 눌러볼 수 있습니다.</p>
+
+    <div class="grid2">
+
+      <article class="card mi-card">
+        <h4>버튼 호버 3종</h4>
+        <p class="d">lift(들어올림) · sweep(채움) · glow(발광) — 전부 :hover만으로</p>
+        <div class="mi-stage"><div class="b-grid">
+          <button class="mb mb--lift">Lift</button>
+          <button class="mb mb--sweep">Sweep</button>
+          <button class="mb mb--glow">Glow</button>
+        </div></div>
+      </article>
+
+      <article class="card mi-card">
+        <h4>클릭 리플 (Material)</h4>
+        <p class="d">클릭 지점에서 원이 퍼지는 안드로이드/머티리얼 시그니처</p>
+        <div class="mi-stage"><button class="ripple-btn" id="rippleBtn">아무 데나 눌러보세요</button></div>
+      </article>
+
+      <article class="card mi-card">
+        <h4>좋아요 하트</h4>
+        <p class="d">탭하면 팝 + 파티클이 터집니다 (인스타/트위터 패턴)</p>
+        <div class="mi-stage"><div class="heart-wrap" id="heart" role="button" tabindex="0" aria-label="좋아요">
+          <span class="heart">❤️</span>
+          <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span>
+        </div></div>
+      </article>
+
+      <article class="card mi-card">
+        <h4>토글 스위치 & 햄버거→X</h4>
+        <p class="d">상태 변화를 모션으로 — 켜짐/열림이 한눈에</p>
+        <div class="mi-stage" style="gap:26px">
+          <div class="toggle" id="toggle" role="switch" tabindex="0" aria-checked="false"><span class="knob"></span></div>
+          <div class="burger" id="burger" role="button" tabindex="0" aria-label="메뉴"><span></span><span></span><span></span></div>
+        </div>
+      </article>
+
+      <article class="card mi-card" style="grid-column:1/-1">
+        <h4>로딩 버튼 — 상태 시퀀스</h4>
+        <p class="d">기본 → 처리 중(스피너) → 완료(체크) 로 매끄럽게 전환되는 비동기 액션 패턴</p>
+        <div class="mi-stage">
+          <button class="load-btn" id="loadBtn">
+            <span class="lb-label">결제하기</span>
+            <span class="lb-spin"><span></span></span>
+            <span class="lb-check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>
+          </button>
+        </div>
+        <pre class="code"><span class="c">// JS: 클릭하면 클래스로 상태를 갈아끼우고, CSS transition이 전환을 그린다</span>
+btn.<span class="p">addEventListener</span>(<span class="v">'click'</span>, () => {
+  btn.classList.<span class="p">add</span>(<span class="v">'loading'</span>);                 <span class="c">// 라벨 → 스피너</span>
+  <span class="k">setTimeout</span>(() => btn.classList.<span class="p">replace</span>(<span class="v">'loading'</span>,<span class="v">'done'</span>), 1500); <span class="c">// → 체크</span>
+  <span class="k">setTimeout</span>(() => btn.classList.<span class="p">remove</span>(<span class="v">'done'</span>), 2800);   <span class="c">// 원위치</span>
+});</pre>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 3. UI COMPONENTS ============ -->
+  <section id="ui" data-reveal>
+    <span class="eyebrow">Part 03</span>
+    <h2 class="sec-title">UI 컴포넌트 와이어프레임</h2>
+    <p class="sec-lead">실제 화면에 들어가는 컴포넌트 단위 모션입니다. 어떤 앱에서 쓰이는지 함께 적어 두었어요. 버튼을 눌러 동작을 확인해 보세요.</p>
+
+    <div class="grid2">
+
+      <!-- skeleton -->
+      <article class="card mi-card">
+        <h4>스켈레톤 → 콘텐츠 (shimmer)</h4>
+        <p class="d">데이터 로딩 중 흐르는 빛 효과. <b>Facebook·LinkedIn·YouTube·Slack</b>이 빈 화면 대신 쓰는 방식</p>
+        <div class="mi-stage">
+          <div class="sk-card" id="skCard">
+            <div class="skeleton">
+              <div class="sk-row"><div class="sk-box sk-avatar"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="sk-box sk-line sk-w40"></div><div class="sk-box sk-line sk-w70"></div></div>
+              </div>
+              <div class="sk-box sk-line sk-w100" style="margin-top:4px"></div>
+              <div class="sk-box sk-line sk-w90"></div>
+            </div>
+            <div class="real hidden">
+              <div class="r-row"><div class="r-av">민</div>
+                <div><div class="r-name">민지 디자이너</div><div class="r-sub">5분 전 · 프로덕트팀</div></div>
+              </div>
+              <p>스켈레톤은 “곧 여기에 콘텐츠가 뜬다”는 신호를 주어 체감 대기 시간을 줄입니다.</p>
+            </div>
+          </div>
+        </div>
+        <div class="ctl" style="padding-bottom:18px"><button class="btn ghost" id="skBtn">다시 로딩</button></div>
+      </article>
+
+      <!-- modal -->
+      <article class="card mi-card">
+        <h4>모달 등장</h4>
+        <p class="d">오버레이 페이드 + 카드 scale-up. iOS·웹앱 다이얼로그의 기본 (ease-out + 살짝 오버슈트)</p>
+        <div class="modal-stage" id="modalStage">
+          <button class="btn" id="modalOpen">모달 열기</button>
+          <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-card">
+              <h5>변경사항을 저장할까요?</h5>
+              <p>오버레이는 opacity로, 카드는 scale·translateY로 등장합니다. 두 transition에 약간의 delay 차이를 주면 더 자연스럽습니다.</p>
+              <div class="row"><button class="btn ghost" id="modalClose">취소</button><button class="btn" id="modalClose2">저장</button></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- toast -->
+      <article class="card mi-card">
+        <h4>토스트 알림</h4>
+        <p class="d">가장자리에서 슬라이드-인 후 자동 사라짐. <b>Gmail·Slack·안드로이드 스낵바</b>의 비차단 알림</p>
+        <div class="toast-stage" id="toastStage">
+          <button class="btn" id="toastBtn">알림 띄우기</button>
+        </div>
+      </article>
+
+      <!-- accordion -->
+      <article class="card mi-card">
+        <h4>아코디언 펼침</h4>
+        <p class="d">FAQ·설정 화면. 높이를 모르는 콘텐츠도 <span style="font-family:var(--mono);font-size:12px">grid-template-rows: 0fr→1fr</span>로 부드럽게</p>
+        <div class="mi-stage" style="align-items:flex-start">
+          <div class="acc" id="acc">
+            <div class="acc-item open"><div class="acc-head">CSS만으로 애니메이션이 되나요?<span class="chev"></span></div><div class="acc-content"><div><p>네. transition과 @keyframes로 대부분의 UI 모션을 자바스크립트 없이 만들 수 있습니다.</p></div></div></div>
+            <div class="acc-item"><div class="acc-head">언제 JS가 필요한가요?<span class="chev"></span></div><div class="acc-content"><div><p>스크롤 위치 감지, 클릭 좌표, 물리 기반 모션, 복잡한 시퀀스 제어가 필요할 때입니다.</p></div></div></div>
+            <div class="acc-item"><div class="acc-head">성능이 걱정돼요.<span class="chev"></span></div><div class="acc-content"><div><p>transform과 opacity만 애니메이션하면 60fps를 유지하기 쉽습니다. width·top·margin은 피하세요.</p></div></div></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- tabs -->
+      <article class="card mi-card">
+        <h4>탭 — 미끄러지는 인디케이터</h4>
+        <p class="d">밑줄이 활성 탭으로 슬라이드. transform으로 위치/너비를 옮겨 부드럽게</p>
+        <div class="mi-stage" style="align-items:flex-start">
+          <div class="tabs" id="tabs">
+            <div class="tab-row">
+              <button class="tab active">디자인</button><button class="tab">개발</button><button class="tab">QA</button>
+              <span class="tab-ink" id="tabInk"></span>
+            </div>
+            <div class="tab-pane active"><p>인디케이터의 left/width를 직접 바꾸는 대신 translateX와 scaleX(또는 width)를 transition하면 리플로우 없이 매끄럽습니다.</p></div>
+            <div class="tab-pane"><p>패널은 fade-up으로 교체합니다. 콘텐츠 높이가 다르면 컨테이너에 min-height를 두거나 측정해 맞춥니다.</p></div>
+            <div class="tab-pane"><p>접근성: 탭은 role=tab, 패널은 role=tabpanel, 키보드 화살표 이동을 함께 구현하세요.</p></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- progress -->
+      <article class="card mi-card">
+        <h4>진행률 바</h4>
+        <p class="d">아는 진행률은 width 채움, 모르는 작업은 무한 루프(인디터미넌트)</p>
+        <div class="mi-stage" style="align-items:stretch">
+          <div class="prog-wrap">
+            <div>
+              <div class="prog-label"><span>업로드</span><span id="progPct">0%</span></div>
+              <div class="prog"><div class="prog-fill" id="progFill"></div></div>
+            </div>
+            <div>
+              <div class="prog-cap">indeterminate — 끝을 모를 때</div>
+              <div class="prog-indet"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ctl" style="padding-bottom:18px"><button class="btn ghost" id="progBtn">업로드 시작</button></div>
+      </article>
+
+    </div>
+
+    <p class="sec-lead" style="margin-top:30px">↑ 그리고 이 페이지의 각 섹션 제목이 스크롤하며 ‘아래에서 떠오르는’ 것 자체가 <b>스크롤 트리거 등장(scroll reveal)</b> 패턴입니다 — IntersectionObserver로 화면에 들어온 순간 CSS 클래스를 붙여 구현했습니다. 마케팅·랜딩 페이지에서 가장 흔히 쓰입니다.</p>
+  </section>
+
+  <footer>
+    <p>이 문서는 단일 HTML 파일로 전부 동작합니다. 코드를 그대로 복사해 프로젝트에 쓰거나, 브라우저 개발자도구로 각 요소의 CSS를 뜯어보세요.</p>
+    <p class="mono">css-motion-lab · transition · @keyframes · transform · timing · micro-interactions · UI components</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s,r){return (r||document).querySelector(s)};
+  var $$ = function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* ---- global pause ---- */
+  var pauseBtn = $('#pauseBtn'), pauseTxt = $('#pauseTxt');
+  pauseBtn.addEventListener('click', function(){
+    var paused = document.body.classList.toggle('is-paused');
+    pauseBtn.setAttribute('aria-pressed', paused);
+    pauseTxt.textContent = paused ? '모션 재생' : '모션 일시정지';
+  });
+
+  /* ---- transform playground ---- */
+  var tg = $('#tfTarget');
+  function fmt(n,d){return Number(n).toFixed(d===undefined?0:d)}
+  function syncTransform(){
+    var tx = +$('#tfTx').value, rot = +$('#tfRot').value, sc = (+$('#tfSc').value)/100, sk = +$('#tfSk').value;
+    tg.style.transform = 'translateX('+tx+'px) rotate('+rot+'deg) scale('+sc+') skewX('+sk+'deg)';
+    $('#oTx').textContent = tx+'px'; $('#oRot').textContent = rot+'°';
+    $('#oSc').textContent = fmt(sc,1); $('#oSk').textContent = sk+'°';
+    $('#cTx').textContent = tx+'px'; $('#cRot').textContent = rot+'deg';
+    $('#cSc').textContent = fmt(sc,2); $('#cSk').textContent = sk+'deg';
+  }
+  ['tfTx','tfRot','tfSc','tfSk'].forEach(function(id){ $('#'+id).addEventListener('input', syncTransform); });
+  syncTransform();
+
+  /* ---- timing replay ---- */
+  var timing = $('#timing');
+  $('#timingPlay').addEventListener('click', function(){
+    timing.classList.remove('run');
+    void timing.offsetWidth;            // force reflow → restart transition
+    timing.classList.add('run');
+  });
+
+  /* ---- ripple ---- */
+  $('#rippleBtn').addEventListener('click', function(e){
+    var b = e.currentTarget, r = b.getBoundingClientRect();
+    var size = Math.max(r.width, r.height);
+    var s = document.createElement('span');
+    s.className = 'ripple';
+    s.style.width = s.style.height = size+'px';
+    s.style.left = (e.clientX - r.left - size/2)+'px';
+    s.style.top  = (e.clientY - r.top - size/2)+'px';
+    b.appendChild(s);
+    s.addEventListener('animationend', function(){ s.remove(); });
+  });
+
+  /* ---- heart ---- */
+  var heart = $('#heart');
+  function toggleHeart(){ heart.classList.toggle('liked'); }
+  heart.addEventListener('click', toggleHeart);
+  heart.addEventListener('keydown', function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggleHeart();} });
+
+  /* ---- toggle ---- */
+  var tog = $('#toggle');
+  function flip(){ var on = tog.classList.toggle('on'); tog.setAttribute('aria-checked', on); }
+  tog.addEventListener('click', flip);
+  tog.addEventListener('keydown', function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();} });
+
+  /* ---- burger ---- */
+  var burger = $('#burger');
+  burger.addEventListener('click', function(){ burger.classList.toggle('open'); });
+  burger.addEventListener('keydown', function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();burger.classList.toggle('open');} });
+
+  /* ---- loading button ---- */
+  var lb = $('#loadBtn'), lbBusy = false;
+  lb.addEventListener('click', function(){
+    if(lbBusy) return; lbBusy = true;
+    lb.classList.add('loading');
+    setTimeout(function(){ lb.classList.remove('loading'); lb.classList.add('done'); }, 1500);
+    setTimeout(function(){ lb.classList.remove('done'); lbBusy = false; }, 2900);
+  });
+
+  /* ---- skeleton ---- */
+  var skCard = $('#skCard');
+  function skel(state){
+    $('.skeleton', skCard).classList.toggle('hidden', !state);
+    $('.real', skCard).classList.toggle('hidden', state);
+  }
+  $('#skBtn').addEventListener('click', function(){
+    skel(true);
+    setTimeout(function(){ skel(false); }, 1800);
+  });
+  setTimeout(function(){ skel(false); }, 1600); // initial demo finishes loading
+
+  /* ---- modal ---- */
+  var mStage = $('#modalStage');
+  $('#modalOpen').addEventListener('click', function(){ mStage.classList.add('show'); });
+  function closeModal(){ mStage.classList.remove('show'); }
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#modalClose2').addEventListener('click', closeModal);
+  $('#modalOverlay').addEventListener('click', function(e){ if(e.target === this) closeModal(); });
+
+  /* ---- toast ---- */
+  var tStage = $('#toastStage'), toastLive = false;
+  $('#toastBtn').addEventListener('click', function(){
+    if(toastLive) return; toastLive = true;
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = '<span class="tk"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span>저장되었습니다</span>';
+    tStage.appendChild(t);
+    setTimeout(function(){ t.classList.add('out'); }, 2400);
+    t.addEventListener('animationend', function(e){
+      if(e.animationName === 'toastOut'){ t.remove(); toastLive = false; }
+    });
+  });
+
+  /* ---- accordion ---- */
+  $$('.acc-head', $('#acc')).forEach(function(h){
+    h.addEventListener('click', function(){ h.parentElement.classList.toggle('open'); });
+  });
+
+  /* ---- tabs ---- */
+  var tabs = $('#tabs'), tabBtns = $$('.tab', tabs), panes = $$('.tab-pane', tabs), ink = $('#tabInk');
+  function moveInk(btn){ ink.style.width = btn.offsetWidth+'px'; ink.style.transform = 'translateX('+btn.offsetLeft+'px)'; }
+  tabBtns.forEach(function(btn,i){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){b.classList.remove('active')});
+      panes.forEach(function(p){p.classList.remove('active')});
+      btn.classList.add('active'); panes[i].classList.add('active'); moveInk(btn);
+    });
+  });
+  function initInk(){ var a = $('.tab.active', tabs); if(a) moveInk(a); }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(initInk); }
+  setTimeout(initInk, 250); window.addEventListener('resize', initInk);
+
+  /* ---- progress ---- */
+  var pf = $('#progFill'), pp = $('#progPct'), pBusy = false;
+  $('#progBtn').addEventListener('click', function(){
+    if(pBusy) return; pBusy = true;
+    var v = 0; pf.style.width = '0%'; pp.textContent = '0%';
+    var iv = setInterval(function(){
+      v += Math.random()*16 + 4; if(v >= 100){ v = 100; clearInterval(iv); pBusy = false; }
+      pf.style.width = v+'%'; pp.textContent = Math.round(v)+'%';
+    }, 240);
+  });
+
+  /* ---- scroll reveal (IntersectionObserver) ---- */
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, {threshold:.12});
+    $$('[data-reveal]').forEach(function(el){ io.observe(el); });
+  } else {
+    $$('[data-reveal]').forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>
