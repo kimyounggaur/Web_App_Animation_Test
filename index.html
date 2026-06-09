@@ -1263,6 +1263,47 @@
       white-space: normal;
       font-size: 12px;
     }
+    .vibe-prompt {
+      margin: 0 16px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      overflow: hidden;
+    }
+    .recipe-card .vibe-prompt {
+      margin: 6px 0 0;
+    }
+    .vibe-prompt summary {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 40px;
+      padding: 8px 10px;
+      color: var(--brand);
+      font-weight: 800;
+      list-style: none;
+    }
+    .vibe-prompt summary::-webkit-details-marker {
+      display: none;
+    }
+    .vibe-prompt-body {
+      border-top: 1px solid var(--line);
+      background: var(--ink-code);
+    }
+    .vibe-prompt pre {
+      margin: 0;
+      max-height: 260px;
+      overflow: auto;
+      padding: 12px;
+    }
+    .vibe-prompt code {
+      color: var(--code);
+      white-space: pre-wrap;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
 
     .settings-badges {
       display: flex;
@@ -2642,12 +2683,116 @@ script.onerror = showFallback;</code></pre></div></div></div></article>
       showCopyToast('코드를 복사했습니다.');
     }
 
-    document.querySelectorAll('[data-copy-target]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const target = document.getElementById(button.dataset.copyTarget);
-        if (target) copyText(target.innerText.trim());
-      });
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-copy-target]');
+      if (!button) return;
+      const target = document.getElementById(button.dataset.copyTarget);
+      if (target) copyText(target.innerText.trim());
     });
+
+    function promptSpecifics(title) {
+      const rules = [
+        [/transition|hover|Button hover|버튼/i, 'transition은 transform, box-shadow, opacity처럼 합성 친화 속성만 지정하고 transition: all은 쓰지 않는다. hover와 :focus-visible을 같은 수준으로 설계한다.'],
+        [/@keyframes|spinner|스피너|Skeleton|shimmer/i, '@keyframes 반복 모션으로 구현하되 prefers-reduced-motion에서는 반복을 멈추거나 정적 상태로 대체한다. 진행률이 아닌 대기 상태임을 텍스트와 aria-label로 함께 표현한다.'],
+        [/카드 lift|Card lift|Transform|이미지 zoom|zoom/i, '카드와 미디어 래퍼의 크기는 고정하고 내부 레이어만 transform: translate/scale로 움직인다. overflow hidden과 focus-within 상태를 함께 고려한다.'],
+        [/Timing|Easing/i, 'linear, ease-out, spring 계열 cubic-bezier를 비교할 수 있게 같은 거리와 duration으로 보여주고, 각 easing을 언제 쓰는지 설명한다.'],
+        [/리플|Ripple/i, '클릭 좌표에서 ripple DOM을 생성하고 animationend에서 반드시 제거한다. 터치와 마우스 모두 동작하고 reduced motion에서는 ripple 강도를 줄인다.'],
+        [/하트|좋아요|Like|Burst/i, 'aria-pressed 상태와 시각 상태를 동기화하고, 파티클 또는 pop 효과는 animationend 후 DOM을 정리한다. 색상만으로 상태를 전달하지 않는다.'],
+        [/토글|Switch|Toggle/i, 'role="switch" 또는 aria-pressed/aria-checked를 정확히 쓰고 Enter/Space 키보드 조작까지 연결한다. 손잡이는 transform으로 이동한다.'],
+        [/햄버거|Menu/i, '세 줄의 transform과 opacity만으로 X 전환을 만들고 aria-expanded 또는 aria-pressed를 상태와 동기화한다.'],
+        [/로딩 버튼|Loading|결제 상태머신|Payment/i, 'idle, loading, success, error 상태머신으로 구현한다. loading 중 disabled 처리, aria-live 상태 텍스트, 성공/오류 모션을 분리한다.'],
+        [/Modal|모달/i, 'backdrop은 opacity, 패널은 translateY/scale/opacity로 등장시키고 Escape, backdrop close, 초기 focus 이동을 포함한다.'],
+        [/Toast/i, 'success, warning, error, info 타입을 지원하고 aria-live, 자동닫힘 progress, 닫기 버튼, reduced-motion 정적 대체를 포함한다.'],
+        [/Accordion/i, 'height:auto 애니메이션 대신 grid-template-rows 0fr/1fr 또는 transform 기반 fallback을 쓰고 aria-expanded를 갱신한다.'],
+        [/progress|진행률|업로드/i, '진행률 값은 슬라이더, 화면 텍스트, CSS/SVG stroke 값, 복사 코드가 같은 params에서 파생되게 한다.'],
+        [/Scroll reveal|Scroll Storytelling|Reveal|Parallax|Horizontal/i, 'IntersectionObserver와 passive scroll + requestAnimationFrame을 조합한다. disableParallax와 reduced-motion에서는 이동을 끄고 즉시 표시한다.'],
+        [/View Transition|Page Transition|Card → Detail|화면 전환/i, 'document.startViewTransition 지원을 feature detect하고 미지원, reduced-motion, disablePageTransitions에서는 즉시 전환 fallback을 제공한다.'],
+        [/clip-path|clipPath|Mask|reveal/i, 'clip-path 또는 SVG clipPath로 보이는 영역만 움직이고, 컨트롤 값과 코드의 circle/rect 크기가 일치하게 한다.'],
+        [/SVG|Stroke|선 그리기|stroke drawing/i, 'path.getTotalLength()로 실제 길이를 측정해 stroke-dasharray와 stroke-dashoffset에 적용한다. role="img"와 title/desc를 제공한다.'],
+        [/animateTransform|톱니|Rotate/i, 'SVG 내부 animateTransform 또는 CSS transform을 쓰고 transform-origin/transform-box를 명확히 지정한다.'],
+        [/Motion path|배송 경로|Route/i, 'SVG path를 기준으로 animateMotion 또는 CSS offset-path를 사용하고, 경로선과 마커 상태를 함께 보여준다.'],
+        [/Morph|Path morph/i, '같은 명령 구조를 가진 path끼리만 morph하고, 구조가 다르면 flubber/GSAP 같은 대안 노트만 설명한다.'],
+        [/Filter|glow/i, 'SVG filter는 작은 영역에 제한하고 장식이면 aria-hidden을 적용한다. 과한 blur와 반복 pulse는 reduced-motion에서 줄인다.'],
+        [/viewBox|camera/i, 'viewBox 또는 내부 g transform으로 카메라 이동을 표현하고, 복잡한 다이어그램의 현재 초점이 텍스트로도 설명되게 한다.'],
+        [/Data viz|대시보드|bars|Chart/i, '막대 높이 직접 애니메이션 대신 transform: scaleY와 count-up을 사용하고 데이터 변경과 모션 의미가 일치하게 한다.'],
+        [/Lottie/i, 'lottie-web을 로드하지 말고 선택 기준 카드로 설명한다. CSS/SVG로 충분한지, JSON 용량, reduced 대체, 접근성 텍스트를 체크한다.'],
+        [/빈 상태|Empty/i, '반복 모션은 작게 유지하고 SVG title/desc와 실제 안내 텍스트를 함께 제공한다.'],
+        [/Timeline|WAAPI|JavaScript Timeline/i, 'Web Animations API element.animate(keyframes, options)로 play, pause, reverse, cancel, finish, progress scrub, playbackRate를 모두 제어한다.'],
+        [/Particle|Canvas|Liquid/i, 'ParticleEngine 클래스로 init/update/draw/reset/resize/destroy를 분리하고 deltaTime, DPR 제한, ResizeObserver, visibility pause, cleanup을 구현한다.'],
+        [/Audio|오디오|청각/i, 'AudioContext는 사용자 제스처 후 resume하고 OscillatorNode/GainNode를 재생마다 생성한 뒤 stop/onended에서 disconnect한다. 사운드만으로 정보를 전달하지 않는다.'],
+        [/3D|WebGL|Three|Spring|센서/i, 'Three.js는 CDN 비동기 로드와 실패 fallback을 제공하고 geometry/material/renderer dispose, CSS 3D fallback, 스프링 드래그, 센서 권한 흐름을 포함한다.'],
+        [/Magnetic|Floating|Draggable|고급 마이크로/i, 'pointer capture, transform 기반 이동, reduced-motion 강도 축소, DOM cleanup, 키보드/ARIA 상태를 모두 포함한다.']
+      ];
+      return rules.find(([pattern]) => pattern.test(title))?.[1]
+        || '효과는 transform, opacity, stroke-dashoffset 중심으로 구현하고 컨트롤 값, 화면 상태, 복사 코드가 같은 params에서 파생되게 한다.';
+    }
+
+    function buildVibeCodingPrompt(meta) {
+      return `너는 시니어 프론트엔드 엔지니어이자 모션 디자이너다.
+
+목표:
+"${meta.title}" 효과를 설치 없는 바닐라 HTML/CSS/JS 데모로 구현해줘.
+
+컨텍스트:
+- 효과 태그: ${meta.tags || 'CSS/SVG/Interaction'}
+- 실제 적용 화면: ${meta.useCase || '제품 UI의 즉각적인 피드백과 상태 전달'}
+- 현재 설명: ${meta.note || '라이브 미리보기, 컨트롤, 코드 복사까지 포함'}
+
+구현 요구:
+1. 기존 디자인 토큰과 카드 구조를 재사용하고 새 UI 스타일을 임의로 만들지 마.
+2. 미리보기, 컨트롤, 적용사례, 접근성 노트, 복사 가능한 코드 패널을 포함해.
+3. ${promptSpecifics(meta.title)}
+4. 모든 인터랙션은 hover, click, keyboard focus, touch 환경에서 가능한 한 동일하게 동작하게 해.
+5. prefers-reduced-motion과 앱의 pause/speed/reduced 설정을 존중해.
+6. 외부 라이브러리는 사용하지 말고, 3D가 꼭 필요한 경우에만 Three.js CDN을 비동기 로드하고 실패 fallback을 제공해.
+7. 무한 루프, observer, event listener, audio node, 3D resource는 cleanup 경로를 포함해.
+8. 복사 코드에는 빈 HTML에 붙여도 동작하는 정직한 코드만 넣어.
+
+완료 기준:
+- 화면의 움직임과 복사 코드가 같은 파라미터에서 생성된다.
+- 콘솔 오류가 없다.
+- 키보드 접근성과 aria 상태가 맞다.
+- reduced-motion 또는 pause 상태에서 과한 움직임이 멈춘다.
+- 모바일 폭에서도 레이아웃이 무너지지 않는다.`;
+    }
+
+    function installVibeCodingPrompts() {
+      document.querySelectorAll('.demo-frame').forEach((frame, index) => {
+        if (frame.querySelector('.vibe-prompt')) return;
+        const title = frame.querySelector('.demo-title-row h3, h3')?.textContent?.trim() || `Effect ${index + 1}`;
+        const tags = [...frame.querySelectorAll('.tags .pill')].map((tag) => tag.textContent.trim()).join(', ');
+        const note = frame.querySelector('.demo-note')?.textContent?.trim() || '';
+        const useCase = frame.querySelector('.use-case')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+        const prompt = buildVibeCodingPrompt({ title, tags, note, useCase });
+        const id = `vibe-prompt-demo-${index}`;
+        const details = document.createElement('details');
+        details.className = 'vibe-prompt';
+        details.innerHTML = `<summary><span>바이브코딩 프롬프트</span><button class="copy-btn" type="button" data-copy-target="${id}">복사</button></summary><div class="vibe-prompt-body"><pre><code id="${id}"></code></pre></div>`;
+        details.querySelector('code').textContent = prompt;
+        frame.append(details);
+      });
+
+      document.querySelectorAll('.recipe-card').forEach((card, index) => {
+        if (card.querySelector('.vibe-prompt')) return;
+        const title = card.querySelector('h3')?.textContent?.trim() || `Recipe ${index + 1}`;
+        const note = card.querySelector('p')?.textContent?.trim() || '';
+        const code = card.querySelector('code')?.textContent?.trim() || '';
+        const prompt = buildVibeCodingPrompt({
+          title,
+          tags: 'Recipe, Copy-ready',
+          note,
+          useCase: `빠른 레시피 코드: ${code}`
+        });
+        const id = `vibe-prompt-recipe-${index}`;
+        const details = document.createElement('details');
+        details.className = 'vibe-prompt';
+        details.innerHTML = `<summary><span>바이브코딩 프롬프트</span><button class="copy-btn" type="button" data-copy-target="${id}">복사</button></summary><div class="vibe-prompt-body"><pre><code id="${id}"></code></pre></div>`;
+        details.querySelector('code').textContent = prompt;
+        card.append(details);
+      });
+    }
+
+    installVibeCodingPrompts();
 
     const ctaDuration = document.getElementById('ctaDuration');
     const ctaDurationOut = document.getElementById('ctaDurationOut');

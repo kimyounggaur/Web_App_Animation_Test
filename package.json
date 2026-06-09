@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "node tests/validate-index.js",
+    "test:controls": "node tests/playwright-controls-check.js"
+  },
+  "dependencies": {
+    "playwright-core": "^1.60.0"
+  }
+}

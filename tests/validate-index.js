@@ -81,6 +81,9 @@ assert(html.includes('DeviceOrientationEvent'), 'Missing device orientation supp
 assert(html.includes('DeviceMotionEvent'), 'Missing device motion support.');
 assert(html.includes('runTransition'), 'Missing Page Transition utility.');
 assert(html.includes('cleanupAdvancedLabs'), 'Missing advanced lab cleanup hook.');
+assert(html.includes('buildVibeCodingPrompt'), 'Missing vibe-coding prompt builder.');
+assert(html.includes('installVibeCodingPrompts'), 'Missing vibe-coding prompt installer.');
+assert(html.includes('바이브코딩 프롬프트'), 'Missing visible vibe-coding prompt label.');
 assert(html.includes('role="img"'), 'Meaningful SVGs need role="img".');
 assert(html.includes('<title>'), 'Meaningful SVGs need title text.');
 assert(!/<script\s+[^>]*src=/i.test(html), 'External script files are not allowed.');
