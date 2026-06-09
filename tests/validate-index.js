@@ -3,12 +3,17 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const htmlPath = path.join(root, 'index.html');
+const pagesWorkflowPath = path.join(root, '.github', 'workflows', 'pages.yml');
 
 if (!fs.existsSync(htmlPath)) {
   throw new Error('index.html must exist at the project root.');
 }
+if (!fs.existsSync(pagesWorkflowPath)) {
+  throw new Error('GitHub Pages workflow must exist at .github/workflows/pages.yml.');
+}
 
 const html = fs.readFileSync(htmlPath, 'utf8');
+const pagesWorkflow = fs.readFileSync(pagesWorkflowPath, 'utf8');
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
@@ -80,5 +85,8 @@ assert(html.includes('role="img"'), 'Meaningful SVGs need role="img".');
 assert(html.includes('<title>'), 'Meaningful SVGs need title text.');
 assert(!/<script\s+[^>]*src=/i.test(html), 'External script files are not allowed.');
 assert(!/<link\s+[^>]*href=/i.test(html), 'External stylesheets/fonts are not allowed.');
+assert(pagesWorkflow.includes('actions/deploy-pages'), 'Pages workflow must deploy with actions/deploy-pages.');
+assert(pagesWorkflow.includes('actions/upload-pages-artifact'), 'Pages workflow must upload a Pages artifact.');
+assert(pagesWorkflow.includes('branches:') && pagesWorkflow.includes('main'), 'Pages workflow must deploy from main.');
 
 console.log('Static acceptance checks passed.');
