@@ -1264,6 +1264,371 @@
       font-size: 12px;
     }
 
+    .settings-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .status-tile {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .status-tile strong {
+      display: block;
+      color: var(--text);
+      font-size: 18px;
+    }
+    .hub-preview {
+      width: min(340px, 100%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .motion-sample {
+      min-height: 116px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .motion-sample span {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      animation: sample-sweep calc(1.4s / var(--speed)) var(--ease-out) infinite alternate;
+    }
+    .motion-sample.reduced span {
+      animation-name: sample-fade;
+    }
+    @keyframes sample-sweep {
+      to { transform: translateX(42px) rotate(18deg) scale(1.08); }
+    }
+    @keyframes sample-fade {
+      to { opacity: .42; }
+    }
+    .focus-modal {
+      width: min(300px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+      display: grid;
+      gap: 10px;
+    }
+    .flash-preview {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: var(--rose);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+    }
+    .flash-preview.is-flashing {
+      animation: safe-flash .42s linear 2;
+    }
+    @keyframes safe-flash {
+      50% { opacity: .25; transform: scale(.96); }
+    }
+    .advanced-lab .stage {
+      min-height: 260px;
+    }
+    .timeline-box {
+      width: 116px;
+      height: 116px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--brand), var(--rose));
+      box-shadow: 0 18px 38px color-mix(in srgb, var(--brand) 34%, transparent);
+      transform: translateX(0);
+    }
+    .timeline-ruler {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .event-log {
+      min-height: 94px;
+      max-height: 126px;
+      overflow: auto;
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .canvas-wrap {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--brand) 16%, transparent), transparent 46%), var(--ink-code);
+      position: relative;
+    }
+    .canvas-wrap canvas {
+      width: 100%;
+      height: 320px;
+      display: block;
+      touch-action: none;
+    }
+    .liquid-card {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      width: 120px;
+      height: 76px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--cyan), var(--mint), var(--yellow));
+      filter: url(#liquidFilter);
+      opacity: .82;
+      pointer-events: none;
+    }
+    .audio-visualizer {
+      width: min(340px, 100%);
+      height: 130px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--ink-code);
+    }
+    .sound-pad {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      width: min(340px, 100%);
+    }
+    .sound-pad .mini-btn {
+      min-height: 52px;
+    }
+    .three-stage, .css3d-stage, .spring-stage {
+      width: min(420px, 100%);
+      min-height: 260px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: radial-gradient(circle at 50% 24%, color-mix(in srgb, var(--brand) 20%, transparent), transparent 44%), var(--ink-code);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+      color: #fff;
+    }
+    .three-stage canvas {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+      display: block;
+    }
+    .css3d-card, .spring-card, .magnetic-demo {
+      width: 180px;
+      height: 120px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.28);
+      background: linear-gradient(135deg, rgba(255,255,255,.24), rgba(255,255,255,.06));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 24px 50px rgba(0,0,0,.24);
+      transform-style: preserve-3d;
+      transition: transform var(--t-base) var(--ease-out);
+      user-select: none;
+      touch-action: none;
+    }
+    .spring-card {
+      cursor: grab;
+    }
+    .spring-card:active {
+      cursor: grabbing;
+    }
+    .sensor-readout {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      color: rgba(255,255,255,.72);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .story-shell {
+      width: 100%;
+      display: grid;
+      gap: 14px;
+    }
+    .story-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 18%, transparent);
+      overflow: hidden;
+    }
+    .story-progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--brand), var(--cyan), var(--mint));
+      transition: width var(--t-base) var(--ease-out);
+    }
+    .story-cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .story-card {
+      min-height: 92px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      opacity: .35;
+      transform: translateY(18px);
+      transition: opacity var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out);
+    }
+    .story-card.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .parallax-scene {
+      min-height: 180px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, var(--cyan), var(--brand));
+    }
+    .parallax-layer {
+      position: absolute;
+      inset: auto 0 0;
+      height: 58%;
+      background: color-mix(in srgb, var(--surface) 30%, transparent);
+      clip-path: polygon(0 60%, 20% 20%, 42% 62%, 66% 24%, 100% 66%, 100% 100%, 0 100%);
+      transform: translateY(var(--parallax-y, 0px));
+      transition: transform var(--t-base) linear;
+    }
+    .horizontal-track {
+      display: flex;
+      gap: 10px;
+      transform: translateX(var(--horizontal-x, 0px));
+      transition: transform var(--t-base) var(--ease-out);
+    }
+    .horizontal-track span {
+      flex: 0 0 150px;
+      min-height: 90px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+    }
+    .vt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      width: min(420px, 100%);
+    }
+    .vt-card {
+      min-height: 92px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      color: #fff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+    .vt-detail {
+      width: min(420px, 100%);
+      min-height: 210px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--brand), var(--rose));
+      color: #fff;
+      padding: 18px;
+      display: grid;
+      align-content: space-between;
+    }
+    .hidden { display: none !important; }
+    .micro-playground {
+      width: min(440px, 100%);
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+    }
+    .magnetic-demo {
+      height: 68px;
+      border: 0;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      cursor: pointer;
+    }
+    .burst-host {
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+    .burst-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose);
+      animation: burst-pop .62s var(--ease-out) forwards;
+    }
+    @keyframes burst-pop {
+      to { transform: translate(var(--tx), var(--ty)) scale(.2); opacity: 0; }
+    }
+    .floating-field {
+      width: min(320px, 100%);
+      position: relative;
+    }
+    .floating-field input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      padding: 18px 12px 8px;
+    }
+    .floating-field label {
+      position: absolute;
+      left: 12px;
+      top: 13px;
+      color: var(--muted);
+      transition: transform var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
+      pointer-events: none;
+    }
+    .floating-field input:focus + label,
+    .floating-field input:not(:placeholder-shown) + label {
+      transform: translateY(-10px) scale(.78);
+      color: var(--brand);
+    }
+    [data-pause-animations="true"] *, [data-pause-animations="true"] *::before, [data-pause-animations="true"] *::after {
+      animation-play-state: paused !important;
+    }
+    [data-reduced-motion="true"] .motion-sample span,
+    [data-reduced-motion="true"] .route-dot,
+    [data-reduced-motion="true"] .empty-box,
+    [data-reduced-motion="true"] .overview-card::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transform: none !important;
+    }
+
     .copy-toast {
       position: fixed;
       right: 18px;
@@ -1366,9 +1731,11 @@
         </button>
         <label class="sr-only" for="speedSelect">전역 속도</label>
         <select class="speed-select" id="speedSelect" title="전역 속도 배율">
+          <option value="0">0x</option>
           <option value="0.25">0.25x</option>
           <option value="0.5">0.5x</option>
           <option value="1" selected>1x</option>
+          <option value="1.5">1.5x</option>
           <option value="2">2x</option>
         </select>
         <button class="control-btn" id="reduceToggle" type="button" aria-pressed="false" title="reduced motion 시뮬레이션">
@@ -1408,6 +1775,17 @@
           <strong>Guide</strong>
           <a class="nav-link" href="#usecase-guide"><span class="nav-dot"></span>I. 선택 가이드</a>
           <a class="nav-link" href="#perf-a11y"><span class="nav-dot"></span>J. 성능 & 접근성</a>
+        </div>
+        <div class="nav-group">
+          <strong>Advanced</strong>
+          <a class="nav-link" href="#motion-hub"><span class="nav-dot"></span>Motion Hub</a>
+          <a class="nav-link" href="#js-timeline-lab"><span class="nav-dot"></span>JS Timeline</a>
+          <a class="nav-link" href="#canvas-particle-lab"><span class="nav-dot"></span>Canvas Particle</a>
+          <a class="nav-link" href="#web-audio-lab"><span class="nav-dot"></span>Web Audio</a>
+          <a class="nav-link" href="#webgl-physics-lab"><span class="nav-dot"></span>3D / Physics</a>
+          <a class="nav-link" href="#scroll-story-lab"><span class="nav-dot"></span>Scroll Story</a>
+          <a class="nav-link" href="#page-transition-lab"><span class="nav-dot"></span>Page Transition</a>
+          <a class="nav-link" href="#advanced-micro-lab"><span class="nav-dot"></span>Advanced Micro</a>
           <a class="nav-link" href="#recipes"><span class="nav-dot"></span>Recipe Library</a>
         </div>
       </nav>
@@ -1966,6 +2344,95 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
         </div>
       </section>
 
+      <section id="motion-hub" class="advanced-lab" aria-labelledby="motion-hub-title">
+        <div class="section-head"><span class="eyebrow">Advanced 0</span><h2 id="motion-hub-title">Accessibility & Motion Hub</h2><p class="lead">기존 pause·speed·reduce 토글을 확장해 모든 고급 Lab이 공유하는 전역 MotionSettings 허브를 제공합니다.</p><div class="settings-badges" id="settingsBadges"><span class="pill">MotionSettings</span></div></div>
+        <div class="demo-grid">
+          <article class="demo-frame wide">
+            <div class="demo-top"><div class="demo-title-row"><h3>전역 모션 설정</h3><div class="tags"><span class="pill mint">localStorage</span><span class="pill cyan">data attributes</span></div></div><p class="demo-note">시스템 선호, 사용자 override, autoplay/parallax/page transition/flash safety를 한곳에서 제어합니다.</p></div>
+            <div class="demo-body">
+              <div class="stage"><div class="hub-preview"><div class="motion-sample"><span></span><small>기본 모션</small></div><div class="motion-sample reduced"><span></span><small>Reduced</small></div></div></div>
+              <div class="panel">
+                <div class="controls">
+                  <div class="status-grid"><div class="status-tile"><strong id="systemRmText">감지 중</strong>OS prefers-reduced-motion</div><div class="status-tile"><strong id="effectiveRmText">false</strong>effectiveReducedMotion</div></div>
+                  <div class="control-row"><span class="label">Reduced Motion Override</span><select class="speed-select" id="rmOverride"><option value="system">Follow System</option><option value="reduce">Reduce</option><option value="no-preference">Allow</option></select></div>
+                  <div class="control-row"><span class="label">Animation Speed</span><select class="speed-select" id="hubSpeed"><option value="0">0x</option><option value="0.25">0.25x</option><option value="0.5">0.5x</option><option value="1">1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+                  <label><input type="checkbox" id="hubPause"> Pause All Animations</label>
+                  <label><input type="checkbox" id="disableAutoplay"> Disable Autoplay</label>
+                  <label><input type="checkbox" id="disableParallax"> Disable Parallax</label>
+                  <label><input type="checkbox" id="disablePageTransitions"> Disable Page Transitions</label>
+                  <label><input type="checkbox" id="flashSafetyMode"> Flash Safety Mode</label>
+                </div>
+                <div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">CSS+JS</button></div><button class="copy-btn" data-copy-target="code-motion-hub" type="button">복사</button></div><pre><code class="code-block" id="code-motion-hub">@media (prefers-reduced-motion: reduce) {
+  [data-animated="true"] { animation-duration: .01ms; animation-iteration-count: 1; }
+}
+const systemPrefersReducedMotion =
+  matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.documentElement.dataset.reducedMotion = String(effectiveReducedMotion);</code></pre></div>
+              </div>
+            </div>
+          </article>
+          <article class="demo-frame"><div class="demo-top"><div class="demo-title-row"><h3>키보드 포커스 + focus trap</h3><div class="tags"><span class="pill">Keyboard</span><span class="pill mint">ARIA</span></div></div><p class="demo-note">Tab 이동, Enter/Space 조작, aria-live 메시지를 함께 확인합니다.</p></div><div class="demo-body"><div class="stage compact"><div class="focus-modal" id="focusTrapDemo" role="dialog" aria-labelledby="focusTrapTitle"><h4 id="focusTrapTitle">미니 모달</h4><button class="mini-btn" id="focusFirst" type="button">첫 버튼</button><button class="mini-btn" id="focusLast" type="button">마지막 버튼</button></div></div><div class="panel"><div class="controls"><button class="mini-btn" id="announcePolite" type="button">polite 알림</button><button class="mini-btn" id="announceAssertive" type="button">assertive 알림</button><button class="mini-btn" id="flashPreview" type="button">Flash preview</button></div><p class="use-case" id="hubLive" aria-live="polite"><strong>aria-live:</strong> 대기 중</p><div class="stage compact"><div class="flash-preview" id="flashBox">SAFE</div></div></div></div></article>
+        </div>
+      </section>
+
+      <section id="js-timeline-lab" class="advanced-lab" aria-labelledby="timeline-title">
+        <div class="section-head"><span class="eyebrow">Lab 1</span><h2 id="timeline-title">JavaScript Timeline Lab</h2><p class="lead">Web Animations API로 재생, 정지, 역재생, scrub, playbackRate를 직접 제어합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>WAAPI timeline controller</h3><div class="tags"><span class="pill">element.animate</span><span class="pill mint">No dependency</span></div></div><p class="demo-note">프리셋과 옵션을 바꾸면 애니메이션과 코드가 동일 params에서 갱신됩니다.</p></div><div class="demo-body"><div class="stage"><div class="timeline-box" id="timelineBox">Animate me</div></div><div class="panel"><div class="controls"><div class="control-row"><label for="timelinePreset">Preset</label><select class="speed-select" id="timelinePreset"><option>Slide+Fade</option><option>Pop</option><option>Rotate Card</option><option>Bounce</option><option>Glow Pulse</option></select></div><div class="control-row"><label for="timelineDuration">Duration <output id="timelineDurationOut">1200ms</output></label><input id="timelineDuration" type="range" min="300" max="5000" value="1200"></div><div class="control-row"><label for="timelineRate">PlaybackRate <output id="timelineRateOut">1x</output></label><input id="timelineRate" type="range" min="0.25" max="3" value="1" step="0.25"></div><div class="control-row"><label for="timelineProgress">Progress <output id="timelineProgressOut">0%</output></label><input id="timelineProgress" type="range" min="0" max="100" value="0"></div><div class="choice-row"><button class="mini-btn" id="tlPlay" type="button">Play</button><button class="mini-btn" id="tlPause" type="button">Pause</button><button class="mini-btn" id="tlReverse" type="button">Reverse</button><button class="mini-btn" id="tlCancel" type="button">Cancel</button><button class="mini-btn" id="tlFinish" type="button">Finish</button><button class="mini-btn" id="tlRestart" type="button">Restart</button></div><div class="timeline-ruler"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div><p class="use-case" id="timelineStatus"><strong>상태:</strong> idle</p><ol class="event-log" id="timelineLog"></ol><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-timeline" type="button">복사</button></div><pre><code class="code-block" id="code-timeline"></code></pre></div></div></div></article>
+      </section>
+
+      <section id="canvas-particle-lab" class="advanced-lab" aria-labelledby="canvas-title">
+        <div class="section-head"><span class="eyebrow">Lab 2</span><h2 id="canvas-title">Canvas Particle + Liquid Distortion Lab</h2><p class="lead">순수 Canvas 2D와 RAF로 입자, 커서 반응, 폭발, 리퀴드 느낌을 구현합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>ParticleEngine</h3><div class="tags"><span class="pill cyan">Canvas 2D</span><span class="pill">RAF cleanup</span></div></div><p class="demo-note">보이지 않는 탭에서는 정지하고, reduced/flashSafety 설정에 따라 count와 폭발을 줄입니다.</p></div><div class="demo-body"><div class="stage"><div class="canvas-wrap"><canvas id="particleCanvas" width="640" height="360"></canvas><div class="liquid-card"></div><svg width="0" height="0" aria-hidden="true"><filter id="liquidFilter"><feTurbulence baseFrequency=".02" numOctaves="2" seed="4"><animate attributeName="baseFrequency" values=".015;.035;.015" dur="4s" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="12"/></filter></svg></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="particlePreset">Preset</label><select class="speed-select" id="particlePreset"><option>Snow</option><option>Rain</option><option>Confetti</option><option>Fireworks</option><option>Cursor Trail</option><option>Starfield</option></select></div><div class="control-row"><label for="particleCount">Particle Count <output id="particleCountOut">180</output></label><input id="particleCount" type="range" min="20" max="800" value="180"></div><div class="control-row"><label for="particleSpeed">Speed <output id="particleSpeedOut">1.4</output></label><input id="particleSpeed" type="range" min="0.1" max="5" value="1.4" step="0.1"></div><div class="choice-row"><button class="mini-btn" id="particlePause" type="button">Pause</button><button class="mini-btn" id="particleReset" type="button">Reset</button></div><label><input type="checkbox" id="adaptiveQuality" checked> Adaptive Quality</label></div><p class="use-case" id="particleStatus"><strong>상태:</strong> FPS -- · count 180</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">Canvas</button></div><button class="copy-btn" data-copy-target="code-particle" type="button">복사</button></div><pre><code class="code-block" id="code-particle">class ParticleEngine {
+  init(config) {}
+  update(dt) {}
+  draw(ctx) {}
+  destroy() {}
+}</code></pre></div></div></div></article>
+      </section>
+
+      <section id="web-audio-lab" class="advanced-lab" aria-labelledby="audio-title">
+        <div class="section-head"><span class="eyebrow">Lab 3</span><h2 id="audio-title">Web Audio 청각 피드백 Lab</h2><p class="lead">외부 음원 없이 OscillatorNode와 GainNode로 UI 사운드를 합성합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>오실레이터 UI 피드백</h3><div class="tags"><span class="pill yellow">AudioContext</span><span class="pill mint">User gesture only</span></div></div><p class="demo-note">사운드는 명시적 버튼 클릭 후에만 활성화되며, 시각 피드백을 항상 병행합니다.</p></div><div class="demo-body"><div class="stage"><div class="micro-playground"><canvas class="audio-visualizer" id="audioVisualizer" width="420" height="150"></canvas><div class="sound-pad"><button class="mini-btn" id="audioEnable" type="button">사운드 활성화</button><button class="mini-btn" id="audioToggleSound" type="button">토글 클릭음</button><button class="mini-btn" id="audioSuccess" type="button">성공 차임</button><button class="mini-btn" id="audioError" type="button">오류 알림</button></div></div></div><div class="panel"><div class="controls"><label><input type="checkbox" id="audioMute"> Mute</label><div class="control-row"><label for="masterVolume">Master Volume <output id="masterVolumeOut">0.25</output></label><input id="masterVolume" type="range" min="0" max="1" value="0.25" step="0.01"></div><div class="control-row"><label for="audioWave">Waveform</label><select class="speed-select" id="audioWave"><option>sine</option><option>square</option><option>triangle</option><option>sawtooth</option></select></div><div class="control-row"><label for="audioFreq">Frequency <output id="audioFreqOut">440Hz</output></label><input id="audioFreq" type="range" min="80" max="2000" value="440"></div></div><p class="use-case" id="audioStatus"><strong>AudioContext:</strong> suspended</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-audio" type="button">복사</button></div><pre><code class="code-block" id="code-audio">const audioCtx = new AudioContext();
+await audioCtx.resume();
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+osc.connect(gain).connect(audioCtx.destination);</code></pre></div></div></div></article>
+      </section>
+
+      <section id="webgl-physics-lab" class="advanced-lab" aria-labelledby="webgl-title">
+        <div class="section-head"><span class="eyebrow">Lab 4</span><h2 id="webgl-title">3D / WebGL + 물리·센서 Lab</h2><p class="lead">Three.js는 CDN으로 비동기 로드하고, CSS 3D·스프링 드래그·센서는 바닐라로 구현합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>3D object + CSS tilt + spring drag</h3><div class="tags"><span class="pill">Three.js CDN</span><span class="pill rose">fallback</span><span class="pill mint">dispose</span></div></div><p class="demo-note">CDN 실패나 WebGL 미지원 시 CSS 3D 카드로 graceful fallback합니다.</p></div><div class="demo-body"><div class="stage"><div class="three-stage" id="threeStage"><div class="css3d-card" id="css3dCard">CSS 3D</div><span class="sensor-readout" id="sensorReadout">sensor: fallback mouse</span></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="threeObject">Object</label><select class="speed-select" id="threeObject"><option>cube</option><option>sphere</option><option>torus</option><option>torusKnot</option></select></div><div class="control-row"><label for="threeSpeed">Rotation Speed <output id="threeSpeedOut">1</output></label><input id="threeSpeed" type="range" min="0" max="5" value="1" step="0.1"></div><label><input type="checkbox" id="threeAutoRotate" checked> Auto Rotate</label><button class="mini-btn" id="sensorPermission" type="button">센서 권한 요청</button></div><div class="spring-stage"><div class="spring-card" id="springCard">Spring Drag</div></div><p class="use-case" id="threeStatus"><strong>WebGL:</strong> Three.js 로드 대기</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-three" type="button">복사</button></div><pre><code class="code-block" id="code-three">const script = document.createElement('script');
+script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+script.onload = initThree;
+script.onerror = showFallback;</code></pre></div></div></div></article>
+      </section>
+
+      <section id="scroll-story-lab" class="advanced-lab" aria-labelledby="story-title">
+        <div class="section-head"><span class="eyebrow">Lab 5</span><h2 id="story-title">Scroll Storytelling Lab</h2><p class="lead">Reveal, Parallax, Sticky Story, Horizontal Scroll을 IO + RAF + transform으로 제어합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>Reveal / Parallax / Horizontal</h3><div class="tags"><span class="pill">IntersectionObserver</span><span class="pill cyan">passive scroll</span></div></div><p class="demo-note">disableParallax나 reduced-motion이 켜지면 이동을 줄이고 즉시 표시합니다.</p></div><div class="demo-body"><div class="stage"><div class="story-shell"><div class="story-progress"><span id="storyProgress"></span></div><div class="story-cards" id="storyCards"><div class="story-card">fade-up</div><div class="story-card">zoom-in</div><div class="story-card">rotate-in</div></div><div class="parallax-scene"><div class="parallax-layer" id="parallaxLayer"></div></div><div class="horizontal-track" id="horizontalTrack"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="storyThreshold">Threshold <output id="storyThresholdOut">0.4</output></label><input id="storyThreshold" type="range" min="0" max="1" value="0.4" step="0.1"></div><div class="control-row"><label for="storyStagger">Stagger <output id="storyStaggerOut">120ms</output></label><input id="storyStagger" type="range" min="0" max="300" value="120"></div><label><input type="checkbox" id="storyDebug"> Debug markers</label><button class="mini-btn" id="storyReplay" type="button">Reveal 재생</button></div><p class="use-case"><strong>적용:</strong> 제품 소개, 포트폴리오 스토리, 긴 문서 챕터.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-story" type="button">복사</button></div><pre><code class="code-block" id="code-story">const observer = new IntersectionObserver(onReveal, {
+  threshold: 0.4,
+  rootMargin: '0px 0px -80px'
+});</code></pre></div></div></div></article>
+      </section>
+
+      <section id="page-transition-lab" class="advanced-lab" aria-labelledby="page-transition-title">
+        <div class="section-head"><span class="eyebrow">Lab 6</span><h2 id="page-transition-title">Page Transition Lab</h2><p class="lead">View Transition API와 CSS fallback으로 카드→상세, 탭, 모달, route-like 전환을 확인합니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>Card → Detail shared transition</h3><div class="tags"><span class="pill" id="vtSupportBadge">감지 중</span><span class="pill rose">fallback</span></div></div><p class="demo-note">disablePageTransitions 또는 reduced-motion이면 즉시 전환으로 안전하게 축소합니다.</p></div><div class="demo-body"><div class="stage"><div id="vtList" class="vt-grid"><button class="vt-card" data-vt-card="Aurora" type="button">Aurora</button><button class="vt-card" data-vt-card="Pulse" type="button">Pulse</button><button class="vt-card" data-vt-card="Orbit" type="button">Orbit</button></div><article id="vtDetail" class="vt-detail hidden"><strong id="vtDetailTitle">Aurora</strong><p>shared-card transition detail view</p><button class="mini-btn" id="vtBack" type="button">뒤로가기</button></article></div><div class="panel"><div class="controls"><div class="control-row"><label for="transitionType">Transition Type</label><select class="speed-select" id="transitionType"><option>fade</option><option>slide</option><option>scale</option><option>shared-card</option><option>blur</option></select></div><div class="control-row"><label for="transitionDuration">Duration <output id="transitionDurationOut">420ms</output></label><input id="transitionDuration" type="range" min="150" max="1200" value="420"></div><label><input type="checkbox" id="disableTransitionLocal"> Disable Transition</label></div><p class="use-case"><strong>적용:</strong> 갤러리 목록→상세, 탭 전환, 모달 전환, SPA route-like 전환.</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">JS</button></div><button class="copy-btn" data-copy-target="code-page-transition" type="button">복사</button></div><pre><code class="code-block" id="code-page-transition">function runTransition(callback) {
+  if (!document.startViewTransition) return callback();
+  document.startViewTransition(callback);
+}</code></pre></div></div></div></article>
+      </section>
+
+      <section id="advanced-micro-lab" class="advanced-lab" aria-labelledby="advanced-micro-title">
+        <div class="section-head"><span class="eyebrow">Lab 7</span><h2 id="advanced-micro-title">고급 마이크로 인터랙션 Lab</h2><p class="lead">기존 B모듈을 넘어 Magnetic, Like Burst, Floating Label, Draggable Card를 다룹니다.</p></div>
+        <article class="demo-frame wide"><div class="demo-top"><div class="demo-title-row"><h3>Magnetic / Burst / Floating Label / Drag</h3><div class="tags"><span class="pill">Pointer</span><span class="pill mint">ARIA</span><span class="pill cyan">Cleanup</span></div></div><p class="demo-note">duration/easing/intensity를 바꾸면 인터랙션과 복사 코드가 함께 바뀝니다.</p></div><div class="demo-body"><div class="stage"><div class="micro-playground"><button class="magnetic-demo" id="magneticButton" type="button">Magnetic</button><div class="burst-host"><button class="heart-button" id="burstButton" type="button" aria-pressed="false" aria-label="좋아요 burst"><svg viewBox="0 0 64 64" aria-hidden="true"><path class="heart-path" d="M32 54 C15 40 8 31 10 21 C12 11 25 9 32 20 C39 9 52 11 54 21 C56 31 49 40 32 54Z"/></svg></button></div><div class="floating-field"><input id="floatingInput" placeholder=" " aria-describedby="floatingHelp"><label for="floatingInput">이메일</label><small id="floatingHelp">focus와 값 입력 시 label 이동</small></div><div class="spring-stage"><div class="spring-card" id="advancedDragCard">Drag me</div></div></div></div><div class="panel"><div class="controls"><div class="control-row"><label for="microIntensity">Intensity <output id="microIntensityOut">48</output></label><input id="microIntensity" type="range" min="0" max="100" value="48"></div><div class="control-row"><label for="microDuration">Duration <output id="microDurationOut">360ms</output></label><input id="microDuration" type="range" min="100" max="1500" value="360"></div><label><input type="checkbox" id="microReducedPreview"> Reduced Preview</label><button class="mini-btn" id="toastAdvanced" type="button">Toast 생성</button></div><p class="use-case" id="advancedMicroLive" aria-live="polite"><strong>상태:</strong> 준비됨</p><div class="code-panel"><div class="code-toolbar"><div class="code-tabs"><button class="tab-btn" aria-selected="true" type="button">HTML+CSS+JS</button></div><button class="copy-btn" data-copy-target="code-advanced-micro" type="button">복사</button></div><pre><code class="code-block" id="code-advanced-micro">button.addEventListener('pointermove', (event) => {
+  const rect = button.getBoundingClientRect();
+  const x = event.clientX - rect.left - rect.width / 2;
+  const y = event.clientY - rect.top - rect.height / 2;
+  button.style.transform = `translate(${x * .18}px, ${y * .18}px)`;
+});</code></pre></div></div></div></article>
+      </section>
+
       <section id="recipes" aria-labelledby="recipes-title">
         <div class="section-head"><span class="eyebrow">Recipe Library</span><h2 id="recipes-title">복사 가능한 레시피 15+</h2><p class="lead">빠르게 가져다 쓸 수 있는 코드 패턴입니다. 각 카드의 키워드는 위 데모의 복사 코드와 연결됩니다.</p></div>
         <div class="recipe-grid">
@@ -1995,11 +2462,22 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
     const storageKey = 'motionlab';
     const root = document.documentElement;
     const runtimeAnimations = [];
+    const advancedCleanups = [];
+    const systemReducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
     const defaultState = {
       theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
       paused: false,
       speed: 1,
       reduceSim: false,
+      systemPrefersReducedMotion: systemReducedQuery.matches,
+      reducedMotionOverride: 'system',
+      effectiveReducedMotion: systemReducedQuery.matches,
+      animationSpeed: 1,
+      pauseAllAnimations: false,
+      disableAutoplay: false,
+      disableParallax: false,
+      disablePageTransitions: false,
+      flashSafetyMode: false,
       resetCounter: 0
     };
     const savedState = (() => {
@@ -2009,15 +2487,31 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
     const store = {
       state: { ...defaultState, ...savedState },
       sync() {
+        this.state.systemPrefersReducedMotion = systemReducedQuery.matches;
+        this.state.animationSpeed = Number(this.state.animationSpeed ?? this.state.speed ?? 1);
+        this.state.speed = this.state.animationSpeed;
+        this.state.pauseAllAnimations = Boolean(this.state.pauseAllAnimations || this.state.paused);
+        this.state.paused = this.state.pauseAllAnimations;
+        this.state.effectiveReducedMotion = this.state.reducedMotionOverride === 'system'
+          ? this.state.systemPrefersReducedMotion
+          : this.state.reducedMotionOverride === 'reduce';
         root.dataset.theme = this.state.theme;
         root.classList.toggle('motion-paused', this.state.paused);
-        root.classList.toggle('rm-sim', this.state.reduceSim);
+        root.classList.toggle('rm-sim', this.state.reduceSim || this.state.effectiveReducedMotion);
         root.style.setProperty('--speed', String(this.state.speed));
+        root.dataset.reducedMotion = String(this.state.effectiveReducedMotion);
+        root.dataset.animationSpeed = String(this.state.animationSpeed);
+        root.dataset.pauseAnimations = String(this.state.pauseAllAnimations);
+        root.style.setProperty('--motion-speed-multiplier', String(this.state.animationSpeed));
+        root.style.setProperty('--motion-duration-fast', `${getMotionDuration(150, this.state)}ms`);
+        root.style.setProperty('--motion-duration-normal', `${getMotionDuration(240, this.state)}ms`);
+        root.style.setProperty('--motion-duration-slow', `${getMotionDuration(380, this.state)}ms`);
         localStorage.setItem(storageKey, JSON.stringify(this.state));
         document.getElementById('themeToggle').setAttribute('aria-pressed', String(this.state.theme === 'dark'));
         document.getElementById('pauseToggle').setAttribute('aria-pressed', String(this.state.paused));
         document.getElementById('reduceToggle').setAttribute('aria-pressed', String(this.state.reduceSim));
         document.getElementById('speedSelect').value = String(this.state.speed);
+        syncMotionHubUi();
         document.querySelectorAll('svg').forEach((svg) => {
           if (typeof svg.pauseAnimations === 'function') {
             this.state.paused ? svg.pauseAnimations() : svg.unpauseAnimations();
@@ -2033,6 +2527,47 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
       }
     };
 
+    function getMotionDuration(baseMs, settings = store.state) {
+      if (shouldReduceMotion(settings) || Number(settings.animationSpeed) === 0) return 1;
+      return Math.round(baseMs / Math.max(.01, Number(settings.animationSpeed || 1)));
+    }
+    function shouldAutoplay(settings = store.state) {
+      return !settings.disableAutoplay && !shouldReduceMotion(settings) && !settings.pauseAllAnimations;
+    }
+    function shouldReduceMotion(settings = store.state) {
+      return Boolean(settings.effectiveReducedMotion || settings.reduceSim);
+    }
+    function getPlaybackRate(settings = store.state, localRate = 1) {
+      if (settings.pauseAllAnimations || Number(settings.animationSpeed) === 0) return 0;
+      return Number(settings.animationSpeed || 1) * Number(localRate || 1);
+    }
+    function cleanupAdvancedLabs() {
+      while (advancedCleanups.length) {
+        const cleanup = advancedCleanups.pop();
+        try { cleanup(); } catch (error) { console.warn('advanced cleanup failed', error); }
+      }
+    }
+    window.addEventListener('beforeunload', cleanupAdvancedLabs);
+
+    function syncMotionHubUi() {
+      const ids = ['systemRmText', 'effectiveRmText', 'rmOverride', 'hubSpeed', 'hubPause', 'disableAutoplay', 'disableParallax', 'disablePageTransitions', 'flashSafetyMode', 'settingsBadges'];
+      if (!ids.every((id) => document.getElementById(id))) return;
+      document.getElementById('systemRmText').textContent = store.state.systemPrefersReducedMotion ? 'reduce' : 'no preference';
+      document.getElementById('effectiveRmText').textContent = String(store.state.effectiveReducedMotion);
+      document.getElementById('rmOverride').value = store.state.reducedMotionOverride;
+      document.getElementById('hubSpeed').value = String(store.state.animationSpeed);
+      document.getElementById('hubPause').checked = store.state.pauseAllAnimations;
+      document.getElementById('disableAutoplay').checked = store.state.disableAutoplay;
+      document.getElementById('disableParallax').checked = store.state.disableParallax;
+      document.getElementById('disablePageTransitions').checked = store.state.disablePageTransitions;
+      document.getElementById('flashSafetyMode').checked = store.state.flashSafetyMode;
+      const badges = [];
+      if (store.state.effectiveReducedMotion) badges.push('<span class="pill rose">Reduced Motion Active</span>');
+      if (store.state.pauseAllAnimations) badges.push('<span class="pill yellow">Animations Paused</span>');
+      if (store.state.disableAutoplay) badges.push('<span class="pill cyan">Autoplay Disabled</span>');
+      document.getElementById('settingsBadges').innerHTML = badges.length ? badges.join('') : '<span class="pill mint">MotionSettings Ready</span>';
+    }
+
     store.sync();
 
     document.getElementById('themeToggle').addEventListener('click', () => {
@@ -2045,13 +2580,41 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
       store.set({ reduceSim: !store.state.reduceSim });
     });
     document.getElementById('speedSelect').addEventListener('change', (event) => {
-      store.set({ speed: Number(event.target.value) });
+      store.set({ speed: Number(event.target.value), animationSpeed: Number(event.target.value) });
     });
     document.getElementById('resetAll').addEventListener('click', () => {
       store.set({ resetCounter: store.state.resetCounter + 1 });
       window.dispatchEvent(new CustomEvent('motionlab:reset', { detail: store.state.resetCounter }));
       replayStroke();
       showCopyToast('모든 데모를 리셋했습니다.');
+    });
+    systemReducedQuery.addEventListener?.('change', () => store.set({ systemPrefersReducedMotion: systemReducedQuery.matches }));
+    document.getElementById('rmOverride')?.addEventListener('change', (event) => store.set({ reducedMotionOverride: event.target.value }));
+    document.getElementById('hubSpeed')?.addEventListener('change', (event) => store.set({ animationSpeed: Number(event.target.value), speed: Number(event.target.value) }));
+    document.getElementById('hubPause')?.addEventListener('change', (event) => store.set({ pauseAllAnimations: event.target.checked, paused: event.target.checked }));
+    document.getElementById('disableAutoplay')?.addEventListener('change', (event) => store.set({ disableAutoplay: event.target.checked }));
+    document.getElementById('disableParallax')?.addEventListener('change', (event) => store.set({ disableParallax: event.target.checked }));
+    document.getElementById('disablePageTransitions')?.addEventListener('change', (event) => store.set({ disablePageTransitions: event.target.checked }));
+    document.getElementById('flashSafetyMode')?.addEventListener('change', (event) => store.set({ flashSafetyMode: event.target.checked }));
+    document.getElementById('announcePolite')?.addEventListener('click', () => {
+      const live = document.getElementById('hubLive');
+      live.setAttribute('aria-live', 'polite');
+      live.innerHTML = '<strong>aria-live:</strong> polite 업데이트가 전달되었습니다.';
+    });
+    document.getElementById('announceAssertive')?.addEventListener('click', () => {
+      const live = document.getElementById('hubLive');
+      live.setAttribute('aria-live', 'assertive');
+      live.innerHTML = '<strong>aria-live:</strong> assertive 알림입니다.';
+    });
+    document.getElementById('flashPreview')?.addEventListener('click', () => {
+      if (store.state.flashSafetyMode) {
+        showCopyToast('Flash Safety Mode가 위험 효과를 차단했습니다.');
+        return;
+      }
+      const box = document.getElementById('flashBox');
+      box.classList.remove('is-flashing');
+      box.getBoundingClientRect();
+      box.classList.add('is-flashing');
     });
 
     function showCopyToast(message = '복사했습니다.') {
@@ -2352,7 +2915,500 @@ ring.style.strokeDashoffset = length * (1 - progress / 100);</code></pre></div><
     }
     requestAnimationFrame(fpsLoop);
 
-    const sectionIds = ['overview', 'css-core', 'micro-interactions', 'ui-components', 'scroll-view', 'media-ui', 'svg-engines', 'svg-techniques', 'scenarios', 'usecase-guide', 'perf-a11y', 'recipes'];
+    const timelinePresets = {
+      'Slide+Fade': [{ transform: 'translateX(-90px)', opacity: .2 }, { transform: 'translateX(90px)', opacity: 1 }],
+      Pop: [{ transform: 'scale(.72)', opacity: .2 }, { transform: 'scale(1.18)', opacity: 1 }, { transform: 'scale(1)' }],
+      'Rotate Card': [{ transform: 'rotateY(0deg) rotateZ(0deg)' }, { transform: 'rotateY(180deg) rotateZ(6deg)' }],
+      Bounce: [{ transform: 'translateY(0)' }, { transform: 'translateY(-72px)' }, { transform: 'translateY(0)' }],
+      'Glow Pulse': [{ filter: 'brightness(1)', transform: 'scale(1)' }, { filter: 'brightness(1.45)', transform: 'scale(1.08)' }]
+    };
+    let timelineAnimation;
+    let timelineRaf = 0;
+    function timelineLog(message) {
+      const log = document.getElementById('timelineLog');
+      if (!log) return;
+      const item = document.createElement('li');
+      item.textContent = `${new Date().toLocaleTimeString()} ${message}`;
+      log.prepend(item);
+      [...log.children].slice(10).forEach((node) => node.remove());
+    }
+    function buildTimelineCode() {
+      const preset = document.getElementById('timelinePreset')?.value || 'Slide+Fade';
+      const duration = Number(document.getElementById('timelineDuration')?.value || 1200);
+      const rate = Number(document.getElementById('timelineRate')?.value || 1);
+      document.getElementById('code-timeline').textContent = `const keyframes = ${JSON.stringify(timelinePresets[preset], null, 2)};
+const animation = element.animate(keyframes, {
+  duration: ${duration},
+  delay: 0,
+  iterations: 1,
+  direction: 'alternate',
+  easing: 'cubic-bezier(.34,1.56,.64,1)',
+  fill: 'both'
+});
+animation.playbackRate = ${rate};`;
+    }
+    function createTimelineAnimation(autoplay = shouldAutoplay()) {
+      const box = document.getElementById('timelineBox');
+      if (!box?.animate) return;
+      timelineAnimation?.cancel();
+      const preset = document.getElementById('timelinePreset').value;
+      const duration = Number(document.getElementById('timelineDuration').value);
+      timelineAnimation = box.animate(timelinePresets[preset], {
+        duration,
+        iterations: 1,
+        direction: 'alternate',
+        easing: 'cubic-bezier(.34,1.56,.64,1)',
+        fill: 'both'
+      });
+      timelineAnimation.playbackRate = getPlaybackRate(store.state, Number(document.getElementById('timelineRate').value));
+      timelineAnimation.onfinish = () => timelineLog('finish');
+      timelineAnimation.oncancel = () => timelineLog('cancel');
+      if (!autoplay || timelineAnimation.playbackRate === 0) timelineAnimation.pause();
+      buildTimelineCode();
+    }
+    function timelineTick() {
+      if (timelineAnimation) {
+        const duration = Number(document.getElementById('timelineDuration').value);
+        const time = Math.max(0, Math.min(duration, timelineAnimation.currentTime || 0));
+        const progress = Math.round((time / duration) * 100);
+        document.getElementById('timelineStatus').innerHTML = `<strong>상태:</strong> ${timelineAnimation.playState} · ${Math.round(time)}ms · rate ${timelineAnimation.playbackRate}`;
+        if (document.activeElement !== document.getElementById('timelineProgress')) {
+          document.getElementById('timelineProgress').value = String(progress);
+          document.getElementById('timelineProgressOut').textContent = `${progress}%`;
+        }
+      }
+      timelineRaf = requestAnimationFrame(timelineTick);
+    }
+    ['timelinePreset', 'timelineDuration', 'timelineRate'].forEach((id) => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        document.getElementById('timelineDurationOut').textContent = `${document.getElementById('timelineDuration').value}ms`;
+        document.getElementById('timelineRateOut').textContent = `${document.getElementById('timelineRate').value}x`;
+        createTimelineAnimation(false);
+      });
+    });
+    document.getElementById('timelineProgress')?.addEventListener('input', (event) => {
+      if (!timelineAnimation) createTimelineAnimation(false);
+      const duration = Number(document.getElementById('timelineDuration').value);
+      timelineAnimation.pause();
+      timelineAnimation.currentTime = duration * Number(event.target.value) / 100;
+      document.getElementById('timelineProgressOut').textContent = `${event.target.value}%`;
+    });
+    document.getElementById('tlPlay')?.addEventListener('click', () => { timelineAnimation?.play(); timelineLog('play'); });
+    document.getElementById('tlPause')?.addEventListener('click', () => { timelineAnimation?.pause(); timelineLog('pause'); });
+    document.getElementById('tlReverse')?.addEventListener('click', () => { timelineAnimation?.reverse(); timelineLog('reverse'); });
+    document.getElementById('tlCancel')?.addEventListener('click', () => timelineAnimation?.cancel());
+    document.getElementById('tlFinish')?.addEventListener('click', () => timelineAnimation?.finish());
+    document.getElementById('tlRestart')?.addEventListener('click', () => { createTimelineAnimation(true); timelineLog('restart'); });
+    createTimelineAnimation(false);
+    timelineTick();
+    advancedCleanups.push(() => { cancelAnimationFrame(timelineRaf); timelineAnimation?.cancel(); });
+
+    class ParticleEngine {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.particles = [];
+        this.running = true;
+        this.pointer = { x: 0, y: 0, active: false };
+        this.config = { preset: 'Snow', count: 180, speed: 1.4 };
+        this.raf = 0;
+        this.last = performance.now();
+        this.fps = 0;
+        this.boundMove = (event) => this.onPointerMove(event);
+        this.boundDown = (event) => this.onPointerDown(event);
+        canvas.addEventListener('pointermove', this.boundMove);
+        canvas.addEventListener('pointerdown', this.boundDown);
+      }
+      resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        const dpr = Math.min(2, devicePixelRatio || 1);
+        this.canvas.width = Math.max(1, Math.round(rect.width * dpr));
+        this.canvas.height = Math.max(1, Math.round(rect.height * dpr));
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      reset(config = this.config) {
+        this.config = { ...this.config, ...config };
+        const count = shouldReduceMotion() ? Math.min(80, this.config.count) : this.config.count;
+        const rect = this.canvas.getBoundingClientRect();
+        this.particles = Array.from({ length: count }, () => this.makeParticle(rect.width, rect.height));
+        this.updateCode();
+      }
+      makeParticle(width, height) {
+        return {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - .5) * this.config.speed * 2,
+          vy: Math.random() * this.config.speed + .2,
+          r: Math.random() * 4 + 1,
+          hue: Math.random() * 360
+        };
+      }
+      onPointerMove(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top, active: true };
+      }
+      onPointerDown(event) {
+        if (store.state.flashSafetyMode) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        for (let i = 0; i < 42; i += 1) {
+          const p = this.makeParticle(rect.width, rect.height);
+          const angle = Math.random() * Math.PI * 2;
+          p.x = x; p.y = y; p.vx = Math.cos(angle) * (Math.random() * 5 + 2); p.vy = Math.sin(angle) * (Math.random() * 5 + 2);
+          this.particles.push(p);
+        }
+      }
+      update(dt) {
+        const rect = this.canvas.getBoundingClientRect();
+        const speed = Number(this.config.speed) * getPlaybackRate(store.state, 1);
+        for (const p of this.particles) {
+          if (this.config.preset === 'Rain') p.vy += .015;
+          if (this.config.preset === 'Starfield') { p.vx *= 1.002; p.vy *= 1.002; }
+          if (this.config.preset === 'Cursor Trail' && this.pointer.active) {
+            p.vx += (this.pointer.x - p.x) * .0008;
+            p.vy += (this.pointer.y - p.y) * .0008;
+          }
+          p.x += p.vx * dt * speed;
+          p.y += p.vy * dt * speed;
+          if (p.x < -20 || p.x > rect.width + 20 || p.y < -20 || p.y > rect.height + 20) Object.assign(p, this.makeParticle(rect.width, rect.height), { y: -10 });
+        }
+      }
+      draw() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.ctx.fillStyle = 'rgba(8,13,23,.18)';
+        this.ctx.fillRect(0, 0, rect.width, rect.height);
+        for (const p of this.particles) {
+          this.ctx.beginPath();
+          this.ctx.fillStyle = this.config.preset === 'Confetti' ? `hsl(${p.hue} 90% 62%)` : 'rgba(255,255,255,.82)';
+          this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+      }
+      loop(now = performance.now()) {
+        const dt = Math.min(32, now - this.last) / 16.67;
+        this.last = now;
+        if (this.running && !store.state.pauseAllAnimations && document.visibilityState === 'visible') {
+          this.update(dt);
+          this.draw();
+          this.fps = Math.round(1000 / Math.max(1, dt * 16.67));
+          document.getElementById('particleStatus').innerHTML = `<strong>상태:</strong> FPS ${this.fps} · count ${this.particles.length}`;
+        }
+        this.raf = requestAnimationFrame((time) => this.loop(time));
+      }
+      updateCode() {
+        document.getElementById('code-particle').textContent = `const engine = new ParticleEngine(canvas);
+engine.reset({ preset: '${this.config.preset}', count: ${this.config.count}, speed: ${this.config.speed} });
+function frame(now) {
+  engine.update(deltaTime);
+  engine.draw(ctx);
+  requestAnimationFrame(frame);
+}`;
+      }
+      destroy() {
+        cancelAnimationFrame(this.raf);
+        this.canvas.removeEventListener('pointermove', this.boundMove);
+        this.canvas.removeEventListener('pointerdown', this.boundDown);
+        this.particles.length = 0;
+      }
+    }
+    const particleCanvas = document.getElementById('particleCanvas');
+    const particleEngine = particleCanvas ? new ParticleEngine(particleCanvas) : null;
+    if (particleEngine) {
+      const resizeObserver = new ResizeObserver(() => { particleEngine.resize(); particleEngine.reset(); });
+      resizeObserver.observe(particleCanvas);
+      particleEngine.resize();
+      particleEngine.reset();
+      particleEngine.loop();
+      document.getElementById('particlePreset').addEventListener('change', (event) => particleEngine.reset({ preset: event.target.value }));
+      document.getElementById('particleCount').addEventListener('input', (event) => {
+        document.getElementById('particleCountOut').textContent = event.target.value;
+        particleEngine.reset({ count: Number(event.target.value) });
+      });
+      document.getElementById('particleSpeed').addEventListener('input', (event) => {
+        document.getElementById('particleSpeedOut').textContent = event.target.value;
+        particleEngine.reset({ speed: Number(event.target.value) });
+      });
+      document.getElementById('particlePause').addEventListener('click', () => {
+        particleEngine.running = !particleEngine.running;
+        document.getElementById('particlePause').textContent = particleEngine.running ? 'Pause' : 'Resume';
+      });
+      document.getElementById('particleReset').addEventListener('click', () => particleEngine.reset());
+      advancedCleanups.push(() => { resizeObserver.disconnect(); particleEngine.destroy(); });
+    }
+
+    let audioCtx;
+    let analyser;
+    let audioRaf = 0;
+    const activeAudioNodes = new Set();
+    async function ensureAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.connect(audioCtx.destination);
+      }
+      if (audioCtx.state !== 'running') await audioCtx.resume();
+      document.getElementById('audioStatus').innerHTML = `<strong>AudioContext:</strong> ${audioCtx.state}`;
+      drawAudioVisualizer();
+      return audioCtx;
+    }
+    function playTone(freq = 440, duration = .16, type = document.getElementById('audioWave')?.value || 'sine') {
+      if (!audioCtx || document.getElementById('audioMute')?.checked) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      const volume = Number(document.getElementById('masterVolume').value);
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + .02);
+      gain.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + duration);
+      osc.connect(gain).connect(analyser);
+      activeAudioNodes.add(osc);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); activeAudioNodes.delete(osc); };
+    }
+    function drawAudioVisualizer() {
+      const canvas = document.getElementById('audioVisualizer');
+      if (!canvas || !analyser) return;
+      const ctx = canvas.getContext('2d');
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      const draw = () => {
+        analyser.getByteTimeDomainData(data);
+        ctx.fillStyle = '#080d17';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#75e6ff';
+        ctx.beginPath();
+        data.forEach((v, i) => {
+          const x = i / (data.length - 1) * canvas.width;
+          const y = v / 255 * canvas.height;
+          i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        });
+        ctx.stroke();
+        audioRaf = requestAnimationFrame(draw);
+      };
+      cancelAnimationFrame(audioRaf);
+      draw();
+    }
+    document.getElementById('audioEnable')?.addEventListener('click', ensureAudioContext);
+    document.getElementById('audioToggleSound')?.addEventListener('click', async () => { await ensureAudioContext(); playTone(Number(document.getElementById('audioFreq').value), .12); });
+    document.getElementById('audioSuccess')?.addEventListener('click', async () => { await ensureAudioContext(); [523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, .2, 'sine'), i * 90)); });
+    document.getElementById('audioError')?.addEventListener('click', async () => { await ensureAudioContext(); [220, 160].forEach((f, i) => setTimeout(() => playTone(f, .18, 'sawtooth'), i * 110)); });
+    document.getElementById('masterVolume')?.addEventListener('input', (event) => document.getElementById('masterVolumeOut').textContent = event.target.value);
+    document.getElementById('audioFreq')?.addEventListener('input', (event) => document.getElementById('audioFreqOut').textContent = `${event.target.value}Hz`);
+    advancedCleanups.push(() => {
+      cancelAnimationFrame(audioRaf);
+      activeAudioNodes.forEach((node) => { try { node.stop(); node.disconnect(); } catch {} });
+      audioCtx?.close();
+    });
+
+    let threeState = { renderer: null, scene: null, camera: null, mesh: null, raf: 0, THREE: null };
+    function loadThree() {
+      return new Promise((resolve, reject) => {
+        if (window.THREE) return resolve(window.THREE);
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        script.async = true;
+        script.onload = () => resolve(window.THREE);
+        script.onerror = reject;
+        document.head.append(script);
+      });
+    }
+    async function initThree() {
+      const stage = document.getElementById('threeStage');
+      try {
+        const THREE = await loadThree();
+        threeState.THREE = THREE;
+        stage.innerHTML = '<span class="sensor-readout" id="sensorReadout">sensor: fallback mouse</span>';
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(55, stage.clientWidth / stage.clientHeight, .1, 100);
+        camera.position.z = 4;
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+        renderer.setSize(stage.clientWidth, stage.clientHeight);
+        stage.prepend(renderer.domElement);
+        scene.add(new THREE.AmbientLight(0xffffff, .7));
+        const light = new THREE.DirectionalLight(0xffffff, 1.4);
+        light.position.set(3, 4, 5);
+        scene.add(light);
+        threeState = { ...threeState, renderer, scene, camera };
+        updateThreeObject();
+        function render() {
+          if (threeState.mesh && document.getElementById('threeAutoRotate').checked && !store.state.pauseAllAnimations && !shouldReduceMotion()) {
+            threeState.mesh.rotation.x += .006 * Number(document.getElementById('threeSpeed').value) * getPlaybackRate(store.state, 1);
+            threeState.mesh.rotation.y += .01 * Number(document.getElementById('threeSpeed').value) * getPlaybackRate(store.state, 1);
+          }
+          renderer.render(scene, camera);
+          threeState.raf = requestAnimationFrame(render);
+        }
+        render();
+        document.getElementById('threeStatus').innerHTML = `<strong>WebGL:</strong> Three.js r128 로드됨 · DPR ${renderer.getPixelRatio()}`;
+      } catch {
+        document.getElementById('threeStatus').innerHTML = '<strong>WebGL:</strong> CDN 로드 실패, CSS 3D fallback 사용';
+      }
+    }
+    function updateThreeObject() {
+      const { THREE, scene, mesh } = threeState;
+      if (!THREE || !scene) return;
+      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); }
+      const type = document.getElementById('threeObject').value;
+      const geometry = type === 'sphere' ? new THREE.SphereGeometry(1, 32, 16) : type === 'torus' ? new THREE.TorusGeometry(1, .32, 32, 80) : type === 'torusKnot' ? new THREE.TorusKnotGeometry(.82, .24, 90, 12) : new THREE.BoxGeometry(1.5, 1.5, 1.5);
+      const material = new THREE.MeshStandardMaterial({ color: 0x7c8cff, roughness: .22, metalness: .34, wireframe: false });
+      threeState.mesh = new THREE.Mesh(geometry, material);
+      scene.add(threeState.mesh);
+    }
+    document.getElementById('threeObject')?.addEventListener('change', updateThreeObject);
+    document.getElementById('threeSpeed')?.addEventListener('input', (event) => document.getElementById('threeSpeedOut').textContent = event.target.value);
+    initThree();
+    advancedCleanups.push(() => {
+      cancelAnimationFrame(threeState.raf);
+      threeState.mesh?.geometry.dispose();
+      threeState.mesh?.material.dispose();
+      threeState.renderer?.dispose();
+    });
+
+    function bindTilt(card) {
+      if (!card) return;
+      const move = (event) => {
+        if (shouldReduceMotion()) return;
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - .5;
+        const y = (event.clientY - rect.top) / rect.height - .5;
+        card.style.transform = `rotateX(${-y * 16}deg) rotateY(${x * 18}deg)`;
+      };
+      const leave = () => card.style.transform = '';
+      card.addEventListener('pointermove', move);
+      card.addEventListener('pointerleave', leave);
+      advancedCleanups.push(() => { card.removeEventListener('pointermove', move); card.removeEventListener('pointerleave', leave); });
+    }
+    bindTilt(document.getElementById('css3dCard'));
+    function bindSpringDrag(card) {
+      if (!card) return;
+      let dragging = false, x = 0, y = 0, vx = 0, vy = 0, raf = 0, lastX = 0, lastY = 0;
+      const render = () => { card.style.transform = `translate(${x}px, ${y}px) rotate(${x * .03}deg)`; };
+      const animateBack = () => {
+        x += vx; y += vy; vx += (0 - x) * .08; vy += (0 - y) * .08; vx *= .78; vy *= .78; render();
+        if (Math.abs(x) + Math.abs(y) + Math.abs(vx) + Math.abs(vy) > .8) raf = requestAnimationFrame(animateBack);
+        else { x = 0; y = 0; render(); }
+      };
+      card.addEventListener('pointerdown', (event) => { dragging = true; lastX = event.clientX; lastY = event.clientY; card.setPointerCapture(event.pointerId); cancelAnimationFrame(raf); });
+      card.addEventListener('pointermove', (event) => { if (!dragging) return; vx = event.clientX - lastX; vy = event.clientY - lastY; x += vx; y += vy; lastX = event.clientX; lastY = event.clientY; render(); });
+      card.addEventListener('pointerup', () => { dragging = false; shouldReduceMotion() ? (x = 0, y = 0, render()) : animateBack(); });
+      advancedCleanups.push(() => cancelAnimationFrame(raf));
+    }
+    bindSpringDrag(document.getElementById('springCard'));
+    bindSpringDrag(document.getElementById('advancedDragCard'));
+    document.getElementById('sensorPermission')?.addEventListener('click', async () => {
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission();
+      document.getElementById('threeStatus').innerHTML = '<strong>센서:</strong> DeviceOrientationEvent / DeviceMotionEvent 요청 완료';
+    });
+    window.addEventListener('deviceorientation', (event) => {
+      document.getElementById('sensorReadout') && (document.getElementById('sensorReadout').textContent = `sensor: beta ${Math.round(event.beta || 0)} gamma ${Math.round(event.gamma || 0)}`);
+    });
+    window.addEventListener('devicemotion', (event) => {
+      const a = event.accelerationIncludingGravity || {};
+      if (Math.abs(a.x || 0) + Math.abs(a.y || 0) + Math.abs(a.z || 0) > 35) navigator.vibrate?.(30);
+    });
+
+    function replayStory() {
+      const stagger = Number(document.getElementById('storyStagger').value);
+      document.querySelectorAll('#storyCards .story-card').forEach((card, index) => {
+        card.classList.remove('is-visible');
+        setTimeout(() => card.classList.add('is-visible'), shouldReduceMotion() ? 0 : index * stagger);
+      });
+      document.getElementById('storyProgress').style.width = '100%';
+    }
+    document.getElementById('storyReplay')?.addEventListener('click', replayStory);
+    document.getElementById('storyThreshold')?.addEventListener('input', (event) => {
+      document.getElementById('storyThresholdOut').textContent = event.target.value;
+      document.getElementById('code-story').textContent = `const observer = new IntersectionObserver(onReveal, {
+  threshold: ${event.target.value},
+  rootMargin: '0px 0px -80px'
+});`;
+    });
+    document.getElementById('storyStagger')?.addEventListener('input', (event) => document.getElementById('storyStaggerOut').textContent = `${event.target.value}ms`);
+    addEventListener('scroll', () => {
+      if (store.state.disableParallax || shouldReduceMotion()) return;
+      const p = Math.min(1, scrollY / Math.max(1, document.body.scrollHeight - innerHeight));
+      document.getElementById('parallaxLayer')?.style.setProperty('--parallax-y', `${p * -48}px`);
+      document.getElementById('horizontalTrack')?.style.setProperty('--horizontal-x', `${p * -260}px`);
+      document.getElementById('storyProgress')?.style.setProperty('width', `${Math.round(p * 100)}%`);
+    }, { passive: true });
+    replayStory();
+
+    function runTransition(callback) {
+      if (store.state.disablePageTransitions || shouldReduceMotion() || document.getElementById('disableTransitionLocal')?.checked) {
+        callback();
+        return Promise.resolve();
+      }
+      if (document.startViewTransition) return document.startViewTransition(callback).finished;
+      callback();
+      return Promise.resolve();
+    }
+    document.getElementById('vtSupportBadge').textContent = document.startViewTransition ? 'View Transition supported' : 'CSS fallback';
+    document.querySelectorAll('[data-vt-card]').forEach((button) => {
+      button.addEventListener('click', () => runTransition(() => {
+        document.getElementById('vtDetailTitle').textContent = button.dataset.vtCard;
+        document.getElementById('vtList').classList.add('hidden');
+        document.getElementById('vtDetail').classList.remove('hidden');
+      }));
+    });
+    document.getElementById('vtBack')?.addEventListener('click', () => runTransition(() => {
+      document.getElementById('vtList').classList.remove('hidden');
+      document.getElementById('vtDetail').classList.add('hidden');
+    }));
+    document.getElementById('transitionDuration')?.addEventListener('input', (event) => {
+      document.getElementById('transitionDurationOut').textContent = `${event.target.value}ms`;
+      document.getElementById('code-page-transition').textContent = `function runTransition(callback) {
+  if (!document.startViewTransition) return callback();
+  document.documentElement.style.setProperty('--vt-duration', '${event.target.value}ms');
+  document.startViewTransition(callback);
+}`;
+    });
+
+    const magneticButton = document.getElementById('magneticButton');
+    magneticButton?.addEventListener('pointermove', (event) => {
+      if (shouldReduceMotion() || document.getElementById('microReducedPreview').checked) return;
+      const intensity = Number(document.getElementById('microIntensity').value) / 100;
+      const rect = magneticButton.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      magneticButton.style.transform = `translate(${x * .28 * intensity}px, ${y * .28 * intensity}px)`;
+    });
+    magneticButton?.addEventListener('pointerleave', () => magneticButton.style.transform = '');
+    document.getElementById('burstButton')?.addEventListener('click', (event) => {
+      const pressed = event.currentTarget.getAttribute('aria-pressed') === 'true';
+      event.currentTarget.setAttribute('aria-pressed', String(!pressed));
+      const host = event.currentTarget.closest('.burst-host');
+      for (let i = 0; i < 12; i += 1) {
+        const dot = document.createElement('span');
+        dot.className = 'burst-dot';
+        const angle = i / 12 * Math.PI * 2;
+        dot.style.setProperty('--tx', `${Math.cos(angle) * 58}px`);
+        dot.style.setProperty('--ty', `${Math.sin(angle) * 58}px`);
+        host.append(dot);
+        dot.addEventListener('animationend', () => dot.remove());
+      }
+      document.getElementById('advancedMicroLive').innerHTML = '<strong>상태:</strong> like burst 파티클 생성 후 정리됨';
+    });
+    document.getElementById('microIntensity')?.addEventListener('input', (event) => {
+      document.getElementById('microIntensityOut').textContent = event.target.value;
+    });
+    document.getElementById('microDuration')?.addEventListener('input', (event) => {
+      document.getElementById('microDurationOut').textContent = `${event.target.value}ms`;
+      document.getElementById('code-advanced-micro').textContent = `button.style.transition = 'transform ${event.target.value}ms cubic-bezier(.2,.8,.2,1)';
+button.addEventListener('pointermove', (event) => {
+  const rect = button.getBoundingClientRect();
+  const x = event.clientX - rect.left - rect.width / 2;
+  const y = event.clientY - rect.top - rect.height / 2;
+  button.style.transform = \`translate(\${x * .18}px, \${y * .18}px)\`;
+});`;
+    });
+    document.getElementById('toastAdvanced')?.addEventListener('click', () => showCopyToast('Advanced toast: success / warning / error / info'));
+
+    const sectionIds = ['overview', 'css-core', 'micro-interactions', 'ui-components', 'scroll-view', 'media-ui', 'svg-engines', 'svg-techniques', 'scenarios', 'usecase-guide', 'perf-a11y', 'motion-hub', 'js-timeline-lab', 'canvas-particle-lab', 'web-audio-lab', 'webgl-physics-lab', 'scroll-story-lab', 'page-transition-lab', 'advanced-micro-lab', 'recipes'];
     const sectionObserver = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!visible) return;

@@ -25,6 +25,14 @@ const requiredSections = [
   'scenarios',
   'usecase-guide',
   'perf-a11y',
+  'motion-hub',
+  'js-timeline-lab',
+  'canvas-particle-lab',
+  'web-audio-lab',
+  'webgl-physics-lab',
+  'scroll-story-lab',
+  'page-transition-lab',
+  'advanced-micro-lab',
   'recipes',
 ];
 
@@ -34,11 +42,24 @@ for (const id of requiredSections) {
 
 assert((html.match(/class="demo-frame/g) || []).length >= 18, 'Expected at least 18 demo frames.');
 assert((html.match(/data-copy-target/g) || []).length >= 15, 'Expected at least 15 copy buttons.');
+assert((html.match(/advanced-lab/g) || []).length >= 7, 'Expected advanced lab sections/cards.');
 assert(html.includes('id="themeToggle"'), 'Missing theme toggle.');
 assert(html.includes('id="pauseToggle"'), 'Missing pause toggle.');
 assert(html.includes('id="reduceToggle"'), 'Missing reduced-motion toggle.');
 assert(html.includes('id="speedSelect"'), 'Missing speed selector.');
 assert(html.includes('id="resetAll"'), 'Missing reset button.');
+assert(html.includes('systemPrefersReducedMotion'), 'Missing MotionSettings system reduced-motion state.');
+assert(html.includes('reducedMotionOverride'), 'Missing MotionSettings override state.');
+assert(html.includes('effectiveReducedMotion'), 'Missing effective reduced-motion state.');
+assert(html.includes('animationSpeed'), 'Missing animation speed state.');
+assert(html.includes('disableAutoplay'), 'Missing disable autoplay state.');
+assert(html.includes('disableParallax'), 'Missing disable parallax state.');
+assert(html.includes('disablePageTransitions'), 'Missing disable page transitions state.');
+assert(html.includes('flashSafetyMode'), 'Missing flash safety state.');
+assert(html.includes('getMotionDuration'), 'Missing shared motion duration helper.');
+assert(html.includes('shouldAutoplay'), 'Missing shared autoplay helper.');
+assert(html.includes('shouldReduceMotion'), 'Missing shared reduced-motion helper.');
+assert(html.includes('getPlaybackRate'), 'Missing shared playback-rate helper.');
 assert(html.includes('navigator.clipboard.writeText'), 'Missing Clipboard API copy path.');
 assert(html.includes('execCommand'), 'Missing clipboard fallback.');
 assert(html.includes('prefers-reduced-motion'), 'Missing reduced motion support.');
@@ -47,6 +68,14 @@ assert(html.includes('requestAnimationFrame'), 'Missing FPS meter implementation
 assert(html.includes('document.startViewTransition'), 'Missing View Transition feature detection.');
 assert(html.includes('IntersectionObserver'), 'Missing scroll fallback implementation.');
 assert(html.includes('getTotalLength'), 'Missing SVG stroke length measurement demo.');
+assert(html.includes('element.animate') || html.includes('.animate('), 'Missing WAAPI timeline demo.');
+assert(html.includes('ParticleEngine'), 'Missing Canvas particle engine.');
+assert(html.includes('AudioContext'), 'Missing Web Audio lab.');
+assert(html.includes('three.min.js'), 'Missing async Three.js CDN loader for 3D lab.');
+assert(html.includes('DeviceOrientationEvent'), 'Missing device orientation support.');
+assert(html.includes('DeviceMotionEvent'), 'Missing device motion support.');
+assert(html.includes('runTransition'), 'Missing Page Transition utility.');
+assert(html.includes('cleanupAdvancedLabs'), 'Missing advanced lab cleanup hook.');
 assert(html.includes('role="img"'), 'Meaningful SVGs need role="img".');
 assert(html.includes('<title>'), 'Meaningful SVGs need title text.');
 assert(!/<script\s+[^>]*src=/i.test(html), 'External script files are not allowed.');
