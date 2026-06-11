@@ -41,6 +41,27 @@
       --lift-y: -10px;
       --clip-size: 48%;
       --upload-progress: 62;
+      --bench-bg: #f6f7fb;
+      --bench-ink: #151a27;
+      --bench-graphite: #2c3447;
+      --bench-paper: #ffffff;
+      --bench-signal: #4f5bd5;
+      --bench-signal-2: #1aa6c4;
+      --bench-signal-3: #1f9d57;
+      --bench-warn: #c98a12;
+      --bench-danger: #e1495b;
+      --bench-grid: rgba(21,26,39,.08);
+      --bench-ring: rgba(79,91,213,.28);
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --radius-control: 8px;
+      --radius-panel: 14px;
+      --motion-enter: cubic-bezier(.16,1,.3,1);
+      --motion-calibrate: cubic-bezier(.2,.9,.24,1);
     }
 
     :root[data-theme="dark"] {
@@ -61,6 +82,12 @@
       --ink-code: #080d17;
       --code: #eaf0ff;
       --shadow-card: 0 12px 34px rgba(0,0,0,.30);
+      --bench-bg: #07111f;
+      --bench-ink: #f6f8ff;
+      --bench-graphite: #a9b8cd;
+      --bench-paper: #0f1830;
+      --bench-grid: rgba(255,255,255,.10);
+      --bench-ring: rgba(124,140,255,.36);
     }
 
     * { box-sizing: border-box; }
@@ -1690,6 +1717,500 @@
       transform: translateY(0);
     }
 
+    .read-progress {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 80;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand), var(--cyan), var(--mint));
+      transform-origin: left;
+      transform: scaleX(0);
+      pointer-events: none;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-shell {
+      min-width: min(360px, 100%);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+    }
+
+    .search-shell input {
+      width: 100%;
+      min-height: 34px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font: 600 14px/1.2 var(--font-sans);
+    }
+
+    .search-shell kbd {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 3px 6px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      font: 700 11px/1 var(--font-mono);
+    }
+
+    .lab-hero-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+      gap: 18px;
+      align-items: stretch;
+      margin: 18px 0;
+    }
+
+    .hero-copy,
+    .hero-bench {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface-glass);
+      box-shadow: var(--shadow-card);
+    }
+
+    .hero-copy {
+      padding: clamp(20px, 4vw, 34px);
+      display: grid;
+      gap: 16px;
+      align-content: center;
+    }
+
+    .hero-copy h2 {
+      font-size: clamp(28px, 4vw, 50px);
+      line-height: 1.04;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+
+    .hero-actions,
+    .quick-starts,
+    .filter-row,
+    .collection-actions,
+    .command-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-bench {
+      position: relative;
+      min-height: 320px;
+      padding: 18px;
+      overflow: hidden;
+      display: grid;
+      align-content: space-between;
+      background:
+        linear-gradient(var(--bench-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bench-grid) 1px, transparent 1px),
+        var(--surface);
+      background-size: 28px 28px;
+    }
+
+    .hero-bench svg {
+      width: 100%;
+      min-height: 190px;
+      overflow: visible;
+    }
+
+    .curve-path {
+      fill: none;
+      stroke: var(--brand);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: drop-shadow(0 12px 20px color-mix(in srgb, var(--brand) 24%, transparent));
+      stroke-dasharray: 560;
+      stroke-dashoffset: 560;
+      animation: curve-draw calc(1800ms / var(--speed)) var(--motion-calibrate) infinite alternate;
+    }
+
+    .curve-handle {
+      fill: var(--surface);
+      stroke: var(--cyan);
+      stroke-width: 5;
+      animation: handle-pulse calc(1200ms / var(--speed)) var(--ease-out) infinite alternate;
+    }
+
+    .bench-readout {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .bench-readout span {
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 9px;
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bench-readout strong {
+      display: block;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 15px;
+    }
+
+    @keyframes curve-draw { to { stroke-dashoffset: 0; } }
+    @keyframes handle-pulse { to { transform: translateY(-6px); } }
+
+    .explorer-panel {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+
+    .explorer-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .explorer-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+    }
+
+    .filter-chip,
+    .tag-chip,
+    .favorite-btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .filter-chip[aria-pressed="true"],
+    .favorite-btn[aria-pressed="true"] {
+      color: var(--brand);
+      border-color: color-mix(in srgb, var(--brand) 58%, var(--line));
+      background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .gallery-card {
+      min-height: 210px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      cursor: pointer;
+      text-align: left;
+      transition: transform var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+    }
+
+    .gallery-card:hover,
+    .gallery-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--brand);
+      box-shadow: var(--shadow-card);
+    }
+
+    .gallery-preview {
+      min-height: 92px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--line-strong);
+      background:
+        linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 20%, transparent), transparent),
+        var(--surface-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-preview::after {
+      content: "";
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      left: 18px;
+      top: 24px;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+      animation: gallery-preview calc(1600ms / var(--speed)) var(--spring) infinite alternate;
+    }
+
+    @keyframes gallery-preview { to { transform: translateX(128px) scale(.72); background: linear-gradient(135deg, var(--cyan), var(--mint)); } }
+
+    .gallery-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .gallery-meta {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state-action {
+      padding: 22px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      display: grid;
+      gap: 10px;
+      justify-items: start;
+    }
+
+    .command-overlay,
+    .tour-overlay,
+    .collection-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: none;
+      background: rgba(8,13,23,.48);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+    }
+
+    .command-overlay.is-open,
+    .tour-overlay.is-open,
+    .collection-drawer.is-open {
+      display: grid;
+      place-items: start center;
+    }
+
+    .command-dialog,
+    .tour-card,
+    .collection-panel {
+      width: min(720px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 24px 70px rgba(0,0,0,.26);
+      padding: 16px;
+    }
+
+    .command-dialog input {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+
+    .command-list {
+      display: grid;
+      gap: 6px;
+      max-height: min(56vh, 520px);
+      overflow: auto;
+      margin-top: 12px;
+    }
+
+    .command-row {
+      min-height: 48px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text);
+      padding: 9px 10px;
+      text-align: left;
+      display: grid;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    .command-row[aria-selected="true"],
+    .command-row:hover {
+      border-color: var(--brand);
+      background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+    }
+
+    .command-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 0 16px 12px;
+    }
+
+    .demo-frame.is-card-paused *,
+    .demo-frame.is-offscreen * {
+      animation-play-state: paused !important;
+    }
+
+    .demo-frame.is-highlighted {
+      box-shadow: 0 0 0 3px var(--bench-ring), var(--shadow-card);
+    }
+
+    .code-why {
+      border-top: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+    }
+
+    .code-why summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      font-weight: 800;
+    }
+
+    .code-why p {
+      margin: 0;
+      padding: 0 12px 12px;
+    }
+
+    .tok-keyword { color: #9af28b; }
+    .tok-string { color: #ffcf70; }
+    .tok-number { color: #75e6ff; }
+    .tok-comment { color: rgba(233,239,255,.58); font-style: italic; }
+    .tok-selector { color: #7c8cff; }
+
+    .collection-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .collection-list,
+    .recent-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .collection-list button,
+    .recent-list button {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-soft);
+      color: var(--text);
+      text-align: left;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .progress-meter {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-meter span {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-soft);
+    }
+
+    .progress-meter i {
+      display: block;
+      height: 100%;
+      width: var(--learned, 0%);
+      background: linear-gradient(90deg, var(--brand), var(--cyan), var(--mint));
+    }
+
+    .tour-card {
+      margin-top: 8vh;
+      display: grid;
+      gap: 12px;
+    }
+
+    .tour-card h2 {
+      margin: 0;
+    }
+
+    .tour-step {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: var(--surface-soft);
+    }
+
+    .tour-step.is-active {
+      border-color: var(--brand);
+      background: color-mix(in srgb, var(--brand) 10%, var(--surface));
+    }
+
+    .mobile-dock {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 70;
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 90%, transparent);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .mobile-dock button {
+      min-height: 44px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    body.gallery-mode main > section:not(#overview):not(#lab-explorer) {
+      display: none;
+    }
+
+    body.gallery-mode #overview .overview-grid,
+    body.gallery-mode #overview .engine-strip {
+      display: none;
+    }
+
     html.motion-paused *, html.motion-paused *::before, html.motion-paused *::after {
       animation-play-state: paused !important;
     }
@@ -1730,6 +2251,9 @@
       .demo-grid, .overview-grid, .engine-strip, .tools-grid, .recipe-grid {
         grid-template-columns: 1fr;
       }
+      .lab-hero-panel {
+        grid-template-columns: 1fr;
+      }
       .demo-body {
         grid-template-columns: 1fr;
       }
@@ -1747,10 +2271,27 @@
       .sidebar nav { grid-template-columns: 1fr; }
       .stage { padding: 18px 12px; }
       pre { max-height: 180px; }
+      body { padding-bottom: 78px; }
+      .search-shell,
+      .topbar-actions {
+        grid-column: 1 / -1;
+      }
+      .hero-bench { min-height: 260px; }
+      .bench-readout { grid-template-columns: 1fr; }
+      .mobile-dock { display: grid; }
+      input[type="range"],
+      .mini-btn,
+      .choice-btn,
+      .copy-btn,
+      .filter-chip,
+      .tag-chip {
+        min-height: 44px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="read-progress" id="readProgress" aria-hidden="true"></div>
   <a class="skip-link" href="#content">본문으로 이동</a>
   <header class="topbar">
     <div class="topbar-inner">
@@ -1762,6 +2303,10 @@
         </div>
       </div>
       <div class="global-controls" aria-label="전역 컨트롤">
+        <label class="search-shell" for="globalSearch">
+          <input id="globalSearch" type="search" placeholder="효과, 태그, 코드 검색" autocomplete="off">
+          <kbd>⌘K</kbd>
+        </label>
         <button class="control-btn" id="themeToggle" type="button" aria-pressed="false" title="라이트/다크 테마 전환">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 16a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm9-7h-2a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2ZM5 12a1 1 0 0 0-1-1H3a1 1 0 1 0 0 2h1a1 1 0 0 0 1-1Zm13.7-6.3a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0ZM7.8 17.2a1 1 0 0 0-1.4-1.4l-1.1 1.1a1 1 0 1 0 1.4 1.4l1.1-1.1Zm10.9 1.1a1 1 0 0 1-1.4 0l-1.1-1.1a1 1 0 0 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4ZM7.8 6.8 6.7 5.7a1 1 0 1 0-1.4 1.4l1.1 1.1a1 1 0 0 0 1.4-1.4ZM12 19a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Z"/></svg>
           테마
@@ -1787,6 +2332,11 @@
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5a7 7 0 1 1-6.3 4H3.4a9 9 0 1 0 2.1-3H3v6h6V9H7.2A7 7 0 0 1 12 5Z"/></svg>
           리셋
         </button>
+        <div class="topbar-actions">
+          <button class="control-btn" id="galleryToggle" type="button" aria-pressed="false" title="갤러리와 문서 보기 전환">갤러리</button>
+          <button class="control-btn" id="commandOpen" type="button" title="커맨드 팔레트 열기">명령</button>
+          <button class="control-btn" id="collectionOpen" type="button" title="저장함 열기">저장함</button>
+        </div>
       </div>
     </div>
   </header>
@@ -1797,6 +2347,7 @@
         <div class="nav-group">
           <strong>Start</strong>
           <a class="nav-link" href="#overview"><span class="nav-dot"></span>Overview</a>
+          <a class="nav-link" href="#lab-explorer"><span class="nav-dot"></span>효과 갤러리</a>
         </div>
         <div class="nav-group">
           <strong>CSS</strong>
@@ -1838,6 +2389,37 @@
           <span class="eyebrow">Live-first · Honest code</span>
           <h1 id="overview-title">보고, 만지고, 복사하는 CSS·SVG 애니메이션 도감</h1>
           <p class="lead">모든 데모는 순수 CSS 또는 네이티브 SVG로 움직입니다. 컨트롤을 바꾸면 화면과 코드가 함께 바뀌고, 복사 버튼은 빈 HTML에서도 재사용할 수 있는 실제 코드를 제공합니다.</p>
+        </div>
+        <div class="lab-hero-panel">
+          <div class="hero-copy">
+            <span class="eyebrow">Calibration Bench</span>
+            <h2>모션을 감으로 고르지 말고, 보고 조율하고 바로 가져가세요.</h2>
+            <p>검색으로 찾고, 갤러리에서 훑고, 슬라이더로 조정한 뒤 실제 코드만 복사합니다. 이 랩의 시그니처는 easing 곡선입니다. 곡선은 브랜드이자 제어판입니다.</p>
+            <div class="hero-actions">
+              <button class="mini-btn" id="heroGallery" type="button">둘러보기</button>
+              <button class="mini-btn" id="heroStart" type="button">바로 시작</button>
+              <button class="mini-btn" id="tourStart" type="button">3스텝 가이드</button>
+            </div>
+            <div class="quick-starts" id="quickStarts" aria-label="처음이라면 여기부터"></div>
+          </div>
+          <div class="hero-bench" aria-label="easing curve calibration preview">
+            <svg viewBox="0 0 480 240" role="img" aria-labelledby="curve-title curve-desc">
+              <title id="curve-title">Easing curve calibration</title>
+              <desc id="curve-desc">두 개의 핸들이 cubic-bezier 곡선을 조율하는 모션 실험실 시그니처 그래픽</desc>
+              <path class="curve-path" d="M52 180 C118 32 178 38 236 122 S358 224 428 54"/>
+              <line x1="52" y1="180" x2="150" y2="58" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="7 8"/>
+              <line x1="428" y1="54" x2="344" y2="190" stroke="var(--line-strong)" stroke-width="2" stroke-dasharray="7 8"/>
+              <circle class="curve-handle" cx="150" cy="58" r="15"/>
+              <circle class="curve-handle" cx="344" cy="190" r="15"/>
+              <circle cx="52" cy="180" r="7" fill="var(--brand)"/>
+              <circle cx="428" cy="54" r="7" fill="var(--mint)"/>
+            </svg>
+            <div class="bench-readout" aria-hidden="true">
+              <span><strong>.2 .9</strong>ease handle</span>
+              <span><strong>45 demos</strong>live surfaces</span>
+              <span><strong>0 deps</strong>copy-ready code</span>
+            </div>
+          </div>
         </div>
         <div class="overview-grid">
           <article class="overview-card">
@@ -1906,6 +2488,24 @@
             <li><strong>접근성</strong>은 토글이 아니라 기본값입니다. motion pause와 reduced-motion을 항상 제공합니다.</li>
             <li><strong>복사 코드</strong>는 프레임워크 없이 붙여 넣어도 돌아가야 합니다.</li>
           </ul>
+        </div>
+      </section>
+
+      <section id="lab-explorer" aria-labelledby="lab-explorer-title">
+        <div class="explorer-panel glass">
+          <div class="explorer-header">
+            <div>
+              <span class="eyebrow">Find in 3 moves</span>
+              <h2 id="lab-explorer-title">효과 갤러리와 실시간 필터</h2>
+              <p>무엇을 만들고 싶은지 기준으로 데모를 찾습니다. 검색, 필터, 즐겨찾기, 최근 항목이 같은 카탈로그를 공유합니다.</p>
+            </div>
+            <div class="progress-meter" id="learningProgress">
+              <b>학습 진행 0%</b>
+              <span><i></i></span>
+            </div>
+          </div>
+          <div class="filter-row" id="filterChips" aria-label="데모 필터"></div>
+          <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
         </div>
       </section>
 
@@ -2497,6 +3097,79 @@ script.onerror = showFallback;</code></pre></div></div></div></article>
     </main>
   </div>
 
+  <div class="command-overlay" id="commandOverlay" role="dialog" aria-modal="true" aria-labelledby="commandTitle">
+    <div class="command-dialog">
+      <div class="explorer-header">
+        <div>
+          <h2 id="commandTitle">커맨드 팔레트</h2>
+          <p>데모, 섹션, 즐겨찾기, 최근 항목으로 바로 이동합니다.</p>
+        </div>
+        <button class="mini-btn" id="commandClose" type="button">닫기</button>
+      </div>
+      <input id="commandInput" type="search" autocomplete="off" placeholder="예: toast, SVG, 로딩, transition">
+      <div class="command-list" id="commandList" role="listbox" aria-label="이동 후보"></div>
+    </div>
+  </div>
+
+  <div class="collection-drawer" id="collectionDrawer" role="dialog" aria-modal="true" aria-labelledby="collectionTitle">
+    <div class="collection-panel">
+      <div class="explorer-header">
+        <div>
+          <h2 id="collectionTitle">저장함</h2>
+          <p>즐겨찾기, 최근 본 항목, 나만의 컬렉션은 이 브라우저에 저장됩니다.</p>
+        </div>
+        <button class="mini-btn" id="collectionClose" type="button">닫기</button>
+      </div>
+      <div class="progress-meter" id="collectionProgress"><b>둘러본 데모 0%</b><span><i></i></span></div>
+      <div class="controls">
+        <div class="control-row">
+          <label for="collectionName">컬렉션 이름</label>
+          <input id="collectionName" type="text" placeholder="예: 결제 플로우 모션">
+        </div>
+        <div class="collection-actions">
+          <button class="mini-btn" id="collectionCreate" type="button">즐겨찾기로 만들기</button>
+          <button class="mini-btn" id="collectionExport" type="button">JSON 내보내기</button>
+          <button class="mini-btn" id="collectionImport" type="button">JSON 가져오기</button>
+          <button class="mini-btn" id="collectionReset" type="button">저장 데이터 초기화</button>
+          <input class="sr-only" id="collectionImportFile" type="file" accept="application/json">
+        </div>
+      </div>
+      <div>
+        <h3>즐겨찾기</h3>
+        <ul class="collection-list" id="favoriteList"></ul>
+      </div>
+      <div>
+        <h3>최근 본 항목</h3>
+        <ul class="recent-list" id="recentList"></ul>
+      </div>
+      <div>
+        <h3>나만의 컬렉션</h3>
+        <ul class="collection-list" id="customCollectionList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="tour-overlay" id="tourOverlay" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+    <div class="tour-card">
+      <span class="eyebrow">3-step Guide</span>
+      <h2 id="tourTitle">보고, 조정하고, 복사합니다.</h2>
+      <div class="tour-step is-active" data-tour-step="0"><strong>1. 데모를 만진다</strong><p>갤러리나 문서에서 원하는 효과를 열고 프리뷰를 확인합니다.</p></div>
+      <div class="tour-step" data-tour-step="1"><strong>2. 컨트롤을 바꾼다</strong><p>슬라이더, 토글, 전역 속도는 화면과 코드에 함께 반영됩니다.</p></div>
+      <div class="tour-step" data-tour-step="2"><strong>3. 코드를 복사한다</strong><p>복사 코드는 프레임워크 없이 붙여 넣어도 동작하도록 유지합니다.</p></div>
+      <div class="hero-actions">
+        <button class="mini-btn" id="tourNext" type="button">다음</button>
+        <button class="mini-btn" id="tourSkip" type="button">건너뛰기</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-dock" aria-label="모바일 빠른 이동">
+    <button type="button" data-mobile-action="gallery">갤러리</button>
+    <button type="button" data-mobile-action="search">검색</button>
+    <button type="button" data-mobile-action="command">명령</button>
+    <button type="button" data-mobile-action="saved">저장함</button>
+  </nav>
+
   <div class="copy-toast" id="copyToast" role="status" aria-live="polite">복사했습니다.</div>
 
   <script type="module">
@@ -2793,6 +3466,608 @@ script.onerror = showFallback;</code></pre></div></div></div></article>
     }
 
     installVibeCodingPrompts();
+
+    const uiStorageKey = 'motionlab-uiux';
+    const filterState = {
+      query: '',
+      tags: new Set(),
+      favoritesOnly: false
+    };
+    const uiState = (() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(uiStorageKey) || 'null') || {};
+        return {
+          favorites: Array.isArray(saved.favorites) ? saved.favorites : [],
+          recent: Array.isArray(saved.recent) ? saved.recent : [],
+          collections: Array.isArray(saved.collections) ? saved.collections : [],
+          visited: Array.isArray(saved.visited) ? saved.visited : [],
+          tourSeen: Boolean(saved.tourSeen)
+        };
+      } catch {
+        return { favorites: [], recent: [], collections: [], visited: [], tourSeen: false };
+      }
+    })();
+
+    function saveUiState() {
+      try {
+        localStorage.setItem(uiStorageKey, JSON.stringify({
+          favorites: uiState.favorites,
+          recent: uiState.recent,
+          collections: uiState.collections,
+          visited: uiState.visited,
+          tourSeen: uiState.tourSeen
+        }));
+      } catch {
+        showCopyToast('저장 공간이 부족합니다. 일부 데이터가 저장되지 않았습니다.');
+      }
+    }
+
+    const sectionLabels = {
+      overview: 'Start',
+      'css-core': 'CSS 기초',
+      'micro-interactions': '마이크로 피드백',
+      'ui-components': 'UI 상태',
+      'scroll-view': '스크롤/전환',
+      'media-ui': '미디어',
+      'svg-engines': 'SVG 엔진',
+      'svg-techniques': 'SVG 기법',
+      scenarios: '실전 시나리오',
+      'usecase-guide': '선택 가이드',
+      'perf-a11y': '성능/접근성',
+      'motion-hub': 'Motion Hub',
+      'js-timeline-lab': 'Timeline',
+      'canvas-particle-lab': 'Canvas',
+      'web-audio-lab': 'Audio',
+      'webgl-physics-lab': '3D/Physics',
+      'scroll-story-lab': 'Storytelling',
+      'page-transition-lab': 'Page Transition',
+      'advanced-micro-lab': 'Advanced Micro',
+      recipes: 'Recipe'
+    };
+
+    function slugify(text, fallback) {
+      const slug = String(text || '')
+        .toLowerCase()
+        .replace(/&lt;|&gt;|→|·|\/|\+|&/g, ' ')
+        .replace(/[^a-z0-9가-힣]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 52);
+      return slug || fallback;
+    }
+
+    function inferDemoMeta(frame, index) {
+      const title = frame.querySelector('.demo-title-row h3, h3')?.textContent?.trim() || `Effect ${index + 1}`;
+      const section = frame.closest('section');
+      const sectionId = section?.id || 'overview';
+      const tagText = [...frame.querySelectorAll('.demo-title-row .tags .pill')]
+        .slice(0, 8)
+        .map((tag) => tag.textContent.trim())
+        .filter(Boolean);
+      const codeText = [...frame.querySelectorAll('.code-panel .code-block, .code-panel code')].map((code) => code.textContent).join(' ');
+      const haystack = `${title} ${tagText.join(' ')} ${codeText} ${sectionId}`.toLowerCase();
+      const engines = [];
+      if (/svg|smil|stroke|path|viewbox|animatetransform/.test(haystack)) engines.push('SVG');
+      if (/canvas|particle/.test(haystack)) engines.push('Canvas');
+      if (/webgl|three|3d|physics|sensor/.test(haystack)) engines.push('WebGL');
+      if (/audio|oscillator|sound/.test(haystack)) engines.push('Audio');
+      if (/waapi|javascript|js|observer|timeline|state|click|pointer|storage/.test(haystack)) engines.push('JS');
+      if (/css|transition|keyframes|transform|clip|hover|grid|media/.test(haystack) || engines.length === 0) engines.push('CSS');
+      const difficulty = /webgl|audio|particle|timeline|advanced|physics|morph|sensor/.test(haystack) ? '고급'
+        : /observer|view transition|svg|waapi|clip|modal|accordion|data/.test(haystack) ? '중급'
+        : '입문';
+      const use = /loading|spinner|skeleton|progress|업로드|로딩/.test(haystack) ? '로딩'
+        : /transition|view|modal|toast|route|page|전환/.test(haystack) ? '전환'
+        : /data|chart|progress|count|dashboard|timeline/.test(haystack) ? '데이터'
+        : /audio|sound|오디오|사운드/.test(haystack) ? '사운드'
+        : /3d|webgl|physics|spring|drag/.test(haystack) ? '3D·물리'
+        : /scroll|story|parallax|reveal/.test(haystack) ? '스토리텔링'
+        : /nav|menu|accordion|guide/.test(haystack) ? '내비'
+        : /filter|glow|empty|image|media|illustration|clip|morph/.test(haystack) ? '장식'
+        : '피드백';
+      const category = use;
+      const id = frame.id || `demo-${slugify(title, index + 1)}`;
+      frame.id = id;
+      frame.dataset.engine = engines.join(',');
+      frame.dataset.difficulty = difficulty;
+      frame.dataset.use = use;
+      frame.dataset.category = category;
+      return {
+        id,
+        index,
+        title,
+        sectionId,
+        sectionLabel: sectionLabels[sectionId] || sectionId,
+        engines,
+        difficulty,
+        use,
+        category,
+        note: frame.querySelector('.demo-note')?.textContent?.trim() || '',
+        tags: [...new Set([...tagText, ...engines, difficulty, use, category])],
+        text: `${title} ${sectionId} ${tagText.join(' ')} ${codeText}`.toLowerCase(),
+        frame
+      };
+    }
+
+    const demoCatalog = [...document.querySelectorAll('.demo-frame')].map(inferDemoMeta);
+
+    function orderedUnique(values) {
+      return [...new Set(values.filter(Boolean))];
+    }
+
+    const catalogTags = orderedUnique([
+      '즐겨찾기',
+      ...demoCatalog.flatMap((demo) => demo.engines),
+      ...demoCatalog.map((demo) => demo.difficulty),
+      ...demoCatalog.map((demo) => demo.use)
+    ]);
+
+    function debounce(fn, delay = 120) {
+      let timer = 0;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    function matchesQuery(demo, query) {
+      if (!query) return true;
+      const normalized = query.toLowerCase().trim();
+      if (demo.text.includes(normalized)) return true;
+      let cursor = 0;
+      return [...normalized].every((char) => {
+        cursor = demo.text.indexOf(char, cursor);
+        if (cursor === -1) return false;
+        cursor += 1;
+        return true;
+      });
+    }
+
+    function filteredDemos() {
+      return demoCatalog.filter((demo) => {
+        if (filterState.favoritesOnly && !uiState.favorites.includes(demo.id)) return false;
+        if (!matchesQuery(demo, filterState.query)) return false;
+        for (const tag of filterState.tags) {
+          if (!demo.tags.includes(tag)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderFilters() {
+      const container = document.getElementById('filterChips');
+      if (!container) return;
+      container.innerHTML = catalogTags.map((tag) => {
+        const active = tag === '즐겨찾기' ? filterState.favoritesOnly : filterState.tags.has(tag);
+        return `<button class="filter-chip" type="button" data-filter-tag="${tag}" aria-pressed="${active}">${tag}</button>`;
+      }).join('');
+    }
+
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      if (!grid) return;
+      const demos = filteredDemos();
+      if (!demos.length) {
+        grid.innerHTML = `<div class="empty-state-action"><strong>맞는 효과를 찾지 못했습니다.</strong><span>필터를 줄이거나 추천 시작점으로 돌아가세요.</span><button class="mini-btn" type="button" id="clearFilters">필터 초기화</button></div>`;
+        return;
+      }
+      grid.innerHTML = demos.map((demo) => `
+        <button class="gallery-card" type="button" data-demo-jump="${demo.id}">
+          <span class="gallery-preview" aria-hidden="true"></span>
+          <h3>${demo.title}</h3>
+          <span>${demo.sectionLabel}</span>
+          <span class="gallery-meta">${demo.tags.slice(0, 5).map((tag) => `<i class="tag-chip">${tag}</i>`).join('')}</span>
+        </button>
+      `).join('');
+    }
+
+    function markVisited(id) {
+      if (!id) return;
+      uiState.visited = [id, ...uiState.visited.filter((item) => item !== id)].slice(0, demoCatalog.length);
+      uiState.recent = [id, ...uiState.recent.filter((item) => item !== id)].slice(0, 8);
+      saveUiState();
+      renderSavedPanels();
+      updateProgressMeters();
+    }
+
+    function jumpToDemo(id) {
+      const demo = demoCatalog.find((item) => item.id === id);
+      if (!demo) return;
+      const go = () => {
+        document.body.classList.remove('gallery-mode');
+        document.getElementById('galleryToggle')?.setAttribute('aria-pressed', 'false');
+        demo.frame.scrollIntoView({ behavior: shouldReduceMotion() ? 'auto' : 'smooth', block: 'start' });
+        demo.frame.classList.add('is-highlighted');
+        setTimeout(() => demo.frame.classList.remove('is-highlighted'), getMotionDuration(1200));
+        markVisited(id);
+      };
+      if (document.startViewTransition && !store.state.disablePageTransitions && !shouldReduceMotion()) {
+        document.startViewTransition(go);
+      } else {
+        go();
+      }
+    }
+
+    function toggleFavorite(id) {
+      const exists = uiState.favorites.includes(id);
+      uiState.favorites = exists ? uiState.favorites.filter((item) => item !== id) : [id, ...uiState.favorites];
+      saveUiState();
+      document.querySelectorAll(`[data-favorite-demo="${id}"]`).forEach((button) => {
+        button.setAttribute('aria-pressed', String(!exists));
+        button.textContent = exists ? '☆ 저장' : '★ 저장됨';
+      });
+      renderFilters();
+      renderGallery();
+      renderSavedPanels();
+    }
+
+    function installCardTools() {
+      demoCatalog.forEach((demo) => {
+        if (demo.frame.querySelector('.card-tools')) return;
+        const tools = document.createElement('div');
+        tools.className = 'card-tools';
+        tools.innerHTML = `
+          <button class="favorite-btn" type="button" data-favorite-demo="${demo.id}" aria-pressed="${uiState.favorites.includes(demo.id)}">${uiState.favorites.includes(demo.id) ? '★ 저장됨' : '☆ 저장'}</button>
+          <button class="mini-btn" type="button" data-card-action="replay" data-card-id="${demo.id}">다시 재생</button>
+          <button class="mini-btn" type="button" data-card-action="pause" data-card-id="${demo.id}" aria-pressed="false">카드 정지</button>
+          <button class="mini-btn" type="button" data-card-action="reset" data-card-id="${demo.id}">카드 리셋</button>
+        `;
+        demo.frame.querySelector('.demo-top')?.after(tools);
+      });
+    }
+
+    function replayCard(frame) {
+      frame.getAnimations({ subtree: true }).forEach((animation) => {
+        try {
+          animation.cancel();
+          if (!shouldReduceMotion() && !store.state.pauseAllAnimations) animation.play();
+        } catch {}
+      });
+      frame.classList.add('is-highlighted');
+      setTimeout(() => frame.classList.remove('is-highlighted'), getMotionDuration(900));
+    }
+
+    function installCodeWhyAndHighlighting() {
+      document.querySelectorAll('.code-panel').forEach((panel, index) => {
+        if (!panel.querySelector('.code-why')) {
+          const demo = panel.closest('.demo-frame');
+          const title = demo?.querySelector('.demo-title-row h3, h3')?.textContent?.trim() || '이 코드';
+          const details = document.createElement('details');
+          details.className = 'code-why';
+          details.innerHTML = `<summary>이 코드 왜 이렇게?</summary><p>${title}는 화면 상태와 복사 코드가 같은 파라미터에서 나오도록 구성했습니다. 성능을 위해 transform, opacity, stroke-dashoffset 같은 합성 친화 속성을 우선 사용합니다.</p>`;
+          panel.append(details);
+        }
+        const code = panel.querySelector('.code-block');
+        if (code && !code.dataset.highlighted && code.textContent.trim()) {
+          code.dataset.highlighted = 'true';
+          code.innerHTML = highlightCode(code.textContent);
+        }
+      });
+    }
+
+    function highlightCode(source) {
+      const escaped = source
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return escaped
+        .replace(/(\/\*[\s\S]*?\*\/|\/\/[^\n]*)/g, '<span class="tok-comment">$1</span>')
+        .replace(/('[^']*'|"[^"]*"|`[^`]*`)/g, '<span class="tok-string">$1</span>')
+        .replace(/\b(const|let|var|function|return|if|else|class|new|await|async|for|of|try|catch)\b/g, '<span class="tok-keyword">$1</span>')
+        .replace(/\b(\d+(?:\.\d+)?(?:ms|s|px|%|rem|deg)?)\b/g, '<span class="tok-number">$1</span>')
+        .replace(/(^|\n)(\.[a-z0-9_-]+|#[a-z0-9_-]+|[a-z][a-z0-9_-]*)(?=\s*\{)/gi, '$1<span class="tok-selector">$2</span>');
+    }
+
+    function renderQuickStarts() {
+      const target = document.getElementById('quickStarts');
+      if (!target) return;
+      const picks = ['demo-transition', 'demo-spinner', 'demo-timing', 'demo-stroke-drawing', 'demo-view-transition']
+        .map((id) => demoCatalog.find((demo) => demo.id === id))
+        .filter(Boolean);
+      const fallback = picks.length ? picks : demoCatalog.slice(0, 5);
+      target.innerHTML = fallback.slice(0, 5).map((demo) => `<button class="tag-chip" type="button" data-demo-jump="${demo.id}">${demo.title}</button>`).join('');
+    }
+
+    function renderSavedPanels() {
+      const byId = (id) => demoCatalog.find((demo) => demo.id === id);
+      const renderList = (id, items, emptyText) => {
+        const list = document.getElementById(id);
+        if (!list) return;
+        list.innerHTML = items.length
+          ? items.map((demoId) => {
+              const demo = byId(demoId);
+              return demo ? `<li><button type="button" data-demo-jump="${demo.id}">${demo.title}<br><span>${demo.sectionLabel} · ${demo.use}</span></button></li>` : '';
+            }).join('')
+          : `<li><button type="button" disabled>${emptyText}</button></li>`;
+      };
+      renderList('favoriteList', uiState.favorites, '저장한 효과가 없습니다.');
+      renderList('recentList', uiState.recent, '아직 본 항목이 없습니다.');
+      const custom = document.getElementById('customCollectionList');
+      if (custom) {
+        custom.innerHTML = uiState.collections.length
+          ? uiState.collections.map((collection, index) => `<li><button type="button" data-open-collection="${index}">${collection.name}<br><span>${collection.items.length}개 효과</span></button></li>`).join('')
+          : '<li><button type="button" disabled>컬렉션이 없습니다.</button></li>';
+      }
+    }
+
+    function updateProgressMeters() {
+      const percent = demoCatalog.length ? Math.round(uiState.visited.length / demoCatalog.length * 100) : 0;
+      ['learningProgress', 'collectionProgress'].forEach((id) => {
+        const meter = document.getElementById(id);
+        if (!meter) return;
+        meter.style.setProperty('--learned', `${percent}%`);
+        meter.querySelector('b').textContent = id === 'learningProgress' ? `학습 진행 ${percent}%` : `둘러본 데모 ${percent}%`;
+      });
+    }
+
+    function renderCommandList() {
+      const input = document.getElementById('commandInput');
+      const list = document.getElementById('commandList');
+      if (!input || !list) return;
+      const query = input.value.trim().toLowerCase();
+      const recent = uiState.recent.map((id) => demoCatalog.find((demo) => demo.id === id)).filter(Boolean);
+      const favorites = uiState.favorites.map((id) => demoCatalog.find((demo) => demo.id === id)).filter(Boolean);
+      const demos = demoCatalog.filter((demo) => matchesQuery(demo, query));
+      const rows = orderedUnique([...favorites, ...recent, ...demos].map((demo) => demo.id))
+        .map((id) => demoCatalog.find((demo) => demo.id === id))
+        .filter(Boolean)
+        .slice(0, 18);
+      list.innerHTML = rows.map((demo, index) => `<button class="command-row" type="button" role="option" aria-selected="${index === 0}" data-command-jump="${demo.id}"><strong>${demo.title}</strong><span>${demo.sectionLabel} · ${demo.tags.slice(0, 4).join(' · ')}</span></button>`).join('');
+    }
+
+    function openCommandPalette(seed = '') {
+      const overlay = document.getElementById('commandOverlay');
+      const input = document.getElementById('commandInput');
+      overlay.classList.add('is-open');
+      input.value = seed;
+      renderCommandList();
+      setTimeout(() => input.focus(), 0);
+    }
+
+    function closeCommandPalette() {
+      document.getElementById('commandOverlay')?.classList.remove('is-open');
+    }
+
+    function openCollectionDrawer() {
+      document.getElementById('collectionDrawer')?.classList.add('is-open');
+      renderSavedPanels();
+      updateProgressMeters();
+    }
+
+    function closeCollectionDrawer() {
+      document.getElementById('collectionDrawer')?.classList.remove('is-open');
+    }
+
+    function runTour(force = false) {
+      if (!force && uiState.tourSeen) return;
+      const overlay = document.getElementById('tourOverlay');
+      overlay.classList.add('is-open');
+      let step = 0;
+      const sync = () => {
+        overlay.querySelectorAll('.tour-step').forEach((item, index) => item.classList.toggle('is-active', index === step));
+        document.getElementById('tourNext').textContent = step >= 2 ? '시작하기' : '다음';
+      };
+      const finish = () => {
+        uiState.tourSeen = true;
+        saveUiState();
+        overlay.classList.remove('is-open');
+      };
+      document.getElementById('tourNext').onclick = () => {
+        if (step >= 2) finish();
+        else { step += 1; sync(); }
+      };
+      document.getElementById('tourSkip').onclick = finish;
+      sync();
+    }
+
+    function updateReadProgress() {
+      const doc = document.documentElement;
+      const max = Math.max(1, doc.scrollHeight - innerHeight);
+      document.getElementById('readProgress')?.style.setProperty('transform', `scaleX(${Math.min(1, scrollY / max)})`);
+    }
+
+    function exportCollectionData() {
+      const blob = new Blob([JSON.stringify(uiState, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'motionlab-collection.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showCopyToast('저장 데이터를 내보냈습니다.');
+    }
+
+    function installExplorerInteractions() {
+      renderFilters();
+      renderGallery();
+      renderQuickStarts();
+      renderSavedPanels();
+      updateProgressMeters();
+      installCardTools();
+      installCodeWhyAndHighlighting();
+      const search = document.getElementById('globalSearch');
+      const onSearch = debounce(() => {
+        filterState.query = search.value;
+        renderGallery();
+      });
+      search?.addEventListener('input', onSearch);
+      document.getElementById('galleryToggle')?.addEventListener('click', (event) => {
+        const active = !document.body.classList.contains('gallery-mode');
+        document.body.classList.toggle('gallery-mode', active);
+        event.currentTarget.setAttribute('aria-pressed', String(active));
+        document.getElementById('lab-explorer')?.scrollIntoView({ behavior: shouldReduceMotion() ? 'auto' : 'smooth' });
+      });
+      document.getElementById('heroGallery')?.addEventListener('click', () => document.getElementById('galleryToggle')?.click());
+      document.getElementById('heroStart')?.addEventListener('click', () => jumpToDemo(demoCatalog[0]?.id));
+      document.getElementById('tourStart')?.addEventListener('click', () => runTour(true));
+      document.getElementById('commandOpen')?.addEventListener('click', () => openCommandPalette());
+      document.getElementById('commandClose')?.addEventListener('click', closeCommandPalette);
+      document.getElementById('collectionOpen')?.addEventListener('click', openCollectionDrawer);
+      document.getElementById('collectionClose')?.addEventListener('click', closeCollectionDrawer);
+      document.getElementById('commandInput')?.addEventListener('input', debounce(renderCommandList, 80));
+      document.getElementById('collectionCreate')?.addEventListener('click', () => {
+        const name = document.getElementById('collectionName').value.trim() || `내 컬렉션 ${uiState.collections.length + 1}`;
+        const items = [...uiState.favorites];
+        if (!items.length) {
+          showCopyToast('즐겨찾기를 먼저 저장하세요.');
+          return;
+        }
+        uiState.collections.unshift({ name, items, createdAt: Date.now() });
+        saveUiState();
+        renderSavedPanels();
+        showCopyToast('컬렉션을 만들었습니다.');
+      });
+      document.getElementById('collectionExport')?.addEventListener('click', exportCollectionData);
+      document.getElementById('collectionImport')?.addEventListener('click', () => document.getElementById('collectionImportFile')?.click());
+      document.getElementById('collectionImportFile')?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const next = JSON.parse(await file.text());
+          uiState.favorites = Array.isArray(next.favorites) ? next.favorites.filter((id) => demoCatalog.some((demo) => demo.id === id)) : uiState.favorites;
+          uiState.recent = Array.isArray(next.recent) ? next.recent.filter((id) => demoCatalog.some((demo) => demo.id === id)) : uiState.recent;
+          uiState.collections = Array.isArray(next.collections) ? next.collections : uiState.collections;
+          uiState.visited = Array.isArray(next.visited) ? next.visited.filter((id) => demoCatalog.some((demo) => demo.id === id)) : uiState.visited;
+          saveUiState();
+          renderSavedPanels();
+          renderGallery();
+          showCopyToast('저장 데이터를 가져왔습니다.');
+        } catch {
+          showCopyToast('JSON을 읽지 못했습니다. 파일 형식을 확인하세요.');
+        } finally {
+          event.target.value = '';
+        }
+      });
+      document.getElementById('collectionReset')?.addEventListener('click', () => {
+        uiState.favorites = [];
+        uiState.recent = [];
+        uiState.collections = [];
+        uiState.visited = [];
+        saveUiState();
+        renderSavedPanels();
+        renderGallery();
+        updateProgressMeters();
+        showCopyToast('저장 데이터를 초기화했습니다.');
+      });
+      addEventListener('scroll', updateReadProgress, { passive: true });
+      updateReadProgress();
+      if (!uiState.tourSeen) setTimeout(() => runTour(false), 900);
+    }
+
+    document.addEventListener('click', (event) => {
+      const filter = event.target.closest('[data-filter-tag]');
+      if (filter) {
+        const tag = filter.dataset.filterTag;
+        if (tag === '즐겨찾기') filterState.favoritesOnly = !filterState.favoritesOnly;
+        else if (filterState.tags.has(tag)) filterState.tags.delete(tag);
+        else filterState.tags.add(tag);
+        renderFilters();
+        renderGallery();
+        return;
+      }
+      const clear = event.target.closest('#clearFilters');
+      if (clear) {
+        filterState.query = '';
+        filterState.tags.clear();
+        filterState.favoritesOnly = false;
+        document.getElementById('globalSearch').value = '';
+        renderFilters();
+        renderGallery();
+        return;
+      }
+      const favorite = event.target.closest('[data-favorite-demo]');
+      if (favorite) {
+        toggleFavorite(favorite.dataset.favoriteDemo);
+        return;
+      }
+      const cardAction = event.target.closest('[data-card-action]');
+      if (cardAction) {
+        const demo = demoCatalog.find((item) => item.id === cardAction.dataset.cardId);
+        if (!demo) return;
+        if (cardAction.dataset.cardAction === 'replay') replayCard(demo.frame);
+        if (cardAction.dataset.cardAction === 'pause') {
+          const paused = !demo.frame.classList.contains('is-card-paused');
+          demo.frame.classList.toggle('is-card-paused', paused);
+          cardAction.setAttribute('aria-pressed', String(paused));
+          cardAction.textContent = paused ? '카드 재생' : '카드 정지';
+        }
+        if (cardAction.dataset.cardAction === 'reset') {
+          replayCard(demo.frame);
+          showCopyToast('카드 프리뷰를 다시 재생했습니다.');
+        }
+        return;
+      }
+      const jump = event.target.closest('[data-demo-jump]');
+      if (jump) {
+        jumpToDemo(jump.dataset.demoJump);
+        return;
+      }
+      const command = event.target.closest('[data-command-jump]');
+      if (command) {
+        closeCommandPalette();
+        jumpToDemo(command.dataset.commandJump);
+        return;
+      }
+      const collection = event.target.closest('[data-open-collection]');
+      if (collection) {
+        const saved = uiState.collections[Number(collection.dataset.openCollection)];
+        if (saved?.items?.[0]) jumpToDemo(saved.items[0]);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      const isCommand = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
+      if (isCommand) {
+        event.preventDefault();
+        openCommandPalette(document.getElementById('globalSearch')?.value || '');
+      }
+      if (event.key === 'Escape') {
+        closeCommandPalette();
+        closeCollectionDrawer();
+        document.getElementById('tourOverlay')?.classList.remove('is-open');
+      }
+      if (!document.getElementById('commandOverlay')?.classList.contains('is-open')) return;
+      const rows = [...document.querySelectorAll('.command-row')];
+      const current = rows.findIndex((row) => row.getAttribute('aria-selected') === 'true');
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const next = event.key === 'ArrowDown'
+          ? Math.min(rows.length - 1, current + 1)
+          : Math.max(0, current - 1);
+        rows.forEach((row, index) => row.setAttribute('aria-selected', String(index === next)));
+        rows[next]?.scrollIntoView({ block: 'nearest' });
+      }
+      if (event.key === 'Enter' && rows[current]) {
+        event.preventDefault();
+        closeCommandPalette();
+        jumpToDemo(rows[current].dataset.commandJump);
+      }
+    });
+
+    document.querySelector('.mobile-dock')?.addEventListener('click', (event) => {
+      const action = event.target.closest('[data-mobile-action]')?.dataset.mobileAction;
+      if (action === 'gallery') document.getElementById('galleryToggle')?.click();
+      if (action === 'search') document.getElementById('globalSearch')?.focus();
+      if (action === 'command') openCommandPalette();
+      if (action === 'saved') openCollectionDrawer();
+    });
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => entry.target.classList.toggle('is-offscreen', !entry.isIntersecting));
+    }, { rootMargin: '220px 0px', threshold: 0 });
+    demoCatalog.forEach((demo) => visibilityObserver.observe(demo.frame));
+
+    if ((navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) || (navigator.deviceMemory && navigator.deviceMemory <= 4)) {
+      root.dataset.quality = 'low';
+      setTimeout(() => {
+        const particleCount = document.getElementById('particleCount');
+        if (particleCount && Number(particleCount.value) > 120) {
+          particleCount.value = '120';
+          particleCount.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }, 600);
+    }
+
+    installExplorerInteractions();
 
     const ctaDuration = document.getElementById('ctaDuration');
     const ctaDurationOut = document.getElementById('ctaDurationOut');
@@ -3553,7 +4828,7 @@ button.addEventListener('pointermove', (event) => {
     });
     document.getElementById('toastAdvanced')?.addEventListener('click', () => showCopyToast('Advanced toast: success / warning / error / info'));
 
-    const sectionIds = ['overview', 'css-core', 'micro-interactions', 'ui-components', 'scroll-view', 'media-ui', 'svg-engines', 'svg-techniques', 'scenarios', 'usecase-guide', 'perf-a11y', 'motion-hub', 'js-timeline-lab', 'canvas-particle-lab', 'web-audio-lab', 'webgl-physics-lab', 'scroll-story-lab', 'page-transition-lab', 'advanced-micro-lab', 'recipes'];
+    const sectionIds = ['overview', 'lab-explorer', 'css-core', 'micro-interactions', 'ui-components', 'scroll-view', 'media-ui', 'svg-engines', 'svg-techniques', 'scenarios', 'usecase-guide', 'perf-a11y', 'motion-hub', 'js-timeline-lab', 'canvas-particle-lab', 'web-audio-lab', 'webgl-physics-lab', 'scroll-story-lab', 'page-transition-lab', 'advanced-micro-lab', 'recipes'];
     const sectionObserver = new IntersectionObserver((entries) => {
       const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (!visible) return;

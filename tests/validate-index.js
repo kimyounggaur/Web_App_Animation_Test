@@ -20,6 +20,7 @@ const assert = (condition, message) => {
 
 const requiredSections = [
   'overview',
+  'lab-explorer',
   'css-core',
   'micro-interactions',
   'ui-components',
@@ -84,6 +85,18 @@ assert(html.includes('cleanupAdvancedLabs'), 'Missing advanced lab cleanup hook.
 assert(html.includes('buildVibeCodingPrompt'), 'Missing vibe-coding prompt builder.');
 assert(html.includes('installVibeCodingPrompts'), 'Missing vibe-coding prompt installer.');
 assert(html.includes('바이브코딩 프롬프트'), 'Missing visible vibe-coding prompt label.');
+assert(html.includes('id="globalSearch"'), 'Missing global search input.');
+assert(html.includes('id="galleryToggle"'), 'Missing gallery/document view toggle.');
+assert(html.includes('id="galleryGrid"'), 'Missing gallery grid.');
+assert(html.includes('id="filterChips"'), 'Missing filter chip container.');
+assert(html.includes('id="commandOverlay"'), 'Missing command palette dialog.');
+assert(html.includes('id="collectionDrawer"'), 'Missing collection drawer.');
+assert(html.includes('id="tourOverlay"'), 'Missing onboarding tour.');
+assert(html.includes('id="readProgress"'), 'Missing reading progress bar.');
+assert(html.includes('data-favorite-demo'), 'Missing favorite controls.');
+assert(html.includes('data-card-action="replay"'), 'Missing per-card replay action.');
+assert(html.includes('highlightCode'), 'Missing lightweight code highlighting.');
+assert(html.includes('uiStorageKey'), 'Missing UI localStorage namespace.');
 assert(html.includes('role="img"'), 'Meaningful SVGs need role="img".');
 assert(html.includes('<title>'), 'Meaningful SVGs need title text.');
 assert(!/<script\s+[^>]*src=/i.test(html), 'External script files are not allowed.');

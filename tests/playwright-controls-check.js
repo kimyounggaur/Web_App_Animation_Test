@@ -41,6 +41,15 @@ async function main() {
     viewport: { width: 1440, height: 1200 },
     permissions: ['clipboard-read', 'clipboard-write'],
   });
+  await page.addInitScript(() => {
+    localStorage.setItem('motionlab-uiux', JSON.stringify({
+      favorites: [],
+      recent: [],
+      collections: [],
+      visited: [],
+      tourSeen: true,
+    }));
+  });
 
   page.on('console', (message) => {
     if (['error', 'warning'].includes(message.type())) {
@@ -54,6 +63,15 @@ async function main() {
   await page.goto(targetUrl, { waitUntil: 'load' });
   await page.waitForTimeout(800);
 
+  async function closeTransientUi() {
+    await page.keyboard.press('Escape').catch(() => {});
+    await page.evaluate(() => {
+      document.getElementById('commandOverlay')?.classList.remove('is-open');
+      document.getElementById('collectionDrawer')?.classList.remove('is-open');
+      document.getElementById('tourOverlay')?.classList.remove('is-open');
+    }).catch(() => {});
+  }
+
   results.counts = await page.evaluate(() => ({
     sections: document.querySelectorAll('main section').length,
     buttons: document.querySelectorAll('button').length,
@@ -64,7 +82,30 @@ async function main() {
     vibePrompts: document.querySelectorAll('.vibe-prompt').length,
     demoFrames: document.querySelectorAll('.demo-frame').length,
     recipeCards: document.querySelectorAll('.recipe-card').length,
+    galleryCards: document.querySelectorAll('.gallery-card').length,
+    filterChips: document.querySelectorAll('[data-filter-tag]').length,
+    favoriteButtons: document.querySelectorAll('[data-favorite-demo]').length,
+    cardToolbars: document.querySelectorAll('.card-tools').length,
+    codePanels: document.querySelectorAll('.code-panel').length,
+    codeWhyPanels: document.querySelectorAll('.code-why').length,
+    commandPalette: document.querySelectorAll('#commandOverlay').length,
+    collectionDrawer: document.querySelectorAll('#collectionDrawer').length,
+    globalSearch: document.querySelectorAll('#globalSearch').length,
   }));
+
+  await page.locator('#globalSearch').fill('toast');
+  await page.waitForTimeout(200);
+  results.counts.galleryCardsAfterSearch = await page.locator('.gallery-card').count();
+  await page.locator('#globalSearch').fill('');
+  await page.locator('[data-filter-tag="CSS"]').first().click({ timeout: 5000 });
+  await page.waitForTimeout(120);
+  results.counts.galleryCardsAfterCssFilter = await page.locator('.gallery-card').count();
+  await page.locator('[data-filter-tag="CSS"]').first().click({ timeout: 5000 });
+  await page.locator('#commandOpen').click({ timeout: 5000 });
+  await page.locator('#commandInput').fill('toast');
+  await page.waitForTimeout(120);
+  results.counts.commandRowsAfterSearch = await page.locator('.command-row').count();
+  await closeTransientUi();
 
   const vtCardCount = await page.locator('[data-vt-card]').count();
   for (let i = 0; i < vtCardCount; i += 1) {
@@ -79,6 +120,7 @@ async function main() {
       await page.waitForTimeout(500);
       await page.locator('#vtBack').click({ timeout: 5000, force: true });
       await page.waitForFunction(() => document.getElementById('vtDetail').classList.contains('hidden'), null, { timeout: 2000 });
+      await closeTransientUi();
       results.buttons.push({ ...meta, status: 'clicked', special: 'view-transition-card' });
     } catch (error) {
       results.buttons.push({ ...meta, status: 'failed', special: 'view-transition-card', error: error.message });
@@ -100,6 +142,7 @@ async function main() {
       await locator.scrollIntoViewIfNeeded({ timeout: 3000 });
       await locator.click({ timeout: 5000, force: true });
       await page.waitForTimeout(45);
+      await closeTransientUi();
       results.buttons.push({ ...meta, status: 'clicked' });
     } catch (error) {
       results.buttons.push({ ...meta, status: 'failed', error: error.message });
@@ -179,6 +222,25 @@ async function main() {
     ...(results.counts.vibePrompts < results.counts.demoFrames + results.counts.recipeCards
       ? [`vibe prompts missing: expected at least ${results.counts.demoFrames + results.counts.recipeCards}, got ${results.counts.vibePrompts}`]
       : []),
+    ...(results.counts.galleryCards < results.counts.demoFrames
+      ? [`gallery cards missing: expected at least ${results.counts.demoFrames}, got ${results.counts.galleryCards}`]
+      : []),
+    ...(results.counts.favoriteButtons < results.counts.demoFrames
+      ? [`favorite buttons missing: expected at least ${results.counts.demoFrames}, got ${results.counts.favoriteButtons}`]
+      : []),
+    ...(results.counts.cardToolbars < results.counts.demoFrames
+      ? [`card toolbars missing: expected at least ${results.counts.demoFrames}, got ${results.counts.cardToolbars}`]
+      : []),
+    ...(results.counts.codeWhyPanels < results.counts.codePanels
+      ? [`code explanation panels missing: expected at least ${results.counts.codePanels}, got ${results.counts.codeWhyPanels}`]
+      : []),
+    ...(results.counts.filterChips < 8 ? [`filter chips missing: got ${results.counts.filterChips}`] : []),
+    ...(results.counts.commandPalette !== 1 ? ['command palette missing'] : []),
+    ...(results.counts.collectionDrawer !== 1 ? ['collection drawer missing'] : []),
+    ...(results.counts.globalSearch !== 1 ? ['global search missing'] : []),
+    ...(results.counts.galleryCardsAfterSearch < 1 ? ['search returned no gallery cards for "toast"'] : []),
+    ...(results.counts.galleryCardsAfterCssFilter < 1 ? ['CSS filter returned no gallery cards'] : []),
+    ...(results.counts.commandRowsAfterSearch < 1 ? ['command palette returned no rows for "toast"'] : []),
     ...results.buttons.filter((item) => item.status === 'failed').map((item) => `button#${item.index} ${item.text || item.id}: ${item.error}`),
     ...results.ranges.filter((item) => item.status === 'failed').map((item) => `range#${item.index} ${item.id}: ${item.error}`),
     ...results.selects.filter((item) => item.status === 'failed').map((item) => `select#${item.index} ${item.id}: ${item.error}`),
